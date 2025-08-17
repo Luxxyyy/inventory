@@ -1,0 +1,45 @@
+* {
+    font-family: Georgia, 'Times New Roman', Times, serif;
+}
+
+/* === Sidebar Styles === */
+#sideBar_Body {
+    background-color: #1855FF !important;
+    color: white;
+}
+
+#sidebar-top {
+    padding: 15px 20px;
+}
+
+/* === Page Header Styles === */
+#page-header {
+    background-color: #1855FF !important;
+    color: white;
+}
+
+#page-title {
+    color: black;
+}
+
+/* === Map Container === */
+#mapContainer {
+    padding-top: 30px;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+#mapBox {
+    width: 95%;
+    max-width: 1400px;
+}
+
+/* === Sidebar Link Hover Effects === */
+.hover-effect:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+    transition: background-color 0.2s ease, transform 0.2s ease;
+    transform: translateX(4px);
+    text-decoration: none;
+}
