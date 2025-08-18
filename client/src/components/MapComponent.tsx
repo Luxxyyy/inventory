@@ -20,7 +20,7 @@ const MapComponent: React.FC = () => {
     });
 
     return isLoaded ? (
-        <GoogleMap mapContainerStyle={containerStyle} center={center} zoom={15}>
+        <GoogleMap mapContainerStyle={containerStyle} center={center} zoom={17}>
             <Marker position={center} />
         </GoogleMap>
     ) : (
