@@ -1,4 +1,6 @@
 import React from 'react';
+import { useEffect } from 'react';
+import axios from 'axios';
 import { useLocation } from 'react-router-dom';
 import Sidebar from './components/SideBar';
 import AppRoutes from './routes/AppRoutes';
@@ -8,6 +10,15 @@ import PageHeader from './components/PageHeader';
 const App: React.FC = () => {
   const location = useLocation();
   const currentPage = GetPageTitle(location.pathname);
+
+  const fetchApi = async () => {
+    const response = await axios.get("http://localhost:8080/api");
+    console.log(response.data.fruits);
+  };
+
+  useEffect(() => {
+    fetchApi();
+  }, []);
 
   return (
     <div className="d-flex" style={{ height: '100vh' }}>
