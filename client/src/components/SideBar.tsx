@@ -39,19 +39,23 @@ const Sidebar: React.FC<SidebarProps> = () => {
                             {collapsed ? '' : 'Lists'}
                         </Link>
                     </li>
-                    <h5>{collapsed ? '' : 'Manage'}</h5>
+                    <h5>{collapsed ? '' : 'Manage'}</h5> 
                     <li className="nav-item">
                         <Link to="/settings" className="nav-link text-white px-3 py-2 rounded hover-effect">
-                            {collapsed ? '' : 'Barangay'}
+                            {collapsed ? '' : 'Add Barangay'}
                         </Link>
                     </li>
                     <li className="nav-item">
                         <Link to="/logout" className="nav-link text-white px-3 py-2 rounded hover-effect">
-                            {collapsed ? '' : 'Residence'}
+                            {collapsed ? '' : ' Add Consumers'}
+                        </Link>
+                    </li>
+                    <li className="nav-item">
+                        <Link to="/logout" className="nav-link text-white px-3 py-2 rounded hover-effect">
+                            {collapsed ? '' : 'Add Logs'}
                         </Link>
                     </li>
                 </ul>
-
             </nav>
         </div>
     );
