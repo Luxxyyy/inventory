@@ -58,6 +58,11 @@ const Sidebar: React.FC<SidebarProps> = () => {
                             {collapsed ? '' : 'Logs'}
                         </Link>
                     </li>
+                    <li className="nav-item">
+                        <Link to="/fruit" className="nav-link text-white px-3 py-2 rounded hover-effect">
+                            {collapsed ? '' : 'Fruit'}
+                        </Link>
+                    </li>
                 </ul>
             </nav>
         </div>

@@ -5,6 +5,7 @@ import Source from '../pages/Source';
 import Consumer from '../pages/Consumer';
 import Balangay from '../pages/Balangay';
 import Logs from '../pages/Logs';
+import Fruit from '../pages/Fruit';
 
 
 function AppRoutes() {
@@ -16,6 +17,7 @@ function AppRoutes() {
             <Route path="/balangay" element={<Balangay />} />
             <Route path="/consumer" element={<Consumer />} />
             <Route path="/logs" element={<Logs />} />
+            <Route path="/fruit" element={<Fruit />} />
         </Routes>
     );
 };
