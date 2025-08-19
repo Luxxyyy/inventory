@@ -4,6 +4,14 @@ function GetPageTitle(pathname: string): string {
             return 'Dashboard';
         case '/list':
             return 'List';
+        case '/source':
+            return 'Source';
+        case '/balangay':
+            return 'Balangay';
+        case '/consumer':
+            return 'Consumer';
+        case '/logs':
+            return 'Logs';
         default:
             return 'Dashboard';
     }

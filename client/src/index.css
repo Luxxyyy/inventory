@@ -4,8 +4,9 @@
 
 /* === Sidebar Styles === */
 #sideBar_Body {
-    background-color: #1855FF !important;
+    background-color: #001e70 !important;
     color: white;
+    border: none;
 }
 
 #sidebar-top {
@@ -14,8 +15,22 @@
 
 /* === Page Header Styles === */
 #page-header {
-    background-color: #1855FF !important;
+    background-color: #001e70 !important;
     color: white;
+    border: none;
+}
+
+#page-footer {
+    background-color: #001e7088 !important;
+    color: white;
+    border: none;
+    height: 30px;
+    padding: 0 !important;
+}
+
+#page-footer h1 {
+    font-size: 15px !important;
+    margin: 10px !important;
 }
 
 #page-title {
@@ -42,4 +57,9 @@
     transition: background-color 0.2s ease, transform 0.2s ease;
     transform: translateX(4px);
     text-decoration: none;
+}
+
+/* === AddBalangay Input === */
+#input-box {
+    width: 30% !important;
 }

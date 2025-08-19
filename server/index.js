@@ -1,30 +1,17 @@
 require('dotenv').config();
-
 const express = require('express');
 const cors = require('cors');
-const mysql = require('mysql2');
+const sequelize = require('./db');
+const Fruit = require('./models/Fruit');
 
 const app = express();
-
 const PORT = process.env.PORT || 8080;
 
 const corsOptions = {
   origin: 'http://localhost:5173',
 };
 app.use(cors(corsOptions));
-
-const pool = mysql.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  port: process.env.DB_PORT || 3306,
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0
-});
-
-const promisePool = pool.promise();
+app.use(express.json());
 
 app.get('/', (req, res) => {
   res.send('API is running. Visit /apiFruits to get fruit data.');
@@ -32,17 +19,23 @@ app.get('/', (req, res) => {
 
 app.get('/apiFruits', async (req, res) => {
   try {
-    const [rows] = await promisePool.query('SELECT fruit_name, description FROM fruits');
-    const fruits = rows.map(row => row.fruit_name);
-    const desc = rows.map(row => row.description);
-    
-    res.json({ fruits, desc });
+    const fruits = await Fruit.findAll({
+      attributes: ['fruit_name', 'description'],
+    });
+
+    const names = fruits.map(f => f.fruit_name);
+    const desc = fruits.map(f => f.description);
+
+    res.json({ fruits: names, desc });
   } catch (error) {
-    console.error('Error fetching fruits from DB:', error);
+    console.error('Sequelize error:', error);
     res.status(500).json({ error: 'Database error' });
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Server started on http://localhost:${PORT}`);
+sequelize.sync().then(() => {
+  console.log('DB synced');
+  app.listen(PORT, () => {
+    console.log(`Server running at http://localhost:${PORT}`);
+  });
 });

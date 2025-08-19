@@ -5,6 +5,7 @@ import AppRoutes from './routes/AppRoutes';
 import GetPageTitle from './utils/GetPageTitle';
 import PageHeader from './components/PageHeader';
 import { getFruits } from './api/Fruits';
+import PageFooter from './components/PageFooter';
 
 const App: React.FC = () => {
   const location = useLocation();
@@ -34,6 +35,7 @@ const App: React.FC = () => {
         >
           <AppRoutes />
         </main>
+        <PageFooter />
       </div>
     </div>
   );
