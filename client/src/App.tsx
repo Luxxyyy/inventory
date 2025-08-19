@@ -1,19 +1,22 @@
-import React from 'react';
-import { useEffect } from 'react';
-import axios from 'axios';
+import React, { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import Sidebar from './components/SideBar';
 import AppRoutes from './routes/AppRoutes';
 import GetPageTitle from './utils/GetPageTitle';
 import PageHeader from './components/PageHeader';
+import { getFruits } from './api/fruit';
 
 const App: React.FC = () => {
   const location = useLocation();
   const currentPage = GetPageTitle(location.pathname);
 
   const fetchApi = async () => {
-    const response = await axios.get("http://localhost:8080/api");
-    console.log(response.data.fruits);
+    try {
+      const fruits = await getFruits();
+      console.log(fruits);
+    } catch (error) {
+      console.error('Error fetching fruits:', error);
+    }
   };
 
   useEffect(() => {

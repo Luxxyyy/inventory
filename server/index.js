@@ -14,7 +14,7 @@ app.get('/', (req, res) => {
 });
 
 app.get('/api', (req, res) => {
-    res.json({ fruits: ['apple', 'durian', 'melon', 'grape'] });
+    res.json({ fruits: ['apple', 'durian', 'melon', 'kitten'] });
 });
 
 app.listen(PORT, () => {
