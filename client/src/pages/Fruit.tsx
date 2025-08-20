@@ -11,7 +11,7 @@ function Fruit() {
     }
 
     try {
-      const response = await fetch('http://localhost:8080/apiFruits', {
+      const response = await fetch('http://localhost:8080/api/fruits', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
