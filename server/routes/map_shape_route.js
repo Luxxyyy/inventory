@@ -29,4 +29,20 @@ router.post("/", async (req, res) => {
   }
 });
 
+// DELETE shape by id
+router.delete("/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+    const deleted = await MapShape.destroy({ where: { id } });
+    if (deleted) {
+      res.json({ message: "Shape deleted" });
+    } else {
+      res.status(404).json({ error: "Shape not found" });
+    }
+  } catch (error) {
+    console.error("Error deleting shape:", error);
+    res.status(500).json({ error: "Failed to delete shape" });
+  }
+});
+
 module.exports = router;

@@ -8,11 +8,10 @@ const PORT = process.env.PORT || 8080;
 
 const corsOptions = {
   origin: "http://localhost:5173",
-  methods: ["GET", "POST", "OPTIONS"],
-  allowedHeaders: ["Content-Type"],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // added DELETE and PUT
+  allowedHeaders: ["Content-Type", "Authorization"], // added Authorization if needed
 };
-app.use(cors(corsOptions));
-app.options("splat", cors(corsOptions));
+app.use(cors(corsOptions)); // handle all CORS preflight requests
 
 app.use(express.json());
 

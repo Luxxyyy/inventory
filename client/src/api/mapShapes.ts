@@ -1,24 +1,25 @@
-import http from './http'; // your axios instance
+const API_BASE_URL = "http://localhost:8080/api/map-shapes";
 
-export type MapShape = {
-  id?: number;
-  type: string;
-  geojson: GeoJSON.Feature;
-  radius?: number | null;
-};
-
-export type MapShapesResponse = MapShape[];
-
-export async function getMapShapes(): Promise<MapShapesResponse> {
-  const { data } = await http.get('/map-shapes');
-  return data;
+export async function getMapShapes() {
+  const response = await fetch(API_BASE_URL);
+  if (!response.ok) throw new Error("Failed to fetch shapes");
+  return response.json();
 }
 
-export async function addMapShape(
-  type: string,
-  geojson: GeoJSON.Feature,
-  radius?: number | null
-) {
-  const { data } = await http.post('/map-shapes', { type, geojson, radius });
-  return data;
+export async function addMapShape(type: string, geojson: any, radius: number | null) {
+  const response = await fetch(API_BASE_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ type, geojson, radius }),
+  });
+  if (!response.ok) throw new Error("Failed to add shape");
+  return response.json();
+}
+
+export async function deleteMapShape(id: number) {
+  const response = await fetch(`${API_BASE_URL}/${id}`, {
+    method: "DELETE",
+  });
+  if (!response.ok) throw new Error("Failed to delete shape");
+  return response.json();
 }
