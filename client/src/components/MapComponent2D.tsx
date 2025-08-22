@@ -3,9 +3,12 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "leaflet-draw";
 import "leaflet-draw/dist/leaflet.draw.css";
-import { addMapShape, getMapShapes, deleteMapShape } from "../api/mapShapes";
+import { addMapShape, getMapShapes, deleteMapShape } from "../api/mapShape";
 
-const MapComponent: React.FC = () => {
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
+const MapComponent2D: React.FC = () => {
   const mapRef = useRef<L.Map | null>(null);
 
   useEffect(() => {
@@ -47,12 +50,14 @@ const MapComponent: React.FC = () => {
         shapes.forEach(({ id, geojson }: any) => {
           const layer = L.geoJSON(geojson).getLayers()[0];
           if (layer) {
-            (layer as any).dbId = id; // save DB id on layer
+            (layer as any).dbId = id;
             drawnItems.addLayer(layer);
           }
         });
+        toast.info("Shapes loaded successfully!");
       } catch (error) {
         console.error("Error loading shapes:", error);
+        toast.error("Failed to load shapes.");
       }
     };
     loadShapes();
@@ -91,16 +96,17 @@ const MapComponent: React.FC = () => {
         shapeType = "rectangle";
         geojson = layer.toGeoJSON();
       } else {
-        // fallback - assume geojson available
         geojson = (layer as any).toGeoJSON();
         shapeType = geojson.geometry.type;
       }
 
       try {
         const savedShape = await addMapShape(shapeType, geojson, radius);
-        (layer as any).dbId = savedShape.id; // save DB id on layer for future edits/deletes
+        (layer as any).dbId = savedShape.id;
+        toast.success(`${shapeType} shape saved!`);
       } catch (error) {
         console.error("Error saving shape:", error);
+        toast.error("Failed to save shape.");
       }
     });
 
@@ -116,19 +122,26 @@ const MapComponent: React.FC = () => {
 
       if (layersToDelete.length === 0) {
         console.warn("No dbId found on deleted layers.");
+        toast.warn("Nothing to delete from DB.");
         return;
       }
 
       try {
         await Promise.all(layersToDelete.map((id) => deleteMapShape(id)));
-        console.log("Deleted shapes from DB:", layersToDelete);
+        toast.success("Shape(s) deleted from DB!");
       } catch (error) {
         console.error("Error deleting shapes from DB:", error);
+        toast.error("Failed to delete shape(s).");
       }
     });
   }, []);
 
-  return <div id="map" style={{ height: "600px", width: "100%" }} />;
+  return (
+    <>
+      <ToastContainer />
+      <div id="map" style={{ height: "600px", width: "100%" }} />
+    </>
+  );
 };
 
-export default MapComponent;
+export default MapComponent2D;

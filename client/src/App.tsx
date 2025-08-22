@@ -5,7 +5,7 @@ import AppRoutes from './routes/AppRoutes';
 import GetPageTitle from './utils/GetPageTitle';
 import PageHeader from './components/PageHeader';
 import { getFruits } from './api/Fruits';
-import { getMapShapes } from './api/mapShapes';
+import { getMapShapes } from './api/mapShape';
 import PageFooter from './components/PageFooter';
 
 const App: React.FC = () => {
@@ -31,7 +31,7 @@ const App: React.FC = () => {
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
         <PageHeader />
         <main
-          className="bg-white text-dark p-4"
+          className="bg-white text-dark main"
           style={{ flex: 1, overflowY: 'auto' }}
         >
           <AppRoutes />

@@ -1,67 +1,56 @@
-/* === Your existing styles === */
+/* === Global resets === */
 * {
-    font-family: Georgia, 'Times New Roman', Times, serif;
+  font-family: Georgia, 'Times New Roman', Times, serif;
+  box-sizing: border-box;
 }
 
 /* === Sidebar Styles === */
 #sideBar_Body {
-    background-color: #001e70 !important;
-    color: white;
-    border: none;
+  background-color: #001e70 !important;
+  color: white;
+  border: none;
 }
 
 #sidebar-top {
-    padding: 15px 20px;
+  padding: 15px 20px;
 }
 
-/* === Page Header Styles === */
+/* === Page Header/Footer === */
 #page-header {
-    background-color: #001e70 !important;
-    color: white;
-    border: none;
+  background-color: #001e70 !important;
+  color: white;
+  border: none;
 }
 
 #page-footer {
-    background-color: #001e7088 !important;
-    color: white;
-    border: none;
-    height: 30px;
-    padding: 0 !important;
+  background-color: #001e7088 !important;
+  color: white;
+  border: none;
+  height: 30px;
+  padding: 0 !important;
 }
 
 #page-footer h1 {
-    font-size: 15px !important;
-    margin: 10px !important;
+  font-size: 15px !important;
+  margin: 10px !important;
 }
 
+/* === Page title color override === */
 #page-title {
-    color: black;
+  color: black;
 }
 
-/* === Map Container === */
-#mapContainer {
-    padding-top: 30px;
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-}
-
-#mapBox {
-    width: 95%;
-    max-width: 1400px;
-}
-
-/* === Sidebar Link Hover Effects === */
+/* === Sidebar hover effect === */
 .hover-effect:hover {
-    background-color: rgba(255, 255, 255, 0.15);
-    transition: background-color 0.2s ease, transform 0.2s ease;
-    transform: translateX(4px);
-    text-decoration: none;
+  background-color: rgba(255, 255, 255, 0.15);
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  transform: translateX(4px);
+  text-decoration: none;
 }
 
-/* === AddBalangay Input === */
+/* === Map Container spacing is handled by Bootstrap now === */
+
+/* === Optional: keep AddBalangay input override === */
 #input-box {
-    width: 30% !important;
+  width: 30% !important;
 }
-

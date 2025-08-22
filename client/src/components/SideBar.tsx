@@ -11,7 +11,7 @@ const Sidebar: React.FC<SidebarProps> = () => {
             className={`text-white d-flex flex-column ${collapsed ? 'sidebar-collapsed' : 'sidebar-expanded'}`}
             id="sideBar_Body"
             style={{
-                width: collapsed ? '60px' : '220px',
+                width: collapsed ? '60px' : '300px',
                 transition: 'width 0.3s ease',
                 height: '100vh',
             }}
