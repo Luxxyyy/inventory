@@ -6,20 +6,21 @@ const sequelize = require("./db");
 const app = express();
 const PORT = process.env.PORT || 8080;
 
-// CORS (optional when using Vite proxy; safe to keep)
 const corsOptions = {
   origin: "http://localhost:5173",
   methods: ["GET", "POST", "OPTIONS"],
   allowedHeaders: ["Content-Type"],
 };
 app.use(cors(corsOptions));
-app.options("splat", cors(corsOptions)); // <-- fixed from 'splat' to '*'
+app.options("splat", cors(corsOptions));
 
 app.use(express.json());
 
 // Routes
 const fruitRoutes = require("./routes/fruit_route");
 app.use("/api/fruits", fruitRoutes);
+const mapShapeRoutes = require("./routes/map_shape_route");
+app.use("/api/map-shapes", mapShapeRoutes);
 
 sequelize
   .sync()

@@ -5,6 +5,7 @@ import AppRoutes from './routes/AppRoutes';
 import GetPageTitle from './utils/GetPageTitle';
 import PageHeader from './components/PageHeader';
 import { getFruits } from './api/Fruits';
+import { getMapShapes } from './api/mapShapes';
 import PageFooter from './components/PageFooter';
 
 const App: React.FC = () => {
