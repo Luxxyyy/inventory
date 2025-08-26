@@ -1,137 +1,140 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "leaflet-draw";
 import "leaflet-draw/dist/leaflet.draw.css";
-import { addMapShape, getMapShapes, deleteMapShape } from "../api/mapShape";
-
+import {
+  addMapShape,
+  getMapShapes,
+  deleteMapShape,
+  updateMapShape,
+} from "../api/mapShape";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import ShapeDetailsModal from "./ShapeDetailsModal";
+
+const defaultDetails = {
+  title: "",
+  description: "",
+  status: "",
+  color: "",
+  specs: { currentSize: "", oldSizes: [] },
+};
 
 const MapComponent2D: React.FC = () => {
   const mapRef = useRef<L.Map | null>(null);
+  const drawnItems = useRef<L.FeatureGroup>(new L.FeatureGroup()).current;
+
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editingLayer, setEditingLayer] = useState<L.Layer | null>(null);
+  const [formData, setFormData] = useState(defaultDetails);
+  const [isEditing, setIsEditing] = useState(false);
+
+  const handleSave = async (data: typeof defaultDetails) => {
+    if (!editingLayer) return;
+    const geojson = editingLayer.toGeoJSON();
+    const radius = "getRadius" in editingLayer ? (editingLayer as any).getRadius() : null;
+    const type = geojson.geometry.type;
+    const payload = { type, geojson, radius, ...data };
+
+    try {
+      let saved;
+      if (isEditing) {
+        saved = await updateMapShape((editingLayer as any).dbId, payload);
+      } else {
+        saved = await addMapShape(
+          type,
+          geojson,
+          radius,
+          data.title,
+          data.description,
+          data.status,
+          data.color,
+          data.specs
+        );
+      }
+      (editingLayer as any).dbId = saved.id;
+      (editingLayer as any).metadata = payload;
+      editingLayer.bindPopup(`
+        <strong>${data.title}</strong><br/>
+        ${data.description}<br/>
+        Status: ${data.status}<br/>
+        Current Size: ${data.specs.currentSize}<br/>
+        Old Sizes: ${data.specs.oldSizes.join(", ")}
+      `);
+      toast.success(isEditing ? "Shape updated!" : "Shape saved!");
+    } catch {
+      toast.error(isEditing ? "Failed to update" : "Failed to save");
+    } finally {
+      setModalOpen(false);
+      setEditingLayer(null);
+      setFormData(defaultDetails);
+      setIsEditing(false);
+    }
+  };
 
   useEffect(() => {
     if (mapRef.current) return;
-
-    const map = L.map("map", {
-      center: [7.730655, 125.099958],
-      zoom: 17,
-    });
+    const map = L.map("map", { center: [7.730655, 125.099958], zoom: 17 });
     mapRef.current = map;
 
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution:
-        '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-    }).addTo(map);
-
-    const drawnItems = new L.FeatureGroup();
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
     map.addLayer(drawnItems);
 
-    const drawControl = new L.Control.Draw({
-      edit: {
-        featureGroup: drawnItems,
-      },
-      draw: {
-        polygon: {},
-        polyline: {},
-        rectangle: {},
-        circle: {},
-        marker: {},
-        circlemarker: {},
-      },
-    });
+    const drawControl = new L.Control.Draw({ edit: { featureGroup: drawnItems } });
     map.addControl(drawControl);
 
-    // Load existing shapes from DB and add to map
     const loadShapes = async () => {
       try {
         const shapes = await getMapShapes();
-        shapes.forEach(({ id, geojson }: any) => {
+        shapes.forEach(({ id, geojson, title, description, status, color, specs }) => {
           const layer = L.geoJSON(geojson).getLayers()[0];
           if (layer) {
             (layer as any).dbId = id;
+            (layer as any).metadata = { title, description, status, color, specs };
+            if (color && "setStyle" in layer) (layer as L.Path).setStyle({ color });
+            layer.bindPopup(`
+              <strong>${title || "Untitled"}</strong><br/>
+              ${description || ""}<br/>
+              Status: ${status || "N/A"}<br/>
+              Current Size: ${specs?.currentSize || "N/A"}<br/>
+              Old Sizes: ${specs?.oldSizes?.join(", ") || "N/A"}
+            `);
             drawnItems.addLayer(layer);
           }
         });
-        toast.info("Shapes loaded successfully!");
-      } catch (error) {
-        console.error("Error loading shapes:", error);
-        toast.error("Failed to load shapes.");
+        toast.success("Shapes loaded");
+      } catch {
+        toast.error("Failed to load shapes");
       }
     };
     loadShapes();
 
-    // When user creates a new shape
-    map.on(L.Draw.Event.CREATED, async (event: L.DrawEvents.Created) => {
-      const layer = event.layer as
-        | L.Circle
-        | L.CircleMarker
-        | L.Marker
-        | L.Polygon
-        | L.Polyline
-        | L.Rectangle
-        | L.Layer;
-
-      drawnItems.addLayer(layer);
-
-      let shapeType = "";
-      let geojson: GeoJSON.Feature;
-      let radius: number | null = null;
-
-      if (layer instanceof L.Circle || layer instanceof L.CircleMarker) {
-        shapeType = layer instanceof L.Circle ? "circle" : "circlemarker";
-        geojson = layer.toGeoJSON();
-        radius = layer.getRadius();
-      } else if (layer instanceof L.Marker) {
-        shapeType = "marker";
-        geojson = layer.toGeoJSON();
-      } else if (layer instanceof L.Polygon) {
-        shapeType = "polygon";
-        geojson = layer.toGeoJSON();
-      } else if (layer instanceof L.Polyline) {
-        shapeType = "polyline";
-        geojson = layer.toGeoJSON();
-      } else if (layer instanceof L.Rectangle) {
-        shapeType = "rectangle";
-        geojson = layer.toGeoJSON();
-      } else {
-        geojson = (layer as any).toGeoJSON();
-        shapeType = geojson.geometry.type;
-      }
-
-      try {
-        const savedShape = await addMapShape(shapeType, geojson, radius);
-        (layer as any).dbId = savedShape.id;
-        toast.success(`${shapeType} shape saved!`);
-      } catch (error) {
-        console.error("Error saving shape:", error);
-        toast.error("Failed to save shape.");
-      }
+    map.on(L.Draw.Event.CREATED, (e: any) => {
+      drawnItems.addLayer(e.layer);
+      setEditingLayer(e.layer);
+      setFormData(defaultDetails);
+      setIsEditing(false);
+      setModalOpen(true);
     });
 
-    // When user deletes shapes
-    map.on(L.Draw.Event.DELETED, async (event: L.DrawEvents.Deleted) => {
-      const layersToDelete: number[] = [];
-      event.layers.eachLayer((layer) => {
-        const dbId = (layer as any).dbId;
-        if (dbId) {
-          layersToDelete.push(dbId);
-        }
+    map.on(L.Draw.Event.EDITED, (e: any) => {
+      e.layers.eachLayer((lyr: any) => {
+        setEditingLayer(lyr);
+        setFormData(lyr.metadata || defaultDetails);
+        setIsEditing(true);
+        setModalOpen(true);
       });
+    });
 
-      if (layersToDelete.length === 0) {
-        console.warn("No dbId found on deleted layers.");
-        toast.warn("Nothing to delete from DB.");
-        return;
-      }
-
+    map.on(L.Draw.Event.DELETED, async (e: any) => {
+      const ids = [];
+      e.layers.eachLayer((lyr: any) => lyr.dbId && ids.push(lyr.dbId));
       try {
-        await Promise.all(layersToDelete.map((id) => deleteMapShape(id)));
-        toast.success("Shape(s) deleted from DB!");
-      } catch (error) {
-        console.error("Error deleting shapes from DB:", error);
-        toast.error("Failed to delete shape(s).");
+        await Promise.all(ids.map((id) => deleteMapShape(id)));
+        toast.success("Shape(s) deleted");
+      } catch {
+        toast.error("Failed to delete shape(s)");
       }
     });
   }, []);
@@ -139,7 +142,13 @@ const MapComponent2D: React.FC = () => {
   return (
     <>
       <ToastContainer />
-      <div id="map" style={{ height: "600px", width: "100%" }} />
+      <div id="map" style={{ height: "600px" }} />
+      <ShapeDetailsModal
+        show={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onSave={handleSave}
+        initialData={formData}
+      />
     </>
   );
 };

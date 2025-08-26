@@ -2,7 +2,6 @@ const express = require("express");
 const router = express.Router();
 const MapShape = require("../models/map_shape_model");
 
-// GET all shapes
 router.get("/", async (req, res) => {
   try {
     const shapes = await MapShape.findAll();
@@ -13,15 +12,23 @@ router.get("/", async (req, res) => {
   }
 });
 
-// POST new shape
 router.post("/", async (req, res) => {
   try {
-    const { type, geojson, radius } = req.body;
+    const { type, geojson, radius, title, description, status, color, specs } =
+      req.body;
     if (!type || !geojson) {
       return res.status(400).json({ error: "Type and geojson are required" });
     }
-
-    const shape = await MapShape.create({ type, geojson, radius });
+    const shape = await MapShape.create({
+      type,
+      geojson,
+      radius,
+      title,
+      description,
+      status,
+      color,
+      specs,
+    });
     res.status(201).json(shape);
   } catch (error) {
     console.error("Error inserting shape:", error);
@@ -29,16 +36,35 @@ router.post("/", async (req, res) => {
   }
 });
 
-// DELETE shape by id
+router.put("/:id", async (req, res) => {
+  try {
+    const { type, geojson, radius, title, description, status, color, specs } =
+      req.body;
+    const shape = await MapShape.findByPk(req.params.id);
+    if (!shape) return res.status(404).json({ error: "Shape not found" });
+    await shape.update({
+      type,
+      geojson,
+      radius,
+      title,
+      description,
+      status,
+      color,
+      specs,
+    });
+    res.json(shape);
+  } catch (error) {
+    console.error("Error updating shape:", error);
+    res.status(500).json({ error: "Failed to update shape" });
+  }
+});
+
 router.delete("/:id", async (req, res) => {
   try {
-    const id = req.params.id;
-    const deleted = await MapShape.destroy({ where: { id } });
-    if (deleted) {
-      res.json({ message: "Shape deleted" });
-    } else {
-      res.status(404).json({ error: "Shape not found" });
-    }
+    const deleted = await MapShape.destroy({ where: { id: req.params.id } });
+    deleted
+      ? res.json({ message: "Shape deleted" })
+      : res.status(404).json({ error: "Shape not found" });
   } catch (error) {
     console.error("Error deleting shape:", error);
     res.status(500).json({ error: "Failed to delete shape" });

@@ -4,18 +4,14 @@ const sequelize = require("../db");
 const MapShape = sequelize.define(
   "MapShape",
   {
-    type: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    geojson: {
-      type: DataTypes.JSON,
-      allowNull: false,
-    },
-    radius: {
-      type: DataTypes.FLOAT,
-      allowNull: true,
-    },
+    type: { type: DataTypes.STRING, allowNull: false },
+    geojson: { type: DataTypes.JSON, allowNull: false },
+    radius: { type: DataTypes.FLOAT, allowNull: true },
+    title: { type: DataTypes.STRING, allowNull: true },
+    description: { type: DataTypes.TEXT, allowNull: true },
+    status: { type: DataTypes.STRING, allowNull: true },
+    color: { type: DataTypes.STRING, allowNull: true },
+    specs: { type: DataTypes.JSON, allowNull: true },
   },
   {
     tableName: "map_shapes",
