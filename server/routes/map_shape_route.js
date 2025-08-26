@@ -14,7 +14,7 @@ router.get("/", async (req, res) => {
 
 router.post("/", async (req, res) => {
   try {
-    const { type, geojson, radius, title, description, status, color, specs } =
+    const { type, geojson, radius, title, description, status, color } =
       req.body;
     if (!type || !geojson) {
       return res.status(400).json({ error: "Type and geojson are required" });
@@ -27,7 +27,6 @@ router.post("/", async (req, res) => {
       description,
       status,
       color,
-      specs,
     });
     res.status(201).json(shape);
   } catch (error) {
@@ -38,7 +37,7 @@ router.post("/", async (req, res) => {
 
 router.put("/:id", async (req, res) => {
   try {
-    const { type, geojson, radius, title, description, status, color, specs } =
+    const { type, geojson, radius, title, description, status, color } =
       req.body;
     const shape = await MapShape.findByPk(req.params.id);
     if (!shape) return res.status(404).json({ error: "Shape not found" });
@@ -50,7 +49,6 @@ router.put("/:id", async (req, res) => {
       description,
       status,
       color,
-      specs,
     });
     res.json(shape);
   } catch (error) {

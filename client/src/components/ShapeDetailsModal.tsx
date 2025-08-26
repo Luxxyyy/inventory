@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from "react";
 
-interface Specs { currentSize: string; oldSizes: string[]; }
-
 interface Props {
   show: boolean;
   onClose: () => void;
-  onSave: (data: { title: string; description: string; status: string; color: string; specs: Specs }) => void;
-  initialData: { title: string; description: string; status: string; color: string; specs: Specs };
+  onSave: (data: { title: string; description: string; status: string; color: string; }) => void;
+  initialData: { title: string; description: string; status: string; color: string; };
 }
 
 const ShapeDetailsModal: React.FC<Props> = ({ show, onClose, onSave, initialData }) => {
@@ -35,27 +33,6 @@ const ShapeDetailsModal: React.FC<Props> = ({ show, onClose, onSave, initialData
                 />
               </div>
             ))}
-            <div className="mb-2">
-              <label className="form-label">Current Size</label>
-              <input
-                className="form-control"
-                value={form.specs.currentSize}
-                onChange={(e) => setForm({ ...form, specs: { ...form.specs, currentSize: e.target.value } })}
-              />
-            </div>
-            <div className="mb-2">
-              <label className="form-label">Old Sizes (comma-separated)</label>
-              <input
-                className="form-control"
-                value={form.specs.oldSizes.join(", ")}
-                onChange={(e) =>
-                  setForm({
-                    ...form,
-                    specs: { ...form.specs, oldSizes: e.target.value.split(",").map((s) => s.trim()) },
-                  })
-                }
-              />
-            </div>
           </div>
           <div className="modal-footer">
             <button className="btn btn-secondary" onClick={onClose}>Cancel</button>

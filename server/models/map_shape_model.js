@@ -11,7 +11,6 @@ const MapShape = sequelize.define(
     description: { type: DataTypes.TEXT, allowNull: true },
     status: { type: DataTypes.STRING, allowNull: true },
     color: { type: DataTypes.STRING, allowNull: true },
-    specs: { type: DataTypes.JSON, allowNull: true },
   },
   {
     tableName: "map_shapes",

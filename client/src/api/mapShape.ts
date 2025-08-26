@@ -12,12 +12,11 @@ export async function addMapShape(
   description: string,
   status: string,
   color: string,
-  specs: any
 ) {
   const response = await fetch("/api/map-shapes", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ type, geojson, radius, title, description, status, color, specs }),
+    body: JSON.stringify({ type, geojson, radius, title, description, status, color }),
   });
   if (!response.ok) throw new Error("Failed to add shape");
   return response.json();

@@ -18,7 +18,6 @@ const defaultDetails = {
   description: "",
   status: "",
   color: "",
-  specs: { currentSize: "", oldSizes: [] },
 };
 
 const MapComponent2D: React.FC = () => {
@@ -50,7 +49,6 @@ const MapComponent2D: React.FC = () => {
           data.description,
           data.status,
           data.color,
-          data.specs
         );
       }
       (editingLayer as any).dbId = saved.id;
@@ -59,8 +57,6 @@ const MapComponent2D: React.FC = () => {
         <strong>${data.title}</strong><br/>
         ${data.description}<br/>
         Status: ${data.status}<br/>
-        Current Size: ${data.specs.currentSize}<br/>
-        Old Sizes: ${data.specs.oldSizes.join(", ")}
       `);
       toast.success(isEditing ? "Shape updated!" : "Shape saved!");
     } catch {
@@ -87,18 +83,16 @@ const MapComponent2D: React.FC = () => {
     const loadShapes = async () => {
       try {
         const shapes = await getMapShapes();
-        shapes.forEach(({ id, geojson, title, description, status, color, specs }) => {
+        shapes.forEach(({ id, geojson, title, description, status, color}) => {
           const layer = L.geoJSON(geojson).getLayers()[0];
           if (layer) {
             (layer as any).dbId = id;
-            (layer as any).metadata = { title, description, status, color, specs };
+            (layer as any).metadata = { title, description, status, color };
             if (color && "setStyle" in layer) (layer as L.Path).setStyle({ color });
             layer.bindPopup(`
               <strong>${title || "Untitled"}</strong><br/>
               ${description || ""}<br/>
               Status: ${status || "N/A"}<br/>
-              Current Size: ${specs?.currentSize || "N/A"}<br/>
-              Old Sizes: ${specs?.oldSizes?.join(", ") || "N/A"}
             `);
             drawnItems.addLayer(layer);
           }
