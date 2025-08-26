@@ -35,48 +35,14 @@ const MapComponent2D: React.FC = () => {
   const [historyOpen, setHistoryOpen] = useState(false);
   const [historyShapeId, setHistoryShapeId] = useState<number | null>(null);
 
-  // 🔹 helper to bind popup with edit + history events
-  const bindShapePopup = (layer: any, data: ShapeDetails) => {
-    layer.bindPopup(`
-      <div>
-        <strong>${data.title || "Untitled"}</strong><br/>
-        ${data.description || ""}<br/>
-        <em>Status:</em> ${data.status || "N/A"}<br/>
-        <em>Size:</em> ${data.size || "N/A"}<br/>
-        <div class="mt-2 d-flex gap-2">
-          <button class="btn btn-sm btn-primary edit-btn">Edit</button>
-          <button class="btn btn-sm btn-dark history-btn">History</button>
-        </div>
-      </div>
-    `);
-
-    layer.off("popupopen"); // prevent duplicate listeners
-    layer.on("popupopen", (e: any) => {
-      const popupEl = e.popup.getElement();
-      if (!popupEl) return;
-
-      const editBtn = popupEl.querySelector(".edit-btn");
-      const historyBtn = popupEl.querySelector(".history-btn");
-
-      if (editBtn) {
-        L.DomEvent.on(editBtn, "click", () => {
-          setEditingLayer(layer);
-          setFormData(layer.metadata || defaultDetails);
-          setIsEditing(true);
-          setModalOpen(true);
-        });
-      }
-
-      if (historyBtn) {
-        L.DomEvent.on(historyBtn, "click", () => {
-          setHistoryShapeId(layer.dbId);
-          setHistoryOpen(true);
-        });
-      }
+  const createColoredMarker = (color: string) =>
+    L.divIcon({
+      className: "custom-marker",
+      html: `<div style="background:${color}; width:16px; height:16px; border-radius:50%; border:2px solid white;"></div>`,
+      iconSize: [16, 16],
+      iconAnchor: [8, 8],
     });
-  };
 
-  // Save or update shape
   const handleSave = async (data: typeof defaultDetails) => {
     if (!editingLayer) return;
     const geojson = editingLayer.toGeoJSON();
@@ -101,12 +67,27 @@ const MapComponent2D: React.FC = () => {
           data.size
         );
       }
-
       (editingLayer as any).dbId = saved.id;
       (editingLayer as any).metadata = payload;
 
-      // 🔹 Always re-bind popup after save
-      bindShapePopup(editingLayer, data);
+      if (editingLayer instanceof L.Marker && data.color) {
+        editingLayer.setIcon(createColoredMarker(data.color));
+      } else if ("setStyle" in editingLayer && data.color) {
+        (editingLayer as L.Path).setStyle({ color: data.color });
+      }
+
+      editingLayer.bindPopup(`
+        <div>
+          <strong>${data.title || "Untitled"}</strong><br/>
+          ${data.description || ""}<br/>
+          <em>Status:</em> ${data.status || "N/A"}<br/>
+          <em>Size:</em> ${data.size || "N/A"}<br/>
+          <div class="mt-2 d-flex gap-2">
+            <button class="btn btn-sm btn-primary edit-btn">Edit</button>
+            <button class="btn btn-sm btn-dark history-btn">History</button>
+          </div>
+        </div>
+      `);
 
       toast.success(isEditing ? "Shape updated!" : "Shape saved!");
     } catch {
@@ -130,7 +111,6 @@ const MapComponent2D: React.FC = () => {
     const drawControl = new L.Control.Draw({ edit: { featureGroup: drawnItems } });
     map.addControl(drawControl);
 
-    // Load saved shapes
     const loadShapes = async () => {
       try {
         const shapes = await getMapShapes();
@@ -140,11 +120,48 @@ const MapComponent2D: React.FC = () => {
             (layer as any).dbId = id;
             (layer as any).metadata = { title, description, status, color, size };
 
-            if (color && "setStyle" in layer)
+            if (layer instanceof L.Marker && color) {
+              (layer as L.Marker).setIcon(createColoredMarker(color));
+            } else if (color && "setStyle" in layer) {
               (layer as L.Path).setStyle({ color });
+            }
 
-            // 🔹 bind popup with buttons
-            bindShapePopup(layer, { title, description, status, color, size });
+            layer.bindPopup(`
+              <div>
+                <strong>${title || "Untitled"}</strong><br/>
+                ${description || ""}<br/>
+                <em>Status:</em> ${status || "N/A"}<br/>
+                <em>Size:</em> ${size || "N/A"}<br/>
+                <div class="mt-2 d-flex gap-2">
+                  <button class="btn btn-sm btn-primary edit-btn">Edit</button>
+                  <button class="btn btn-sm btn-dark history-btn">History</button>
+                </div>
+              </div>
+            `);
+
+            layer.on("popupopen", (e) => {
+              const popupEl = e.popup.getElement();
+              if (!popupEl) return;
+
+              const editBtn = popupEl.querySelector(".edit-btn");
+              const historyBtn = popupEl.querySelector(".history-btn");
+
+              if (editBtn) {
+                L.DomEvent.on(editBtn, "click", () => {
+                  setEditingLayer(layer);
+                  setFormData(layer.metadata || defaultDetails);
+                  setIsEditing(true);
+                  setModalOpen(true);
+                });
+              }
+
+              if (historyBtn) {
+                L.DomEvent.on(historyBtn, "click", () => {
+                  setHistoryShapeId((layer as any).dbId);
+                  setHistoryOpen(true);
+                });
+              }
+            });
 
             drawnItems.addLayer(layer);
           }
@@ -156,7 +173,6 @@ const MapComponent2D: React.FC = () => {
     };
     loadShapes();
 
-    // Handle create
     map.on(L.Draw.Event.CREATED, (e: any) => {
       drawnItems.addLayer(e.layer);
       setEditingLayer(e.layer);
@@ -165,7 +181,6 @@ const MapComponent2D: React.FC = () => {
       setModalOpen(true);
     });
 
-    // Handle edit
     map.on(L.Draw.Event.EDITED, (e: any) => {
       e.layers.eachLayer((lyr: any) => {
         setEditingLayer(lyr);
@@ -175,7 +190,6 @@ const MapComponent2D: React.FC = () => {
       });
     });
 
-    // Handle delete
     map.on(L.Draw.Event.DELETED, async (e: any) => {
       const ids: number[] = [];
       e.layers.eachLayer((lyr: any) => lyr.dbId && ids.push(lyr.dbId));
