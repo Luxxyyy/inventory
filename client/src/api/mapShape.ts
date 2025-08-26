@@ -1,9 +1,13 @@
-export async function getMapShapes() {
+import { MapShape } from "../types/mapShape_type";
+
+// GET all shapes
+export async function getMapShapes(): Promise<MapShape[]> {
   const response = await fetch("/api/map-shapes");
   if (!response.ok) throw new Error("Failed to fetch shapes");
   return response.json();
 }
 
+// POST new shape
 export async function addMapShape(
   type: string,
   geojson: any,
@@ -11,8 +15,8 @@ export async function addMapShape(
   title: string,
   description: string,
   status: string,
-  color: string,
-) {
+  color: string
+): Promise<MapShape> {
   const response = await fetch("/api/map-shapes", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -22,7 +26,8 @@ export async function addMapShape(
   return response.json();
 }
 
-export async function updateMapShape(id: number, data: any) {
+// PUT update shape
+export async function updateMapShape(id: number, data: Partial<MapShape>): Promise<MapShape> {
   const response = await fetch(`/api/map-shapes/${id}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
@@ -32,7 +37,8 @@ export async function updateMapShape(id: number, data: any) {
   return response.json();
 }
 
-export async function deleteMapShape(id: number) {
+// DELETE shape
+export async function deleteMapShape(id: number): Promise<{ success: boolean }> {
   const response = await fetch(`/api/map-shapes/${id}`, { method: "DELETE" });
   if (!response.ok) throw new Error("Failed to delete shape");
   return response.json();

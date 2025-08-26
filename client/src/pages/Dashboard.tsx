@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import MapComponent2D from "../components/MapComponent2D";
+import MapComponent2D from "../components/map/MapComponent2D";
 import MapComponent3D from "../components/MapComponent3D";
 
 function Dashboard() {

@@ -12,14 +12,17 @@ const corsOptions = {
   allowedHeaders: ["Content-Type", "Authorization"],
 };
 app.use(cors(corsOptions));
-
 app.use(express.json());
 
 // Routes
 const fruitRoutes = require("./routes/fruit_route");
 app.use("/api/fruits", fruitRoutes);
+
 const mapShapeRoutes = require("./routes/map_shape_route");
 app.use("/api/map-shapes", mapShapeRoutes);
+
+const pipeLogRoutes = require("./routes/pipe_log_route");
+app.use("/api/map-shapes", pipeLogRoutes);
 
 sequelize
   .sync()

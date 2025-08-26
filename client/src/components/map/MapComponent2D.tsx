@@ -8,16 +8,19 @@ import {
   getMapShapes,
   deleteMapShape,
   updateMapShape,
-} from "../api/mapShape";
+} from "../../api/mapShape";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import ShapeDetailsModal from "./ShapeDetailsModal";
+import ShapeDetailsModal from "../ShapeDetailsModal";
+import PipeHistoryModal from "./PipeHistoryModal";
+import { ShapeDetails } from "../../types/mapShape_type";
 
-const defaultDetails = {
+const defaultDetails: ShapeDetails = {
   title: "",
   description: "",
   status: "",
   color: "",
+  size: "",
 };
 
 const MapComponent2D: React.FC = () => {
@@ -29,10 +32,56 @@ const MapComponent2D: React.FC = () => {
   const [formData, setFormData] = useState(defaultDetails);
   const [isEditing, setIsEditing] = useState(false);
 
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [historyShapeId, setHistoryShapeId] = useState<number | null>(null);
+
+  // 🔹 helper to bind popup with edit + history events
+  const bindShapePopup = (layer: any, data: ShapeDetails) => {
+    layer.bindPopup(`
+      <div>
+        <strong>${data.title || "Untitled"}</strong><br/>
+        ${data.description || ""}<br/>
+        <em>Status:</em> ${data.status || "N/A"}<br/>
+        <em>Size:</em> ${data.size || "N/A"}<br/>
+        <div class="mt-2 d-flex gap-2">
+          <button class="btn btn-sm btn-primary edit-btn">Edit</button>
+          <button class="btn btn-sm btn-dark history-btn">History</button>
+        </div>
+      </div>
+    `);
+
+    layer.off("popupopen"); // prevent duplicate listeners
+    layer.on("popupopen", (e: any) => {
+      const popupEl = e.popup.getElement();
+      if (!popupEl) return;
+
+      const editBtn = popupEl.querySelector(".edit-btn");
+      const historyBtn = popupEl.querySelector(".history-btn");
+
+      if (editBtn) {
+        L.DomEvent.on(editBtn, "click", () => {
+          setEditingLayer(layer);
+          setFormData(layer.metadata || defaultDetails);
+          setIsEditing(true);
+          setModalOpen(true);
+        });
+      }
+
+      if (historyBtn) {
+        L.DomEvent.on(historyBtn, "click", () => {
+          setHistoryShapeId(layer.dbId);
+          setHistoryOpen(true);
+        });
+      }
+    });
+  };
+
+  // Save or update shape
   const handleSave = async (data: typeof defaultDetails) => {
     if (!editingLayer) return;
     const geojson = editingLayer.toGeoJSON();
-    const radius = "getRadius" in editingLayer ? (editingLayer as any).getRadius() : null;
+    const radius =
+      "getRadius" in editingLayer ? (editingLayer as any).getRadius() : null;
     const type = geojson.geometry.type;
     const payload = { type, geojson, radius, ...data };
 
@@ -49,15 +98,16 @@ const MapComponent2D: React.FC = () => {
           data.description,
           data.status,
           data.color,
+          data.size
         );
       }
+
       (editingLayer as any).dbId = saved.id;
       (editingLayer as any).metadata = payload;
-      editingLayer.bindPopup(`
-        <strong>${data.title}</strong><br/>
-        ${data.description}<br/>
-        Status: ${data.status}<br/>
-      `);
+
+      // 🔹 Always re-bind popup after save
+      bindShapePopup(editingLayer, data);
+
       toast.success(isEditing ? "Shape updated!" : "Shape saved!");
     } catch {
       toast.error(isEditing ? "Failed to update" : "Failed to save");
@@ -80,20 +130,22 @@ const MapComponent2D: React.FC = () => {
     const drawControl = new L.Control.Draw({ edit: { featureGroup: drawnItems } });
     map.addControl(drawControl);
 
+    // Load saved shapes
     const loadShapes = async () => {
       try {
         const shapes = await getMapShapes();
-        shapes.forEach(({ id, geojson, title, description, status, color}) => {
+        shapes.forEach(({ id, geojson, title, description, status, color, size }: any) => {
           const layer = L.geoJSON(geojson).getLayers()[0];
           if (layer) {
             (layer as any).dbId = id;
-            (layer as any).metadata = { title, description, status, color };
-            if (color && "setStyle" in layer) (layer as L.Path).setStyle({ color });
-            layer.bindPopup(`
-              <strong>${title || "Untitled"}</strong><br/>
-              ${description || ""}<br/>
-              Status: ${status || "N/A"}<br/>
-            `);
+            (layer as any).metadata = { title, description, status, color, size };
+
+            if (color && "setStyle" in layer)
+              (layer as L.Path).setStyle({ color });
+
+            // 🔹 bind popup with buttons
+            bindShapePopup(layer, { title, description, status, color, size });
+
             drawnItems.addLayer(layer);
           }
         });
@@ -104,6 +156,7 @@ const MapComponent2D: React.FC = () => {
     };
     loadShapes();
 
+    // Handle create
     map.on(L.Draw.Event.CREATED, (e: any) => {
       drawnItems.addLayer(e.layer);
       setEditingLayer(e.layer);
@@ -112,6 +165,7 @@ const MapComponent2D: React.FC = () => {
       setModalOpen(true);
     });
 
+    // Handle edit
     map.on(L.Draw.Event.EDITED, (e: any) => {
       e.layers.eachLayer((lyr: any) => {
         setEditingLayer(lyr);
@@ -121,8 +175,9 @@ const MapComponent2D: React.FC = () => {
       });
     });
 
+    // Handle delete
     map.on(L.Draw.Event.DELETED, async (e: any) => {
-      const ids = [];
+      const ids: number[] = [];
       e.layers.eachLayer((lyr: any) => lyr.dbId && ids.push(lyr.dbId));
       try {
         await Promise.all(ids.map((id) => deleteMapShape(id)));
@@ -142,6 +197,11 @@ const MapComponent2D: React.FC = () => {
         onClose={() => setModalOpen(false)}
         onSave={handleSave}
         initialData={formData}
+      />
+      <PipeHistoryModal
+        shapeId={historyShapeId}
+        show={historyOpen}
+        onClose={() => setHistoryOpen(false)}
       />
     </>
   );
