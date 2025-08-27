@@ -24,6 +24,9 @@ app.use("/api/map-shapes", mapShapeRoutes);
 const pipeLogRoutes = require("./routes/pipe_log_route");
 app.use("/api/map-shapes", pipeLogRoutes);
 
+const sourceRoute = require("./routes/source_route");
+app.use("/api/sources", sourceRoute);
+
 sequelize
   .sync()
   .then(() => {

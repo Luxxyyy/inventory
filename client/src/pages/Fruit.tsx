@@ -39,7 +39,7 @@ function Fruit() {
   };
 
   return (
-    <div>
+    <div className="fuild-container mx-4 my-3">
       <div className="mb-3" id="input-box">
         <label htmlFor="formGroupExampleInput" className="form-label">Fruit Name</label>
         <input

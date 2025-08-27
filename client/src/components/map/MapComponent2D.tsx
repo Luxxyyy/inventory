@@ -23,25 +23,37 @@ const defaultDetails: ShapeDetails = {
   size: "",
 };
 
+// Custom Layer type for metadata and dbId
+type CustomLayer = L.Layer & {
+  dbId?: number;
+  metadata?: ShapeDetails;
+};
+
 const MapComponent2D: React.FC = () => {
   const mapRef = useRef<L.Map | null>(null);
   const drawnItems = useRef<L.FeatureGroup>(new L.FeatureGroup()).current;
 
   const [modalOpen, setModalOpen] = useState(false);
-  const [editingLayer, setEditingLayer] = useState<L.Layer | null>(null);
+  const [editingLayer, setEditingLayer] = useState<CustomLayer | null>(null);
   const [formData, setFormData] = useState(defaultDetails);
   const [isEditing, setIsEditing] = useState(false);
 
   const [historyOpen, setHistoryOpen] = useState(false);
   const [historyShapeId, setHistoryShapeId] = useState<number | null>(null);
 
-  const createColoredMarker = (color: string) =>
-    L.divIcon({
-      className: "custom-marker",
-      html: `<div style="background:${color}; width:16px; height:16px; border-radius:50%; border:2px solid white;"></div>`,
-      iconSize: [16, 16],
-      iconAnchor: [8, 8],
-    });
+  const [loading, setLoading] = useState(false);
+
+  // Memoized marker creator
+  const createColoredMarker = React.useCallback(
+    (color: string) =>
+      L.divIcon({
+        className: "custom-marker",
+        html: `<div style="background:${color}; width:16px; height:16px; border-radius:50%; border:2px solid white;"></div>`,
+        iconSize: [16, 16],
+        iconAnchor: [8, 8],
+      }),
+    []
+  );
 
   const handleSave = async (data: typeof defaultDetails) => {
     if (!editingLayer) return;
@@ -90,8 +102,11 @@ const MapComponent2D: React.FC = () => {
       `);
 
       toast.success(isEditing ? "Shape updated!" : "Shape saved!");
-    } catch {
-      toast.error(isEditing ? "Failed to update" : "Failed to save");
+    } catch (err: any) {
+      toast.error(
+        (isEditing ? "Failed to update: " : "Failed to save: ") +
+          (err?.message || "")
+      );
     } finally {
       setModalOpen(false);
       setEditingLayer(null);
@@ -112,13 +127,14 @@ const MapComponent2D: React.FC = () => {
     map.addControl(drawControl);
 
     const loadShapes = async () => {
+      setLoading(true);
       try {
         const shapes = await getMapShapes();
         shapes.forEach(({ id, geojson, title, description, status, color, size }: any) => {
-          const layer = L.geoJSON(geojson).getLayers()[0];
+          const layer = L.geoJSON(geojson).getLayers()[0] as CustomLayer;
           if (layer) {
-            (layer as any).dbId = id;
-            (layer as any).metadata = { title, description, status, color, size };
+            layer.dbId = id;
+            layer.metadata = { title, description, status, color, size };
 
             if (layer instanceof L.Marker && color) {
               (layer as L.Marker).setIcon(createColoredMarker(color));
@@ -157,7 +173,7 @@ const MapComponent2D: React.FC = () => {
 
               if (historyBtn) {
                 L.DomEvent.on(historyBtn, "click", () => {
-                  setHistoryShapeId((layer as any).dbId);
+                  setHistoryShapeId(layer.dbId);
                   setHistoryOpen(true);
                 });
               }
@@ -167,8 +183,10 @@ const MapComponent2D: React.FC = () => {
           }
         });
         toast.success("Shapes loaded");
-      } catch {
-        toast.error("Failed to load shapes");
+      } catch (err: any) {
+        toast.error("Failed to load shapes: " + (err?.message || ""));
+      } finally {
+        setLoading(false);
       }
     };
     loadShapes();
@@ -182,7 +200,7 @@ const MapComponent2D: React.FC = () => {
     });
 
     map.on(L.Draw.Event.EDITED, (e: any) => {
-      e.layers.eachLayer((lyr: any) => {
+      e.layers.eachLayer((lyr: CustomLayer) => {
         setEditingLayer(lyr);
         setFormData(lyr.metadata || defaultDetails);
         setIsEditing(true);
@@ -192,20 +210,29 @@ const MapComponent2D: React.FC = () => {
 
     map.on(L.Draw.Event.DELETED, async (e: any) => {
       const ids: number[] = [];
-      e.layers.eachLayer((lyr: any) => lyr.dbId && ids.push(lyr.dbId));
+      e.layers.eachLayer((lyr: CustomLayer) => lyr.dbId && ids.push(lyr.dbId));
       try {
         await Promise.all(ids.map((id) => deleteMapShape(id)));
         toast.success("Shape(s) deleted");
-      } catch {
-        toast.error("Failed to delete shape(s)");
+      } catch (err: any) {
+        toast.error("Failed to delete shape(s): " + (err?.message || ""));
       }
     });
-  }, []);
+  }, [createColoredMarker]);
 
   return (
     <>
       <ToastContainer />
-      <div id="map" style={{ height: "600px" }} />
+      {loading && <div className="loading-indicator">Loading map shapes...</div>}
+      <div
+        id="map"
+        style={{
+          height: "60vh",
+          minHeight: "400px",
+          width: "100%",
+          maxWidth: "100vw",
+        }}
+      />
       <ShapeDetailsModal
         show={modalOpen}
         onClose={() => setModalOpen(false)}

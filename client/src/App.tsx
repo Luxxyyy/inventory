@@ -5,8 +5,9 @@ import AppRoutes from './routes/AppRoutes';
 import GetPageTitle from './utils/GetPageTitle';
 import PageHeader from './components/PageHeader';
 import { getFruits } from './api/Fruits';
-import { getMapShapes } from './api/mapShape';
 import PageFooter from './components/PageFooter';
+import './index.css'
+
 
 const App: React.FC = () => {
   const location = useLocation();

@@ -54,3 +54,29 @@
 #input-box {
   width: 30% !important;
 }
+/* === Maplegend === */
+.green-line {
+  display: inline-block;
+  width: 32px;
+  height: 0;
+  border-top: 6px solid green;
+  margin-right: 4px;
+}
+
+.blue-dot {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: blue;
+  border: 2px solid #fff;
+}
+
+.yellow-dot {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: yellow;
+  border: 2px solid #fff;
+}

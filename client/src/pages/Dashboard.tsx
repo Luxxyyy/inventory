@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import MapComponent2D from "../components/map/MapComponent2D";
 import MapComponent3D from "../components/MapComponent3D";
+import MapLegend from "../components/map/MapLegend";
 
 function Dashboard() {
   const [is2DMap, setIs2DMap] = useState(true);
@@ -79,6 +80,9 @@ function Dashboard() {
       <div className="w-100" style={{ height: "100%", minHeight: "500px" }}>
         {is2DMap ? <MapComponent2D /> : <MapComponent3D />}
       </div>
+
+      {/* Map Legend BELOW the map */}
+      <MapLegend />
     </div>
   );
 }
