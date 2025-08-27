@@ -1,16 +1,44 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import MapComponent2D from "../components/map/MapComponent2D";
 import MapComponent3D from "../components/MapComponent3D";
 import MapLegend from "../components/map/MapLegend";
+import { getSources } from "../api/source_api";
 
 function Dashboard() {
   const [is2DMap, setIs2DMap] = useState(true);
+  const [sources, setSources] = useState<{ id?: number; source: string; latitude?: string; longitude?: string; barangay?: string; purok?: string }[]>([]);
+  const [selectedSource, setSelectedSource] = useState<{ latitude?: string; longitude?: string } | null>(null);
+  const [barangays, setBarangays] = useState<string[]>(["Barangay A", "Barangay B", "Barangay C"]);
+  const [puroks, setPuroks] = useState<string[]>(["Purok 1", "Purok 2", "Purok 3"]);
+  const [selectedBarangay, setSelectedBarangay] = useState<string | null>(null);
+  const [selectedPurok, setSelectedPurok] = useState<string | null>(null);
+
+  useEffect(() => {
+    getSources()
+      .then((data) => setSources(data))
+      .catch(() => setSources([]));
+  }, []);
+
+  const getCenter = () => {
+    if (selectedSource && selectedSource.latitude && selectedSource.longitude) {
+      return selectedSource;
+    }
+    if (selectedBarangay) {
+      const found = sources.find(src => src.barangay === selectedBarangay && src.latitude && src.longitude);
+      if (found) return { latitude: found.latitude, longitude: found.longitude };
+    }
+    if (selectedPurok) {
+      const found = sources.find(src => src.purok === selectedPurok && src.latitude && src.longitude);
+      if (found) return { latitude: found.latitude, longitude: found.longitude };
+    }
+    return null;
+  };
+
+  const center = getCenter();
 
   return (
     <div className="container-fluid p-3">
-      {/* Controls Row */}
       <div className="d-flex flex-wrap justify-content-between align-items-center mb-3">
-        {/* Map Toggle Button */}
         <button
           className="btn btn-primary me-2 mb-2"
           onClick={() => setIs2DMap((prev) => !prev)}
@@ -18,9 +46,7 @@ function Dashboard() {
           Switch to {is2DMap ? "3D" : "2D"} Map
         </button>
 
-        {/* Dropdowns */}
         <div className="d-flex flex-wrap gap-2">
-          {/* Source Dropdown */}
           <div className="dropdown">
             <button
               className="btn btn-outline-secondary dropdown-toggle"
@@ -32,13 +58,29 @@ function Dashboard() {
               Source
             </button>
             <ul className="dropdown-menu" aria-labelledby="sourceDropdown">
-              <li><a className="dropdown-item" href="#">Source 1</a></li>
-              <li><a className="dropdown-item" href="#">Source 2</a></li>
-              <li><a className="dropdown-item" href="#">Source 3</a></li>
+              {sources.length === 0 ? (
+                <li>
+                  <span className="dropdown-item text-muted">No sources found</span>
+                </li>
+              ) : (
+                sources.map((src) => (
+                  <li key={src.id || src.source}>
+                    <button
+                      className="dropdown-item"
+                      onClick={() => {
+                        setSelectedSource({ latitude: src.latitude, longitude: src.longitude });
+                        setSelectedBarangay(src.barangay || null);
+                        setSelectedPurok(src.purok || null);
+                      }}
+                      disabled={!src.latitude || !src.longitude}
+                    >
+                      {src.source}
+                    </button>
+                  </li>
+                ))
+              )}
             </ul>
           </div>
-
-          {/* Barangay Dropdown */}
           <div className="dropdown">
             <button
               className="btn btn-outline-secondary dropdown-toggle"
@@ -50,13 +92,21 @@ function Dashboard() {
               Barangay
             </button>
             <ul className="dropdown-menu" aria-labelledby="barangayDropdown">
-              <li><a className="dropdown-item" href="#">Barangay A</a></li>
-              <li><a className="dropdown-item" href="#">Barangay B</a></li>
-              <li><a className="dropdown-item" href="#">Barangay C</a></li>
+              {barangays.map((barangay) => (
+                <li key={barangay}>
+                  <button
+                    className="dropdown-item"
+                    onClick={() => {
+                      setSelectedBarangay(barangay);
+                      setSelectedSource(null);
+                    }}
+                  >
+                    {barangay}
+                  </button>
+                </li>
+              ))}
             </ul>
           </div>
-
-          {/* Purok Dropdown */}
           <div className="dropdown">
             <button
               className="btn btn-outline-secondary dropdown-toggle"
@@ -68,20 +118,26 @@ function Dashboard() {
               Purok
             </button>
             <ul className="dropdown-menu" aria-labelledby="purokDropdown">
-              <li><a className="dropdown-item" href="#">Purok 1</a></li>
-              <li><a className="dropdown-item" href="#">Purok 2</a></li>
-              <li><a className="dropdown-item" href="#">Purok 3</a></li>
+              {puroks.map((purok) => (
+                <li key={purok}>
+                  <button
+                    className="dropdown-item"
+                    onClick={() => {
+                      setSelectedPurok(purok);
+                      setSelectedSource(null);
+                    }}
+                  >
+                    {purok}
+                  </button>
+                </li>
+              ))}
             </ul>
           </div>
         </div>
       </div>
-
-      {/* Map Display */}
       <div className="w-100" style={{ height: "100%", minHeight: "500px" }}>
-        {is2DMap ? <MapComponent2D /> : <MapComponent3D />}
+        {is2DMap ? <MapComponent2D center={center} /> : <MapComponent3D center={center} />}
       </div>
-
-      {/* Map Legend BELOW the map */}
       <MapLegend />
     </div>
   );

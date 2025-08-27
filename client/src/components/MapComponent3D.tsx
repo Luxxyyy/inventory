@@ -10,17 +10,26 @@ import {
 import { getMapShapes } from "../api/mapShape";
 import { MapShape } from "../types/mapShape_type";
 
+type CenterType = {
+  latitude?: string;
+  longitude?: string;
+};
+
+type Props = {
+  center?: CenterType | null;
+};
+
 const containerStyle = {
   width: "100%",
   height: "600px",
 };
 
-const center = {
+const defaultCenter = {
   lat: 7.731782,
   lng: 125.099118,
 };
 
-const MapComponent3D: React.FC = () => {
+const MapComponent3D: React.FC<Props> = ({ center }) => {
   const { isLoaded } = useJsApiLoader({
     id: "google-map-script",
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
@@ -29,14 +38,24 @@ const MapComponent3D: React.FC = () => {
   const [shapes, setShapes] = useState<MapShape[]>([]);
   const [selectedShape, setSelectedShape] = useState<MapShape | null>(null);
   const [infoWindowPos, setInfoWindowPos] = useState<{ lat: number; lng: number } | null>(null);
+  const [mapCenter, setMapCenter] = useState(defaultCenter);
 
   useEffect(() => {
     getMapShapes().then(setShapes).catch(console.error);
   }, []);
 
+  useEffect(() => {
+    if (center && center.latitude && center.longitude) {
+      setMapCenter({
+        lat: Number(center.latitude),
+        lng: Number(center.longitude),
+      });
+    }
+  }, [center]);
+
   // Helper to get InfoWindow position for lines/polygons
   const getMidPoint = (coordinates: number[][]) => {
-    if (!coordinates.length) return center;
+    if (!coordinates.length) return mapCenter;
     const midIdx = Math.floor(coordinates.length / 2);
     const [lng, lat] = coordinates[midIdx];
     return { lat, lng };
@@ -56,7 +75,13 @@ const MapComponent3D: React.FC = () => {
   };
 
   return isLoaded ? (
-    <GoogleMap mapContainerStyle={containerStyle} center={center} zoom={17}>
+    <GoogleMap mapContainerStyle={containerStyle} center={mapCenter} zoom={17}>
+      {/* Marker for selected center */}
+      {center && center.latitude && center.longitude && (
+        <Marker position={{ lat: Number(center.latitude), lng: Number(center.longitude) }} />
+      )}
+
+      {/* Render shapes from database */}
       {shapes.map((shape, idx) => {
         const { geojson, title, description, status, color } = shape;
         if (!geojson?.geometry) return null;

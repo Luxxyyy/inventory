@@ -29,9 +29,15 @@ type CustomLayer = L.Layer & {
   metadata?: ShapeDetails;
 };
 
-const MapComponent2D: React.FC = () => {
+type CenterType = {
+  latitude?: string;
+  longitude?: string;
+};
+
+const MapComponent2D: React.FC<{ center?: CenterType | null }> = ({ center }) => {
   const mapRef = useRef<L.Map | null>(null);
   const drawnItems = useRef<L.FeatureGroup>(new L.FeatureGroup()).current;
+  const markerRef = useRef<L.Marker | null>(null);
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editingLayer, setEditingLayer] = useState<CustomLayer | null>(null);
@@ -219,6 +225,22 @@ const MapComponent2D: React.FC = () => {
       }
     });
   }, [createColoredMarker]);
+
+  // Center the map and add marker when center changes
+  useEffect(() => {
+    if (center && mapRef.current && center.latitude && center.longitude) {
+      const lat = Number(center.latitude);
+      const lng = Number(center.longitude);
+      mapRef.current.setView([lat, lng], 17);
+
+      // Remove previous marker
+      if (markerRef.current) {
+        mapRef.current.removeLayer(markerRef.current);
+      }
+      // Add new marker
+      markerRef.current = L.marker([lat, lng]).addTo(mapRef.current);
+    }
+  }, [center]);
 
   return (
     <>
