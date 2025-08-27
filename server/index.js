@@ -15,9 +15,6 @@ app.use(cors(corsOptions));
 app.use(express.json());
 
 // Routes
-const fruitRoutes = require("./routes/fruit_route");
-app.use("/api/fruits", fruitRoutes);
-
 const mapShapeRoutes = require("./routes/map_shape_route");
 app.use("/api/map-shapes", mapShapeRoutes);
 
@@ -26,6 +23,12 @@ app.use("/api/map-shapes", pipeLogRoutes);
 
 const sourceRoute = require("./routes/source_route");
 app.use("/api/sources", sourceRoute);
+
+const balangayRoute = require("./routes/balangay_route");
+app.use("/api/balangays", balangayRoute);
+
+const purokRoute = require("./routes/purok_route");
+app.use("/api/puroks", purokRoute);
 
 sequelize
   .sync()

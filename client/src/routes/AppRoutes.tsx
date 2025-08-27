@@ -4,8 +4,7 @@ import Dashboard from '../pages/Dashboard';
 import Source from '../pages/Source';
 import Consumer from '../pages/Consumer';
 import Balangay from '../pages/Balangay';
-import Logs from '../pages/Logs';
-import Fruit from '../pages/Fruit';
+import Purok from '../pages/Purok';
 
 
 function AppRoutes() {
@@ -16,8 +15,7 @@ function AppRoutes() {
             <Route path="/source" element={<Source />} />
             <Route path="/balangay" element={<Balangay />} />
             <Route path="/consumer" element={<Consumer />} />
-            <Route path="/logs" element={<Logs />} />
-            <Route path="/fruit" element={<Fruit />} />
+            <Route path="/purok" element={<Purok />} />
         </Routes>
     );
 };

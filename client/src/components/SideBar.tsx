@@ -48,18 +48,8 @@ const Sidebar: React.FC<SidebarProps> = () => {
                         </Link>
                     </li>
                     <li className="nav-item">
-                        <Link to="/consumer" className="nav-link text-white px-3 py-2 rounded hover-effect">
-                            {collapsed ? '' : 'Consumers'}
-                        </Link>
-                    </li>
-                    <li className="nav-item">
-                        <Link to="/logs" className="nav-link text-white px-3 py-2 rounded hover-effect">
-                            {collapsed ? '' : 'Logs'}
-                        </Link>
-                    </li>
-                    <li className="nav-item">
-                        <Link to="/fruit" className="nav-link text-white px-3 py-2 rounded hover-effect">
-                            {collapsed ? '' : 'Fruit'}
+                        <Link to="/purok" className="nav-link text-white px-3 py-2 rounded hover-effect">
+                            {collapsed ? '' : 'Purok'}
                         </Link>
                     </li>
                 </ul>
