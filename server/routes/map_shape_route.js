@@ -2,9 +2,10 @@ const express = require("express");
 const router = express.Router();
 const MapShape = require("../models/map_shape_model");
 const PipeLog = require("../models/pipe_log_model");
+const { isAuthenticated } = require("../middleware/auth_middleware");
 
 // Get all shapes
-router.get("/", async (req, res) => {
+router.get("/", isAuthenticated, async (req, res) => {
   try {
     const shapes = await MapShape.findAll();
     res.json(shapes);
@@ -15,7 +16,7 @@ router.get("/", async (req, res) => {
 });
 
 // Create a new shape
-router.post("/", async (req, res) => {
+router.post("/", isAuthenticated, async (req, res) => {
   try {
     const { type, geojson, radius, title, description, status, color, size } =
       req.body;
@@ -51,7 +52,7 @@ router.post("/", async (req, res) => {
 });
 
 // Update a shape
-router.put("/:id", async (req, res) => {
+router.put("/:id", isAuthenticated, async (req, res) => {
   try {
     const { type, geojson, radius, title, description, status, color, size } =
       req.body;
@@ -91,7 +92,7 @@ router.put("/:id", async (req, res) => {
 });
 
 // Delete a shape
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", isAuthenticated, async (req, res) => {
   try {
     const deleted = await MapShape.destroy({ where: { id: req.params.id } });
     deleted

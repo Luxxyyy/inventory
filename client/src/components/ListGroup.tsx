@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import Modal from "./Modal";
-import { getFruits } from "../api/Fruits";
+import { getFruits } from "../api/Fruitss";
 
 function ListGroup() {
   const [items, setItems] = useState<string[]>([]);

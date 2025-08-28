@@ -14,6 +14,7 @@ import "react-toastify/dist/ReactToastify.css";
 import ShapeDetailsModal from "../ShapeDetailsModal";
 import PipeHistoryModal from "./PipeHistoryModal";
 import { ShapeDetails } from "../../types/mapShape_type";
+import { useAuth } from "../../contexts/AuthContext"; // <-- Make sure this is correctly pointing to your context
 
 const defaultDetails: ShapeDetails = {
   title: "",
@@ -23,7 +24,6 @@ const defaultDetails: ShapeDetails = {
   size: "",
 };
 
-// Custom Layer type for metadata and dbId
 type CustomLayer = L.Layer & {
   dbId?: number;
   metadata?: ShapeDetails;
@@ -49,7 +49,8 @@ const MapComponent2D: React.FC<{ center?: CenterType | null }> = ({ center }) =>
 
   const [loading, setLoading] = useState(false);
 
-  // Memoized marker creator
+  const { user } = useAuth(); // <-- Required to check role
+
   const createColoredMarker = React.useCallback(
     (color: string) =>
       L.divIcon({
@@ -109,10 +110,7 @@ const MapComponent2D: React.FC<{ center?: CenterType | null }> = ({ center }) =>
 
       toast.success(isEditing ? "Shape updated!" : "Shape saved!");
     } catch (err: any) {
-      toast.error(
-        (isEditing ? "Failed to update: " : "Failed to save: ") +
-          (err?.message || "")
-      );
+      toast.error((isEditing ? "Failed to update: " : "Failed to save: ") + (err?.message || ""));
     } finally {
       setModalOpen(false);
       setEditingLayer(null);
@@ -129,8 +127,12 @@ const MapComponent2D: React.FC<{ center?: CenterType | null }> = ({ center }) =>
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
     map.addLayer(drawnItems);
 
-    const drawControl = new L.Control.Draw({ edit: { featureGroup: drawnItems } });
-    map.addControl(drawControl);
+    if (user?.role === "admin") {
+      const drawControl = new L.Control.Draw({
+        edit: { featureGroup: drawnItems },
+      });
+      map.addControl(drawControl);
+    }
 
     const loadShapes = async () => {
       setLoading(true);
@@ -168,7 +170,7 @@ const MapComponent2D: React.FC<{ center?: CenterType | null }> = ({ center }) =>
               const editBtn = popupEl.querySelector(".edit-btn");
               const historyBtn = popupEl.querySelector(".history-btn");
 
-              if (editBtn) {
+              if (editBtn && user?.role === "admin") {
                 L.DomEvent.on(editBtn, "click", () => {
                   setEditingLayer(layer);
                   setFormData(layer.metadata || defaultDetails);
@@ -195,49 +197,50 @@ const MapComponent2D: React.FC<{ center?: CenterType | null }> = ({ center }) =>
         setLoading(false);
       }
     };
+
     loadShapes();
 
-    map.on(L.Draw.Event.CREATED, (e: any) => {
-      drawnItems.addLayer(e.layer);
-      setEditingLayer(e.layer);
-      setFormData(defaultDetails);
-      setIsEditing(false);
-      setModalOpen(true);
-    });
-
-    map.on(L.Draw.Event.EDITED, (e: any) => {
-      e.layers.eachLayer((lyr: CustomLayer) => {
-        setEditingLayer(lyr);
-        setFormData(lyr.metadata || defaultDetails);
-        setIsEditing(true);
+    if (user?.role === "admin") {
+      map.on(L.Draw.Event.CREATED, (e: any) => {
+        drawnItems.addLayer(e.layer);
+        setEditingLayer(e.layer);
+        setFormData(defaultDetails);
+        setIsEditing(false);
         setModalOpen(true);
       });
-    });
 
-    map.on(L.Draw.Event.DELETED, async (e: any) => {
-      const ids: number[] = [];
-      e.layers.eachLayer((lyr: CustomLayer) => lyr.dbId && ids.push(lyr.dbId));
-      try {
-        await Promise.all(ids.map((id) => deleteMapShape(id)));
-        toast.success("Shape(s) deleted");
-      } catch (err: any) {
-        toast.error("Failed to delete shape(s): " + (err?.message || ""));
-      }
-    });
-  }, [createColoredMarker]);
+      map.on(L.Draw.Event.EDITED, (e: any) => {
+        e.layers.eachLayer((lyr: CustomLayer) => {
+          setEditingLayer(lyr);
+          setFormData(lyr.metadata || defaultDetails);
+          setIsEditing(true);
+          setModalOpen(true);
+        });
+      });
 
-  // Center the map and add marker when center changes
+      map.on(L.Draw.Event.DELETED, async (e: any) => {
+        const ids: number[] = [];
+        e.layers.eachLayer((lyr: CustomLayer) => lyr.dbId && ids.push(lyr.dbId));
+        try {
+          await Promise.all(ids.map((id) => deleteMapShape(id)));
+          toast.success("Shape(s) deleted");
+        } catch (err: any) {
+          toast.error("Failed to delete shape(s): " + (err?.message || ""));
+        }
+      });
+    }
+  }, [createColoredMarker, user]);
+
   useEffect(() => {
     if (center && mapRef.current && center.latitude && center.longitude) {
       const lat = Number(center.latitude);
       const lng = Number(center.longitude);
       mapRef.current.setView([lat, lng], 17);
 
-      // Remove previous marker
       if (markerRef.current) {
         mapRef.current.removeLayer(markerRef.current);
       }
-      // Add new marker
+
       markerRef.current = L.marker([lat, lng]).addTo(mapRef.current);
     }
   }, [center]);
@@ -246,15 +249,7 @@ const MapComponent2D: React.FC<{ center?: CenterType | null }> = ({ center }) =>
     <>
       <ToastContainer />
       {loading && <div className="loading-indicator">Loading map shapes...</div>}
-      <div
-        id="map"
-        style={{
-          height: "60vh",
-          minHeight: "400px",
-          width: "100%",
-          maxWidth: "100vw",
-        }}
-      />
+      <div id="map" style={{ height: "60vh", minHeight: "400px", width: "100%", maxWidth: "100vw" }} />
       <ShapeDetailsModal
         show={modalOpen}
         onClose={() => setModalOpen(false)}

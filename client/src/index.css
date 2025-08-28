@@ -48,6 +48,47 @@
   text-decoration: none;
 }
 
+.modern-link {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  color: white !important;
+  font-weight: 500;
+  transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+  display: block;
+  position: relative;
+}
+
+.modern-link:hover,
+.modern-link:focus {
+  background-color: #4a90e2;
+  color: white !important;
+  text-decoration: none;
+  box-shadow: 0 0 8px rgba(74, 144, 226, 0.6);
+  outline: none;
+}
+
+.modern-link::after {
+  content: '';
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 6px;
+  height: 6px;
+  border-top: 2px solid transparent;
+  border-right: 2px solid transparent;
+  border-bottom: 2px solid white;
+  border-left: 2px solid white;
+  clip-path: polygon(0 0, 100% 50%, 0 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.modern-link:hover::after,
+.modern-link:focus::after {
+  opacity: 1;
+}
+
 /* === Map Container spacing is handled by Bootstrap now === */
 
 /* === Optional: keep AddBalangay input override === */
@@ -60,6 +101,14 @@
   width: 32px;
   height: 0;
   border-top: 6px solid green;
+  margin-right: 4px;
+}
+
+.lime-line {
+  display: inline-block;
+  width: 32px;
+  height: 0;
+  border-top: 6px solid lime;
   margin-right: 4px;
 }
 
@@ -78,5 +127,14 @@
   height: 18px;
   border-radius: 50%;
   background: yellow;
+  border: 2px solid #fff;
+}
+
+.orange-dot {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: orange;
   border: 2px solid #fff;
 }
