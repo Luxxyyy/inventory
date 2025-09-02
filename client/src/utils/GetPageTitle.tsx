@@ -1,7 +1,7 @@
 function GetPageTitle(pathname: string): string {
     switch (pathname) {
         case '/':
-            return 'Dashboard';
+            return 'Map';
         case '/list':
             return 'List';
         case '/source':

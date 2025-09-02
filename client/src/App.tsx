@@ -2,7 +2,6 @@ import React from 'react';
 import { useLocation } from 'react-router-dom';
 import Sidebar from './components/SideBar';
 import AppRoutes from './routes/AppRoutes';
-import GetPageTitle from './utils/GetPageTitle';
 import PageHeader from './components/PageHeader';
 import PageFooter from './components/PageFooter';
 import Login from './pages/Login';
@@ -12,8 +11,6 @@ import './index.css';
 
 const App: React.FC = () => {
   const location = useLocation();
- 
-  // Don't show sidebar, header, and footer on login page
   const isLoginPage = location.pathname === '/login';
   
   if (isLoginPage) {

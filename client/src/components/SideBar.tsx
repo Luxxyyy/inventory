@@ -45,7 +45,7 @@ const Sidebar: React.FC<SidebarProps> = () => {
         <ul className="nav flex-column">
           <li className="nav-item">
             <Link to="/" className="nav-link modern-link">
-              {collapsed ? '' : 'Dashboard'}
+              {collapsed ? '' : 'Map'}
             </Link>
           </li>
           <li className="nav-item">
