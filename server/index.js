@@ -45,7 +45,6 @@ app.use(express.json());
 
 // Routes
 const mapShapeRoutes = require("./routes/map_shape_route");
-const pipeLogRoutes = require("./routes/pipe_log_route");
 app.use("/api/map-shapes", mapShapeRoutes);
 
 const sourceRoute = require("./routes/source_route");
@@ -59,6 +58,9 @@ app.use("/api/puroks", purokRoute);
 
 const authRoute = require("./routes/auth_route");
 app.use("/api/auth", authRoute);
+
+const pipeLogRoutes = require("./routes/pipe_log_route");
+app.use("/api/pipe-logs", pipeLogRoutes);
 
 const User = require("./models/user_model");
 

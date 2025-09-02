@@ -112,6 +112,22 @@
   margin-right: 4px;
 }
 
+.blue-line {
+  display: inline-block;
+  width: 32px;
+  height: 0;
+  border-top: 6px solid blue;
+  margin-right: 4px;
+}
+
+.aqua-line {
+  display: inline-block;
+  width: 32px;
+  height: 0;
+  border-top: 6px solid aqua;
+  margin-right: 4px;
+}
+
 .blue-dot {
   display: inline-block;
   width: 18px;
@@ -138,3 +154,32 @@
   background: orange;
   border: 2px solid #fff;
 }
+
+.aqua-dot {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: aqua;
+  border: 2px solid #fff;
+}
+
+.coral-dot {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: coral;
+  border: 2px solid #fff;
+}
+
+.indianred-dot {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: indianred;
+  border: 2px solid #fff;
+}
+
+

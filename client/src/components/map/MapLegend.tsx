@@ -12,6 +12,16 @@ const legendItems = [
     color: "lime-line",
   },
   {
+    label: "75mm (Blue Line)",
+    type: "line",
+    color: "blue-line",
+  },
+  {
+    label: "50mm (Aqua Line)",
+    type: "line",
+    color: "aqua-line",
+  },
+  {
     label: "AVIAR VALVE ASSEMBLY (Blue Dot)",
     type: "dot",
     color: "blue-dot",
@@ -25,6 +35,21 @@ const legendItems = [
     label: "BREAK PRESSURE CHAMBER (Orange Dot)",
     type: "dot",
     color: "orange-dot",
+  },
+  {
+    label: "TEE (Aqua Dot)",
+    type: "dot",
+    color: "aqua-dot",
+  },
+  {
+    label: "GATE VALVE (Coral Dot)",
+    type: "dot",
+    color: "coral-dot",
+  },
+  {
+    label: "REDUCER (Indianred Dot)",
+    type: "dot",
+    color: "indianred-dot",
   },
 ];
 
