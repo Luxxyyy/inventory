@@ -4,7 +4,6 @@ import Sidebar from './components/SideBar';
 import AppRoutes from './routes/AppRoutes';
 import PageHeader from './components/PageHeader';
 import PageFooter from './components/PageFooter';
-import Login from './pages/Login';
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import './index.css';

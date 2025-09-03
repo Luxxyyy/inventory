@@ -1,57 +1,5 @@
 import React from "react";
-
-const legendItems = [
-  {
-    label: "250mm (Green Line)",
-    type: "line",
-    color: "green-line",
-  },
-  {
-    label: "200mm (Lime Line)",
-    type: "line",
-    color: "lime-line",
-  },
-  {
-    label: "75mm (Blue Line)",
-    type: "line",
-    color: "blue-line",
-  },
-  {
-    label: "50mm (Aqua Line)",
-    type: "line",
-    color: "aqua-line",
-  },
-  {
-    label: "AVIAR VALVE ASSEMBLY (Blue Dot)",
-    type: "dot",
-    color: "blue-dot",
-  },
-  {
-    label: "SADDLE CLAMP (Yellow Dot)",
-    type: "dot",
-    color: "yellow-dot",
-  },
-  {
-    label: "BREAK PRESSURE CHAMBER (Orange Dot)",
-    type: "dot",
-    color: "orange-dot",
-  },
-  {
-    label: "TEE (Aqua Dot)",
-    type: "dot",
-    color: "aqua-dot",
-  },
-  {
-    label: "GATE VALVE (Coral Dot)",
-    type: "dot",
-    color: "coral-dot",
-  },
-  {
-    label: "REDUCER (Indianred Dot)",
-    type: "dot",
-    color: "indianred-dot",
-  },
-];
+import { legendItems } from "../../utils/legendItems";
 
 const MapLegend: React.FC = React.memo(() => {
   return (
@@ -65,7 +13,7 @@ const MapLegend: React.FC = React.memo(() => {
               className="d-flex align-items-center gap-2"
               style={{ minWidth: "200px", flex: "1 1 auto" }}
             >
-              <span className={item.color} />
+              <span className={item.cssClass} />
               <span style={{ wordBreak: "break-word" }}>{item.label}</span>
             </div>
           ))}

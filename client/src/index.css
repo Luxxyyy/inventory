@@ -96,90 +96,35 @@
   width: 30% !important;
 }
 /* === Maplegend === */
-.green-line {
+
+/* lines */
+[class$="-line"] {
   display: inline-block;
-  width: 32px;
-  height: 0;
-  border-top: 6px solid green;
-  margin-right: 4px;
+  width: 40px;
+  height: 4px;
+  border-radius: 2px;
 }
 
-.lime-line {
-  display: inline-block;
-  width: 32px;
-  height: 0;
-  border-top: 6px solid lime;
-  margin-right: 4px;
-}
+.green-line { background-color: green; }
+.lime-line { background-color: lime; }
+.darkturquoise-line { background-color: darkturquoise; }
+.steelblue-line { background-color: steelblue; }
+.blue-line { background-color: blue; }
+.aqua-line { background-color: aqua; }
 
-.blue-line {
+/* dots */
+[class$="-dot"] {
   display: inline-block;
-  width: 32px;
-  height: 0;
-  border-top: 6px solid blue;
-  margin-right: 4px;
-}
-
-.aqua-line {
-  display: inline-block;
-  width: 32px;
-  height: 0;
-  border-top: 6px solid aqua;
-  margin-right: 4px;
-}
-
-.blue-dot {
-  display: inline-block;
-  width: 18px;
-  height: 18px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
-  background: blue;
-  border: 2px solid #fff;
 }
 
-.yellow-dot {
-  display: inline-block;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: yellow;
-  border: 2px solid #fff;
-}
-
-.orange-dot {
-  display: inline-block;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: orange;
-  border: 2px solid #fff;
-}
-
-.aqua-dot {
-  display: inline-block;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: aqua;
-  border: 2px solid #fff;
-}
-
-.coral-dot {
-  display: inline-block;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: coral;
-  border: 2px solid #fff;
-}
-
-.indianred-dot {
-  display: inline-block;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: indianred;
-  border: 2px solid #fff;
-}
-
-
+.green-dot { background-color: green; }
+.blue-dot { background-color: blue; }
+.yellow-dot { background-color: yellow; }
+.orange-dot { background-color: orange; }
+.aqua-dot { background-color: aqua; }
+.coral-dot { background-color: coral; }
+.indianred-dot { background-color: indianred; }
+.black-dot { background-color: black; }

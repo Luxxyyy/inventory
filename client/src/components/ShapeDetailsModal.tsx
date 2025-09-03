@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
-
-export interface ShapeDetails {
-  title: string;
-  description: string;
-  status: string;
-  color: string;
-  size: string;
-}
+import { ShapeDetails } from "../types/mapShape_type";
+import {
+  getColorByTitleOrSize,
+  titleOptions,
+  sizeOptions,
+} from "../utils/legendHelpers";
 
 interface Props {
   show: boolean;
@@ -16,7 +14,6 @@ interface Props {
   initialData: ShapeDetails;
 }
 
-// ---- Component ----
 const ShapeDetailsModal: React.FC<Props> = ({
   show,
   onClose,
@@ -31,29 +28,32 @@ const ShapeDetailsModal: React.FC<Props> = ({
     size: "",
   });
 
-  // Load initialData when modal opens
   useEffect(() => {
     if (initialData) {
-      setFormData({
-        title: initialData.title || "",
-        description: initialData.description || "",
-        status: initialData.status || "",
-        color: initialData.color || "",
-        size: initialData.size || "",
-      });
+      setFormData({ ...initialData });
     }
   }, [initialData]);
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    setFormData((prev) => {
+      const newData = { ...prev, [name]: value };
+
+      if (name === "title" || name === "size") {
+        const autoColor = getColorByTitleOrSize(newData.title, newData.size);
+        if (autoColor) newData.color = autoColor;
+      }
+
+      return newData;
+    });
   };
 
-  const handleSubmit = () => {
-    onSave(formData);
-  };
+  const handleSubmit = () => onSave(formData);
 
   return (
     <Modal show={show} onHide={onClose} centered>
@@ -62,17 +62,41 @@ const ShapeDetailsModal: React.FC<Props> = ({
       </Modal.Header>
       <Modal.Body>
         <Form>
+          {/* Valve/Equipment */}
           <Form.Group className="mb-3">
-            <Form.Label>Title</Form.Label>
-            <Form.Control
-              type="text"
+            <Form.Label>Valve / Equipment</Form.Label>
+            <Form.Select
               name="title"
               value={formData.title}
               onChange={handleChange}
-              placeholder="Enter title"
-            />
+            >
+              <option value="">-- Select Equipment --</option>
+              {titleOptions.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </Form.Select>
           </Form.Group>
 
+          {/* Pipe Size */}
+          <Form.Group className="mb-3">
+            <Form.Label>Pipe Size</Form.Label>
+            <Form.Select
+              name="size"
+              value={formData.size}
+              onChange={handleChange}
+            >
+              <option value="">-- Select Size --</option>
+              {sizeOptions.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </Form.Select>
+          </Form.Group>
+
+          {/* Description */}
           <Form.Group className="mb-3">
             <Form.Label>Description</Form.Label>
             <Form.Control
@@ -81,41 +105,28 @@ const ShapeDetailsModal: React.FC<Props> = ({
               name="description"
               value={formData.description}
               onChange={handleChange}
-              placeholder="Enter description"
             />
           </Form.Group>
 
+          {/* Status */}
           <Form.Group className="mb-3">
             <Form.Label>Status</Form.Label>
-            <Form.Control
-              type="text"
+            <Form.Select
               name="status"
               value={formData.status}
               onChange={handleChange}
-              placeholder="Enter status"
-            />
+            >
+              <option value="">-- Select Status --</option>
+              <option value="Active">Active</option>
+              <option value="Non-Active">Non-Active</option>
+              <option value="Broken">Broken</option>
+            </Form.Select>
           </Form.Group>
 
+          {/* Auto-filled Color */}
           <Form.Group className="mb-3">
-            <Form.Label>Color</Form.Label>
-            <Form.Control
-              type="text"
-              name="color"
-              value={formData.color}
-              onChange={handleChange}
-              placeholder="Enter color (e.g. red, #ff0000)"
-            />
-          </Form.Group>
-
-          <Form.Group className="mb-3">
-            <Form.Label>Size</Form.Label>
-            <Form.Control
-              type="text"
-              name="size"
-              value={formData.size}
-              onChange={handleChange}
-              placeholder="Enter size"
-            />
+            <Form.Label>Color (auto-filled)</Form.Label>
+            <Form.Control type="text" name="color" value={formData.color} readOnly />
           </Form.Group>
         </Form>
       </Modal.Body>
