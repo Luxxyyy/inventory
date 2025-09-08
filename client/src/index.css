@@ -111,6 +111,7 @@
 .steelblue-line { background-color: steelblue; }
 .blue-line { background-color: blue; }
 .aqua-line { background-color: aqua; }
+.darkslategray-line { background-color: darkslategray; }
 
 /* dots */
 [class$="-dot"] {
@@ -128,3 +129,6 @@
 .coral-dot { background-color: coral; }
 .indianred-dot { background-color: indianred; }
 .black-dot { background-color: black; }
+.bisque-dot { background-color: bisque; }
+.burlywood-dot { background-color: burlywood; }
+.red-dot { background-color: red; }
