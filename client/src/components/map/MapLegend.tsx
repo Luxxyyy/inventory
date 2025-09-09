@@ -15,9 +15,9 @@ const MapLegend: React.FC = React.memo(() => {
       className="map-legend shadow-sm"
       style={{
         position: "absolute",
-        bottom: "100px",
-        right: "20px",
-        backgroundColor: "rgba(255, 255, 255, 0.60)",
+        bottom: "20px",
+        right: "25px",
+        backgroundColor: "rgba(255, 255, 255, 0.80)",
         padding: "12px",
         borderRadius: "8px",
         maxHeight: "200px",

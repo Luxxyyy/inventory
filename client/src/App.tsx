@@ -1,8 +1,7 @@
 import React from "react";
 import { useLocation } from "react-router-dom";
-import Layout from "../src/components/Layout";
-import AppRoutes from "./routes/AppRoutes";
 import { AuthProvider } from "./contexts/AuthContext";
+import AppRoutes from "./routes/AppRoutes";
 
 const App: React.FC = () => {
   const location = useLocation();
@@ -20,7 +19,7 @@ const App: React.FC = () => {
           </main>
         </div>
       ) : (
-        <Layout />
+        <AppRoutes />
       )}
     </AuthProvider>
   );

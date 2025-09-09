@@ -1,9 +1,8 @@
 import React, { useState } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, Outlet } from "react-router-dom";
 import Sidebar from "./SideBar";
 import PageHeader from "./PageHeader";
 import PageFooter from "./PageFooter";
-import AppRoutes from "../routes/AppRoutes";
 import { useAuth } from "../contexts/AuthContext";
 
 const Layout: React.FC = () => {
@@ -31,7 +30,7 @@ const Layout: React.FC = () => {
           className="bg-white text-dark main"
           style={{ flex: 1, overflowY: "auto", padding: "1rem" }}
         >
-          <AppRoutes />
+          <Outlet />
         </main>
         <PageFooter />
       </div>

@@ -12,6 +12,8 @@ function Purok() {
   const [balangays, setBalangays] = useState<{ id?: number; balangay: string }[]>([]);
   const [sources, setSources] = useState<{ id?: number; source: string }[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
   useEffect(() => {
     getBalangays()
@@ -23,30 +25,38 @@ function Purok() {
   }, []);
 
   const handleAdd = async () => {
+    setError('');
+    setSuccess('');
+
     if (!purok || !balangay || !source || !latitude || !longitude) {
-      alert("All fields are required!");
+      setError("All fields are required!");
       return;
     }
     setLoading(true);
     try {
       await addPurok(purok, balangay, source, latitude, longitude);
-      alert("Purok added!");
+      setSuccess("Purok added!");
       setPurok('');
       setBalangay('');
       setSource('');
       setLatitude('');
       setLongitude('');
     } catch (error) {
-      alert("Failed to add purok.");
+      setError("Failed to add purok.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="fuild-container mx-4 my-3">
-        <div className="mb-3" id="input-box">
-        <label htmlFor="putokInput" className="form-label">Purok</label>
+    <div className="container-fluid mx-4 my-3" style={{ maxWidth: '600px' }}>
+      <h2>Add Purok</h2>
+
+      {error && <div className="alert alert-danger">{error}</div>}
+      {success && <div className="alert alert-success">{success}</div>}
+
+      <div className="mb-3">
+        <label htmlFor="purokInput" className="form-label">Purok</label>
         <input
           type="text"
           className="form-control"
@@ -56,7 +66,8 @@ function Purok() {
           onChange={(e) => setPurok(e.target.value)}
         />
       </div>
-      <div className="mb-3" id="input-box">
+
+      <div className="mb-3">
         <label htmlFor="balangayInput" className="form-label">Balangay</label>
         <select
           className="form-select"
@@ -72,7 +83,8 @@ function Purok() {
           ))}
         </select>
       </div>
-      <div className="mb-3" id="input-box">
+
+      <div className="mb-3">
         <label htmlFor="sourceInput" className="form-label">Source</label>
         <select
           className="form-select"
@@ -88,7 +100,8 @@ function Purok() {
           ))}
         </select>
       </div>
-      <div className="mb-3" id="input-box">
+
+      <div className="mb-3">
         <label htmlFor="latitudeInput" className="form-label">Latitude</label>
         <input
           type="text"
@@ -99,7 +112,8 @@ function Purok() {
           onChange={(e) => setLatitude(e.target.value)}
         />
       </div>
-      <div className="mb-3" id="input-box">
+
+      <div className="mb-3">
         <label htmlFor="longitudeInput" className="form-label">Longitude</label>
         <input
           type="text"
@@ -110,9 +124,10 @@ function Purok() {
           onChange={(e) => setLongitude(e.target.value)}
         />
       </div>
+
       <button
         type="button"
-        className="btn btn-primary m-1"
+        className="btn btn-primary"
         onClick={handleAdd}
         disabled={loading}
       >

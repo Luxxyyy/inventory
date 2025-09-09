@@ -35,14 +35,14 @@ const UserCreate: React.FC = () => {
   if (!isAdmin) return <p>Access Denied</p>;
 
   return (
-    <div className="container-fluid mx-4 my-3">
+    <div className="container-fluid mx-4 my-3" style={{ maxWidth: '600px' }}>
       <h2>Create New User</h2>
 
       {error && <div className="alert alert-danger">{error}</div>}
       {success && <div className="alert alert-success">{success}</div>}
 
       <form onSubmit={handleSubmit}>
-        <div className="mb-3" id="input-box">
+        <div className="mb-3">
           <label htmlFor="username" className="form-label">Username</label>
           <input
             id="username"
@@ -51,10 +51,11 @@ const UserCreate: React.FC = () => {
             value={form.username}
             onChange={handleChange}
             required
+            autoComplete="username"
           />
         </div>
 
-        <div className="mb-3" id="input-box">
+        <div className="mb-3">
           <label htmlFor="email" className="form-label">Email</label>
           <input
             type="email"
@@ -64,10 +65,11 @@ const UserCreate: React.FC = () => {
             value={form.email}
             onChange={handleChange}
             required
+            autoComplete="email"
           />
         </div>
 
-        <div className="mb-3" id="input-box">
+        <div className="mb-3">
           <label htmlFor="password" className="form-label">Password</label>
           <input
             type="password"
@@ -77,10 +79,11 @@ const UserCreate: React.FC = () => {
             value={form.password}
             onChange={handleChange}
             required
+            autoComplete="new-password"
           />
         </div>
 
-        <div className="mb-3" id="input-box">
+        <div className="mb-3">
           <label htmlFor="role" className="form-label">Role</label>
           <select
             id="role"
@@ -94,7 +97,9 @@ const UserCreate: React.FC = () => {
           </select>
         </div>
 
-        <button className="btn btn-primary">Create User</button>
+        <button type="submit" className="btn btn-primary">
+          Create User
+        </button>
       </form>
     </div>
   );

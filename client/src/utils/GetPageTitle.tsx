@@ -12,8 +12,8 @@ function GetPageTitle(pathname: string): string {
             return 'Consumer';
         case '/logs':
             return 'Logs';
-        case '/fruit':
-            return 'Fruit';
+        case '/add-user':
+            return 'Add User';
         default:
             return 'Dashboard';
     }

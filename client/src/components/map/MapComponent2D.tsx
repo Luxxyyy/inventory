@@ -249,7 +249,7 @@ const MapComponent2D: React.FC<{ center?: CenterType | null }> = ({ center }) =>
     <>
       <ToastContainer />
       {loading && <div className="loading-indicator">Loading map shapes...</div>}
-      <div id="map" style={{ height: "60vh", minHeight: "400px", width: "100%", maxWidth: "100vw" }} />
+      <div id="map" style={{ height: "100vh", minHeight: "400px", width: "100%", maxWidth: "100vw" }} />
       <ShapeDetailsModal
         show={modalOpen}
         onClose={() => setModalOpen(false)}

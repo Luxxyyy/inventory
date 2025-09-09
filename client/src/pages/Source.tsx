@@ -6,29 +6,39 @@ function Source() {
   const [source, setSource] = useState('');
   const [latitude, setLatitude] = useState('');
   const [longitude, setLongitude] = useState('');
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
   const handleSubmit = async () => {
+    setError('');
+    setSuccess('');
+
     if (!balangay || !source || !latitude || !longitude) {
-      alert('All fields are required!');
+      setError('All fields are required!');
       return;
     }
 
     try {
       const data = await addSource(balangay, source, latitude, longitude);
-      alert(`Inserted: ${data.source} (${data.balangay})`);
+      setSuccess(`Inserted: ${data.source} (${data.balangay})`);
       setBalangay('');
       setSource('');
       setLatitude('');
       setLongitude('');
     } catch (error) {
       console.error('Error inserting source:', error);
-      alert('Something went wrong!');
+      setError('Something went wrong!');
     }
   };
 
   return (
-    <div className="fuild-container mx-4 my-3">
-      <div className="mb-3" id="input-box">
+    <div className="container-fluid mx-4 my-3" style={{ maxWidth: '600px' }}>
+      <h2>Add Source</h2>
+
+      {error && <div className="alert alert-danger">{error}</div>}
+      {success && <div className="alert alert-success">{success}</div>}
+
+      <div className="mb-3">
         <label className="form-label">Balangay</label>
         <input
           type="text"
@@ -38,7 +48,8 @@ function Source() {
           onChange={(e) => setBalangay(e.target.value)}
         />
       </div>
-      <div className="mb-3" id="input-box">
+
+      <div className="mb-3">
         <label className="form-label">Source</label>
         <input
           type="text"
@@ -48,7 +59,8 @@ function Source() {
           onChange={(e) => setSource(e.target.value)}
         />
       </div>
-      <div className="mb-3" id="input-box">
+
+      <div className="mb-3">
         <label className="form-label">Latitude</label>
         <input
           type="text"
@@ -58,7 +70,8 @@ function Source() {
           onChange={(e) => setLatitude(e.target.value)}
         />
       </div>
-      <div className="mb-3" id="input-box">
+
+      <div className="mb-3">
         <label className="form-label">Longitude</label>
         <input
           type="text"
@@ -68,7 +81,8 @@ function Source() {
           onChange={(e) => setLongitude(e.target.value)}
         />
       </div>
-      <button type="button" className="btn btn-primary m-1" onClick={handleSubmit}>
+
+      <button type="button" className="btn btn-primary" onClick={handleSubmit}>
         Add
       </button>
     </div>

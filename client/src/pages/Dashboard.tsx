@@ -7,7 +7,6 @@ import { getPuroks } from "../api/purok_api";
 import { getCenterFromSelection } from "../utils/mapUtils";
 import type { Source, Balangay, Purok } from "../types/mapTypes";
 
-// Lazy load map components
 const MapComponent2D = React.lazy(() => import("../components/map/MapComponent2D"));
 const MapComponent3D = React.lazy(() => import("../components/MapComponent3D"));
 
@@ -53,7 +52,10 @@ function Dashboard() {
   if (error) return <div className="alert alert-danger">{error}</div>;
 
   return (
-    <div className="position-relative" style={{ height: "100%", width: "100%", overflow: "hidden" }}>
+    <div
+      className="position-relative"
+      style={{ height: "100%", width: "100%", overflow: "hidden" }}
+    >
       <div className="position-absolute top-0 start-0 w-100 h-100 z-0">
         <Suspense fallback={<div>Loading map...</div>}>
           {is2DMap ? <MapComponent2D center={center} /> : <MapComponent3D center={center} />}
@@ -67,7 +69,10 @@ function Dashboard() {
           borderBottomRightRadius: "8px",
         }}
       >
-        <button className="btn btn-primary me-2 mb-2" onClick={() => setIs2DMap((prev) => !prev)}>
+        <button
+          className="btn btn-primary me-2 mb-2"
+          onClick={() => setIs2DMap((prev) => !prev)}
+        >
           Switch to {is2DMap ? "Google" : "2D"} Map
         </button>
 
@@ -94,18 +99,7 @@ function Dashboard() {
         />
       </div>
 
-      {/* Floating Legend */}
-      <div
-        className="position-absolute bottom-0 end-0 p-3 z-2"
-        style={{
-          maxWidth: "500px",
-          width: "100%",
-          background: "rgba(255, 255, 255, 0.95)",
-          borderTopLeftRadius: "10px",
-        }}
-      >
-        <MapLegend />
-      </div>
+      <MapLegend />
     </div>
   );
 }
