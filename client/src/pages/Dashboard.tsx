@@ -1,170 +1,111 @@
-import React, { useState, useEffect } from "react";
-import MapComponent2D from "../components/map/MapComponent2D";
-import MapComponent3D from "../components/MapComponent3D";
+import React, { useEffect, useState, useMemo, Suspense } from "react";
+import SharedDropdown from "../components/SharedDropdown";
 import MapLegend from "../components/map/MapLegend";
 import { getSources } from "../api/source_api";
 import { getBalangays } from "../api/balangay_api";
 import { getPuroks } from "../api/purok_api";
+import { getCenterFromSelection } from "../utils/mapUtils";
+import type { Source, Balangay, Purok } from "../types/mapTypes";
+
+// Lazy load map components
+const MapComponent2D = React.lazy(() => import("../components/map/MapComponent2D"));
+const MapComponent3D = React.lazy(() => import("../components/MapComponent3D"));
 
 function Dashboard() {
   const [is2DMap, setIs2DMap] = useState(true);
-  const [sources, setSources] = useState<{ id?: number; source: string; latitude?: string; longitude?: string; balangay?: string; purok?: string }[]>([]);
-  const [balangays, setBalangays] = useState<{ id?: number; balangay: string; latitude?: string; longitude?: string }[]>([]);
-  const [puroks, setPuroks] = useState<{ id?: number; purok: string; latitude?: string; longitude?: string }[]>([]);
-  const [selectedSource, setSelectedSource] = useState<{ latitude?: string; longitude?: string } | null>(null);
-  const [selectedBalangay, setSelectedBalangay] = useState<{ latitude?: string; longitude?: string } | null>(null);
-  const [selectedPurok, setSelectedPurok] = useState<{ latitude?: string; longitude?: string } | null>(null);
+  const [sources, setSources] = useState<Source[]>([]);
+  const [balangays, setBalangays] = useState<Balangay[]>([]);
+  const [puroks, setPuroks] = useState<Purok[]>([]);
+
+  const [selection, setSelection] = useState<{
+    source: Source | null;
+    balangay: Balangay | null;
+    purok: Purok | null;
+  }>({
+    source: null,
+    balangay: null,
+    purok: null,
+  });
+
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    getSources()
-      .then((data) => setSources(data))
-      .catch(() => setSources([]));
-    getBalangays()
-      .then((data) => setBalangays(data))
-      .catch(() => setBalangays([]));
-    getPuroks()
-      .then((data) => setPuroks(data))
-      .catch(() => setPuroks([]));
+    setLoading(true);
+    Promise.all([getSources(), getBalangays(), getPuroks()])
+      .then(([src, bal, pur]) => {
+        setSources(src);
+        setBalangays(bal);
+        setPuroks(pur);
+      })
+      .catch((err) => {
+        console.error(err);
+        setError("Failed to load map data.");
+      })
+      .finally(() => setLoading(false));
   }, []);
 
-  // Priority: Source > Balangay > Purok
-  const getCenter = () => {
-    if (selectedSource && selectedSource.latitude && selectedSource.longitude) {
-      return selectedSource;
-    }
-    if (selectedBalangay && selectedBalangay.latitude && selectedBalangay.longitude) {
-      return selectedBalangay;
-    }
-    if (selectedPurok && selectedPurok.latitude && selectedPurok.longitude) {
-      return selectedPurok;
-    }
-    return null;
-  };
+  const center = useMemo(() => {
+    return getCenterFromSelection(selection.source, selection.balangay, selection.purok);
+  }, [selection]);
 
-  const center = getCenter();
+  if (loading) return <div className="p-4">Loading map data...</div>;
+  if (error) return <div className="alert alert-danger">{error}</div>;
 
   return (
-    <div className="container-fluid p-3">
-      <div className="d-flex flex-wrap justify-content-between align-items-center mb-3">
-        <button
-          className="btn btn-primary me-2 mb-2"
-          onClick={() => setIs2DMap((prev) => !prev)}
-        >
+    <div className="position-relative" style={{ height: "100%", width: "100%", overflow: "hidden" }}>
+      <div className="position-absolute top-0 start-0 w-100 h-100 z-0">
+        <Suspense fallback={<div>Loading map...</div>}>
+          {is2DMap ? <MapComponent2D center={center} /> : <MapComponent3D center={center} />}
+        </Suspense>
+      </div>
+
+      <div
+        className="position-absolute top-0 end-0 p-3 d-flex flex-wrap gap-2 align-items-start z-1"
+        style={{
+          background: "rgba(255,255,255,0.0)",
+          borderBottomRightRadius: "8px",
+        }}
+      >
+        <button className="btn btn-primary me-2 mb-2" onClick={() => setIs2DMap((prev) => !prev)}>
           Switch to {is2DMap ? "Google" : "2D"} Map
         </button>
 
-        <div className="d-flex flex-wrap gap-2">
-          {/* Source Dropdown */}
-          <div className="dropdown">
-            <button
-              className="btn btn-outline-secondary dropdown-toggle"
-              type="button"
-              id="sourceDropdown"
-              data-bs-toggle="dropdown"
-              aria-expanded="false"
-            >
-              Source
-            </button>
-            <ul className="dropdown-menu" aria-labelledby="sourceDropdown">
-              {sources.length === 0 ? (
-                <li>
-                  <span className="dropdown-item text-muted">No sources found</span>
-                </li>
-              ) : (
-                sources.map((src) => (
-                  <li key={src.id || src.source}>
-                    <button
-                      className="dropdown-item"
-                      onClick={() => {
-                        setSelectedSource({ latitude: src.latitude, longitude: src.longitude });
-                        setSelectedBalangay(null);
-                        setSelectedPurok(null);
-                      }}
-                      disabled={!src.latitude || !src.longitude}
-                    >
-                      {src.source}
-                    </button>
-                  </li>
-                ))
-              )}
-            </ul>
-          </div>
-          {/* Balangay Dropdown */}
-          <div className="dropdown">
-            <button
-              className="btn btn-outline-secondary dropdown-toggle"
-              type="button"
-              id="balangayDropdown"
-              data-bs-toggle="dropdown"
-              aria-expanded="false"
-            >
-              Balangay
-            </button>
-            <ul className="dropdown-menu" aria-labelledby="balangayDropdown">
-              {balangays.length === 0 ? (
-                <li>
-                  <span className="dropdown-item text-muted">No balangays found</span>
-                </li>
-              ) : (
-                balangays.map((bal) => (
-                  <li key={bal.id || bal.balangay}>
-                    <button
-                      className="dropdown-item"
-                      onClick={() => {
-                        setSelectedBalangay({ latitude: bal.latitude, longitude: bal.longitude });
-                        setSelectedSource(null);
-                        setSelectedPurok(null);
-                      }}
-                      disabled={!bal.latitude || !bal.longitude}
-                    >
-                      {bal.balangay}
-                    </button>
-                  </li>
-                ))
-              )}
-            </ul>
-          </div>
-          {/* Purok Dropdown */}
-          <div className="dropdown">
-            <button
-              className="btn btn-outline-secondary dropdown-toggle"
-              type="button"
-              id="purokDropdown"
-              data-bs-toggle="dropdown"
-              aria-expanded="false"
-            >
-              Purok
-            </button>
-            <ul className="dropdown-menu" aria-labelledby="purokDropdown">
-              {puroks.length === 0 ? (
-                <li>
-                  <span className="dropdown-item text-muted">No puroks found</span>
-                </li>
-              ) : (
-                puroks.map((purok) => (
-                  <li key={purok.id || purok.purok}>
-                    <button
-                      className="dropdown-item"
-                      onClick={() => {
-                        setSelectedPurok({ latitude: purok.latitude, longitude: purok.longitude });
-                        setSelectedSource(null);
-                        setSelectedBalangay(null);
-                      }}
-                      disabled={!purok.latitude || !purok.longitude}
-                    >
-                      {purok.purok}
-                    </button>
-                  </li>
-                ))
-              )}
-            </ul>
-          </div>
-        </div>
+        <SharedDropdown
+          label="Source"
+          items={sources}
+          getLabel={(src) => src.source}
+          onSelect={(src) => setSelection({ source: src, balangay: null, purok: null })}
+          disabledCheck={(src) => !src.latitude || !src.longitude}
+        />
+        <SharedDropdown
+          label="Balangay"
+          items={balangays}
+          getLabel={(bal) => bal.balangay}
+          onSelect={(bal) => setSelection({ source: null, balangay: bal, purok: null })}
+          disabledCheck={(bal) => !bal.latitude || !bal.longitude}
+        />
+        <SharedDropdown
+          label="Purok"
+          items={puroks}
+          getLabel={(pur) => pur.purok}
+          onSelect={(pur) => setSelection({ source: null, balangay: null, purok: pur })}
+          disabledCheck={(pur) => !pur.latitude || !pur.longitude}
+        />
       </div>
-      <div className="w-100" style={{ height: "100%", minHeight: "500px" }}>
-        {is2DMap ? <MapComponent2D center={center} /> : <MapComponent3D center={center} />}
+
+      {/* Floating Legend */}
+      <div
+        className="position-absolute bottom-0 end-0 p-3 z-2"
+        style={{
+          maxWidth: "500px",
+          width: "100%",
+          background: "rgba(255, 255, 255, 0.95)",
+          borderTopLeftRadius: "10px",
+        }}
+      >
+        <MapLegend />
       </div>
-      <MapLegend />
     </div>
   );
 }
