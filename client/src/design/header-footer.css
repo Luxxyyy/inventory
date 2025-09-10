@@ -1,0 +1,22 @@
+#page-header {
+  background-color: #001e70 !important;
+  color: white;
+  border: none;
+}
+
+#page-footer {
+  background-color: #001e7088 !important;
+  color: white;
+  border: none;
+  height: 30px;
+  padding: 0 !important;
+}
+
+#page-footer h1 {
+  font-size: 15px !important;
+  margin: 10px !important;
+}
+
+#page-title {
+  color: black;
+}

@@ -1,19 +1,21 @@
 type ModalProps = {
     onClose: () => void;
-    item: string;
+    title: string;
+    children: React.ReactNode;
+    footer?: React.ReactNode;
 };
 
-function Modal({ onClose, item }: ModalProps) {
+function Modal({ onClose, title, children, footer }: ModalProps) {
     return (
         <div
             className="modal show d-block"
             tabIndex={-1}
             style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
         >
-            <div className="modal-dialog">
+            <div className="modal-dialog modal-dialog-centered">
                 <div className="modal-content">
                     <div className="modal-header">
-                        <h5 className="modal-title">{item}</h5>
+                        <h5 className="modal-title">{title}</h5>
                         <button
                             type="button"
                             className="btn-close"
@@ -21,17 +23,9 @@ function Modal({ onClose, item }: ModalProps) {
                         ></button>
                     </div>
                     <div className="modal-body text-dark">
-                        <p>This is a modal body for {item}</p>
+                        {children}
                     </div>
-                    <div className="modal-footer">
-                        <button
-                            type="button"
-                            className="btn btn-secondary bg-danger"
-                            onClick={onClose}
-                        >
-                            Close
-                        </button>
-                    </div>
+                    {footer && <div className="modal-footer">{footer}</div>}
                 </div>
             </div>
         </div>

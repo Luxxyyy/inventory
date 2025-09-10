@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { legendItems } from "../../utils/legendItems";
+import "../../design/maplegend.css";
 
 const MapLegend: React.FC = React.memo(() => {
   const [searchTerm, setSearchTerm] = useState("");

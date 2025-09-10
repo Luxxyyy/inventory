@@ -111,9 +111,44 @@ const getCurrentUser = (req, res) => {
   }
 };
 
+// NEW: Get all users (admin only)
+const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.findAll({
+      attributes: ["id", "username", "email", "role"], // exclude password
+      order: [["id", "DESC"]],
+    });
+
+    return res.json(users);
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    return res.status(500).json({ error: "Failed to fetch users" });
+  }
+};
+
+// DELETE user (admin only)
+const deleteUser = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const user = await User.findByPk(id);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    await user.destroy();
+    return res.json({ message: "User deleted successfully" });
+  } catch (error) {
+    console.error("Delete user error:", error);
+    return res.status(500).json({ error: "Failed to delete user" });
+  }
+};
+
 module.exports = {
   register,
   login,
   logout,
   getCurrentUser,
+  getAllUsers,
+  deleteUser,
 };

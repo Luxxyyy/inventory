@@ -1,4 +1,5 @@
 import '../index.css'
+import '../design/header-footer.css'
 
 function PageFooter() {
 

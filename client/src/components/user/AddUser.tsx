@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import authService from '../services/authService';
+import { useAuth } from '../../contexts/AuthContext';
+import authService from '../../services/authService';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
-const UserCreate: React.FC = () => {
+const AddUser: React.FC = () => {
   const [form, setForm] = useState({
     username: '',
     email: '',
@@ -10,8 +12,6 @@ const UserCreate: React.FC = () => {
     role: 'user',
   });
 
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
   const { isAdmin } = useAuth();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -20,15 +20,14 @@ const UserCreate: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
 
     try {
       await authService.register(form);
-      setSuccess('User successfully created!');
+      toast.success('User successfully created!');
       setForm({ username: '', email: '', password: '', role: 'user' });
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to create user');
+      const errorMessage = err.response?.data?.error || 'Failed to create user';
+      toast.error(errorMessage);
     }
   };
 
@@ -36,10 +35,8 @@ const UserCreate: React.FC = () => {
 
   return (
     <div className="container-fluid mx-4 my-3" style={{ maxWidth: '600px' }}>
+      <ToastContainer position="top-right" autoClose={3000} />
       <h2>Create New User</h2>
-
-      {error && <div className="alert alert-danger">{error}</div>}
-      {success && <div className="alert alert-success">{success}</div>}
 
       <form onSubmit={handleSubmit}>
         <div className="mb-3">
@@ -105,4 +102,4 @@ const UserCreate: React.FC = () => {
   );
 };
 
-export default UserCreate;
+export default AddUser;

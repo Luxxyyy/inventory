@@ -8,7 +8,7 @@ import Balangay from "../pages/Balangay";
 import Purok from "../pages/Purok";
 import Login from "../pages/Login";
 import ProtectedRoute from "../components/ProtectedRoute";
-import UserCreate from "../pages/AddUser";
+import User from "../pages/User";
 import Layout from "../components/Layout";
 
 function AppRoutes() {
@@ -26,7 +26,7 @@ function AppRoutes() {
           path="add-user"
           element={
             <ProtectedRoute requiredRole="admin">
-              <UserCreate />
+              <User />
             </ProtectedRoute>
           }
         />

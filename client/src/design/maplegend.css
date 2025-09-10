@@ -1,0 +1,42 @@
+/* lines */
+[class$="-line"] {
+  display: inline-block;
+  width: 40px;
+  height: 4px;
+  border-radius: 2px;
+}
+
+.green-line { background-color: green; }
+.lime-line { background-color: lime; }
+.darkturquoise-line { background-color: darkturquoise; }
+.steelblue-line { background-color: steelblue; }
+.blue-line { background-color: blue; }
+.aqua-line { background-color: aqua; }
+.darkslategray-line { background-color: darkslategray; }
+
+/* dots */
+[class$="-dot"] {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+}
+
+.green-dot { background-color: green; }
+.blue-dot { background-color: blue; }
+.yellow-dot { background-color: yellow; }
+.orange-dot { background-color: orange; }
+.aqua-dot { background-color: aqua; }
+.coral-dot { background-color: coral; }
+.indianred-dot { background-color: indianred; }
+.black-dot { background-color: black; }
+.bisque-dot { background-color: bisque; }
+.burlywood-dot { background-color: burlywood; }
+.red-dot { background-color: red; }
+
+
+/* Map legend */
+.legend-label {
+  font-size: 0.875rem;
+  word-break: break-word;
+}

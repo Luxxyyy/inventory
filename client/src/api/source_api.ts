@@ -2,7 +2,6 @@ import http from './http';
 
 export type SourceType = {
   id?: number;
-  balangay: string;
   source: string;
   latitude: string;
   longitude: string;
@@ -13,7 +12,7 @@ export async function getSources(): Promise<SourceType[]> {
   return data;
 }
 
-export async function addSource(balangay: string, source: string, latitude: string, longitude: string) {
-  const { data } = await http.post('/sources', { balangay, source, latitude, longitude });
+export async function addSource(source: string, latitude: string, longitude: string) {
+  const { data } = await http.post('/sources', { source, latitude, longitude });
   return data;
 }

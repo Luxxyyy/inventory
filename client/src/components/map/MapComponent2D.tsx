@@ -14,7 +14,8 @@ import "react-toastify/dist/ReactToastify.css";
 import ShapeDetailsModal from "./ShapeDetailsModal";
 import PipeHistoryModal from "./PipeHistoryModal";
 import { ShapeDetails } from "../../types/mapShape_type";
-import { useAuth } from "../../contexts/AuthContext"; // <-- Make sure this is correctly pointing to your context
+import "../../design/map.css";
+import { useAuth } from "../../contexts/AuthContext";
 
 const defaultDetails: ShapeDetails = {
   title: "",

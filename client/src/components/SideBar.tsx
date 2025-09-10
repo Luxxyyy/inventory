@@ -9,6 +9,7 @@ import {
 } from "react-icons/fi";
 import { FaFaucet, FaMapMarkerAlt, FaMapPin  } from "react-icons/fa";
 import { useAuth } from "../contexts/AuthContext";
+import "../../src/design/sidebar.css";
 
 interface SidebarProps {
   collapsed: boolean;

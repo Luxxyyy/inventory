@@ -1,6 +1,7 @@
 import React from "react";
 import GetPageTitle from "../utils/GetPageTitle";
 import { AuthContext } from "../contexts/AuthContext";
+import "../design/header-footer.css";
 
 function PageHeader({ collapsed }: { collapsed: boolean }) {
   const pageTitle = GetPageTitle(location.pathname);
