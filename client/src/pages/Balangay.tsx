@@ -7,7 +7,7 @@ function Balangay() {
   const [source, setSource] = useState('');
   const [latitude, setLatitude] = useState('');
   const [longitude, setLongitude] = useState('');
-  const [sources, setSources] = useState<{ id?: number; source: string }[]>([]);
+  const [sources, setSources] = useState<{ id: number; source: string }[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -26,10 +26,19 @@ function Balangay() {
       setError("All fields are required!");
       return;
     }
+
+    const parsedSourceId = parseInt(source);
+    if (isNaN(parsedSourceId)) {
+      setError("Invalid source selected!");
+      return;
+    }
+
     setLoading(true);
     try {
-      await addBalangay(balangay, source, longitude, latitude);
+      await addBalangay(balangay, parsedSourceId, longitude, latitude);
       setSuccess("Balangay added!");
+
+      // Reset form
       setBalangay('');
       setSource('');
       setLatitude('');
@@ -70,7 +79,7 @@ function Balangay() {
         >
           <option value="">Select Source</option>
           {sources.map((src) => (
-            <option key={src.id || src.source} value={src.source}>
+            <option key={src.id} value={src.id}>
               {src.source}
             </option>
           ))}

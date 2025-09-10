@@ -1,5 +1,6 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../db");
+const Source = require("./source_model");
 
 const Balangay = sequelize.define(
   "Balangay",
@@ -13,9 +14,13 @@ const Balangay = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    source: {
-      type: DataTypes.STRING,
+    source_id: {
+      type: DataTypes.INTEGER,
       allowNull: false,
+      references: {
+        model: Source,
+        key: "id",
+      },
     },
     latitude: {
       type: DataTypes.STRING,
@@ -36,5 +41,8 @@ const Balangay = sequelize.define(
     timestamps: false,
   }
 );
+
+Balangay.belongsTo(Source, { foreignKey: "source_id" });
+Source.hasMany(Balangay, { foreignKey: "source_id" });
 
 module.exports = Balangay;

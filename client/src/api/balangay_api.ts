@@ -15,10 +15,10 @@ export async function getBalangays(): Promise<BalangayResponse> {
 
 export async function addBalangay(
   balangay: string,
-  source: string,
+  source_id: number,
   longitude: string,
   latitude: string
 ) {
-  const { data } = await http.post('/balangays', { balangay, source, longitude, latitude });
+  const { data } = await http.post('/balangays', { balangay, source_id, longitude, latitude });
   return data;
 }

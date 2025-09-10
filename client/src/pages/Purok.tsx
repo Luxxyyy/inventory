@@ -9,8 +9,8 @@ function Purok() {
   const [source, setSource] = useState('');
   const [latitude, setLatitude] = useState('');
   const [longitude, setLongitude] = useState('');
-  const [balangays, setBalangays] = useState<{ id?: number; balangay: string }[]>([]);
-  const [sources, setSources] = useState<{ id?: number; source: string }[]>([]);
+  const [balangays, setBalangays] = useState<{ id: number; balangay: string }[]>([]);
+  const [sources, setSources] = useState<{ id: number; source: string }[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -32,9 +32,17 @@ function Purok() {
       setError("All fields are required!");
       return;
     }
+
+    const balangay_id = parseInt(balangay);
+    const source_id = parseInt(source);
+    if (isNaN(balangay_id) || isNaN(source_id)) {
+      setError("Invalid balangay or source selection.");
+      return;
+    }
+
     setLoading(true);
     try {
-      await addPurok(purok, balangay, source, latitude, longitude);
+      await addPurok(purok, balangay_id, source_id, latitude, longitude);
       setSuccess("Purok added!");
       setPurok('');
       setBalangay('');
@@ -77,7 +85,7 @@ function Purok() {
         >
           <option value="">Select Balangay</option>
           {balangays.map((b) => (
-            <option key={b.id || b.balangay} value={b.balangay}>
+            <option key={b.id} value={b.id}>
               {b.balangay}
             </option>
           ))}
@@ -94,7 +102,7 @@ function Purok() {
         >
           <option value="">Select Source</option>
           {sources.map((src) => (
-            <option key={src.id || src.source} value={src.source}>
+            <option key={src.id} value={src.id}>
               {src.source}
             </option>
           ))}

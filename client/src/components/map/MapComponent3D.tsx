@@ -7,8 +7,8 @@ import {
   Polygon,
   InfoWindow,
 } from "@react-google-maps/api";
-import { getMapShapes } from "../api/mapShape";
-import { MapShape } from "../types/mapShape_type";
+import { getMapShapes } from "../../api/mapShape";
+import { MapShape } from "../../types/mapShape_type";
 
 type CenterType = {
   latitude?: string;
@@ -21,7 +21,7 @@ type Props = {
 
 const containerStyle = {
   width: "100%",
-  height: "100vh",
+  height: "100%",
 };
 
 const defaultCenter = {

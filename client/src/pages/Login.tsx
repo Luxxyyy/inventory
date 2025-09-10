@@ -33,8 +33,8 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="d-flex align-items-center justify-content-center min-vh-100 bg-light">
-      <div className="card shadow" style={{ width: '100%', maxWidth: '400px' }}>
+    <div className="d-flex align-items-center justify-content-center min-vh-100 login-body">
+      <div className="card shadow login-card" style={{ width: '100%', maxWidth: '400px' }}>
         <div className="card-body p-5">
           <div className="text-center mb-4">
             <img
@@ -43,7 +43,6 @@ const Login: React.FC = () => {
                 className="mb-3"
                 style={{ maxWidth: '150px' }}
             />
-            <h1>QBWD</h1>
             <h4 className="card-title">Login</h4>
             <p className="text-muted">Sign in to your account</p>
           </div>

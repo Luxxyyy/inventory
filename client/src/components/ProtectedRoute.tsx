@@ -11,11 +11,9 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole 
   const { isAuthenticated, user } = useAuth();
 
   if (!isAuthenticated) {
-    // Redirect to login page if not authenticated
     return <Navigate to="/login" replace />;
   }
 
-  // If a specific role is required and the user doesn't have it, redirect to home
   if (requiredRole && user?.role !== requiredRole) {
     return <Navigate to="/" replace />;
   }

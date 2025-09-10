@@ -1,5 +1,7 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../db");
+const Balangay = require("./balangay_model");
+const Source = require("./source_model");
 
 const Purok = sequelize.define(
   "Purok",
@@ -10,14 +12,6 @@ const Purok = sequelize.define(
       primaryKey: true,
     },
     purok: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    balangay: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    source: {
       type: DataTypes.STRING,
       allowNull: false,
     },
@@ -40,5 +34,8 @@ const Purok = sequelize.define(
     timestamps: false,
   }
 );
+
+Purok.belongsTo(Balangay, { foreignKey: "balangay_id" });
+Purok.belongsTo(Source, { foreignKey: "source_id" });
 
 module.exports = Purok;

@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { Modal, Button, Form, Spinner } from "react-bootstrap";
 import Select from "react-select";
-import { ShapeDetails } from "../types/mapShape_type";
+import { ShapeDetails } from "../../types/mapShape_type";
 import {
   getColorByTitleOrSize,
   titleOptions,
   sizeOptions,
-} from "../utils/legendHelpers";
+} from "../../utils/legendHelpers";
 
 interface Props {
   show: boolean;

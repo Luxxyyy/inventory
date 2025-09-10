@@ -22,7 +22,7 @@ function SharedDropdown<T>({ label, items, onSelect, getLabel, disabledCheck }: 
         className="dropdown-menu"
         style={{
           backgroundColor: "#0d6efd",
-          color: "white",
+          color: "e",
         }}
       >
         {items.length === 0 ? (
@@ -33,7 +33,7 @@ function SharedDropdown<T>({ label, items, onSelect, getLabel, disabledCheck }: 
           items.map((item, index) => (
             <li key={index}>
               <button
-                className="dropdown-item"
+                className="dropdown-item custom-dropdown-item"
                 onClick={() => onSelect(item)}
                 disabled={disabledCheck(item)}
                 style={{ color: "white" }}

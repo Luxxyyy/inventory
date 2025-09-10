@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo, Suspense } from "react";
-import SharedDropdown from "../components/SharedDropdown";
+import SharedDropdown from "../components/map/SharedDropdown";
 import MapLegend from "../components/map/MapLegend";
 import { getSources } from "../api/source_api";
 import { getBalangays } from "../api/balangay_api";
@@ -8,7 +8,7 @@ import { getCenterFromSelection } from "../utils/mapUtils";
 import type { Source, Balangay, Purok } from "../types/mapTypes";
 
 const MapComponent2D = React.lazy(() => import("../components/map/MapComponent2D"));
-const MapComponent3D = React.lazy(() => import("../components/MapComponent3D"));
+const MapComponent3D = React.lazy(() => import("../components/map/MapComponent3D"));
 
 function Dashboard() {
   const [is2DMap, setIs2DMap] = useState(true);
