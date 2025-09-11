@@ -27,7 +27,7 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: false,
+      secure: false, // set true if using HTTPS in prod
       httpOnly: true,
       maxAge: 24 * 60 * 60 * 1000,
     },
@@ -42,6 +42,9 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 app.use(express.json());
+
+const { attachUser } = require("./middleware/auth_middleware");
+app.use(attachUser);
 
 // Routes
 const mapShapeRoutes = require("./routes/map_shape_route");

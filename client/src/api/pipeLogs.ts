@@ -8,7 +8,7 @@ export type PipeLog = {
 
 export async function getPipeLogs(shapeId: number): Promise<PipeLog[]> {
   const response = await fetch(`/api/pipe-logs/${shapeId}/logs`, {
-    credentials: "include", // include session cookies if needed
+    credentials: "include",
   });
   if (!response.ok) {
     throw new Error("Failed to fetch pipe logs");

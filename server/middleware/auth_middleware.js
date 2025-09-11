@@ -1,4 +1,3 @@
-// Middleware to check if user is authenticated
 const isAuthenticated = (req, res, next) => {
   if (req.session && req.session.user) {
     return next();
@@ -7,7 +6,6 @@ const isAuthenticated = (req, res, next) => {
   }
 };
 
-// Middleware to check if user is an admin
 const isAdmin = (req, res, next) => {
   if (req.session && req.session.user && req.session.user.role === "admin") {
     return next();
@@ -16,7 +14,6 @@ const isAdmin = (req, res, next) => {
   }
 };
 
-// Middleware to check if user is authenticated and attach user to request
 const attachUser = (req, res, next) => {
   if (req.session && req.session.user) {
     req.user = req.session.user;

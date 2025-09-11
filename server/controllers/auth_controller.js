@@ -1,12 +1,10 @@
 const bcrypt = require("bcrypt");
 const User = require("../models/user_model");
 
-// Register a new user (admin only)
 const register = async (req, res) => {
   try {
     const { username, email, password, role } = req.body;
 
-    // Check if user already exists
     const existingUser = await User.findOne({
       where: {
         [require("sequelize").Op.or]: [
@@ -26,15 +24,13 @@ const register = async (req, res) => {
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-    // Create the user
     const newUser = await User.create({
       username,
       email,
       password: hashedPassword,
-      role: role || "user", // Default to 'user' if no role is provided
+      role: role || "user",
     });
 
-    // Remove password from response
     const userResponse = newUser.toJSON();
     delete userResponse.password;
 
@@ -45,12 +41,10 @@ const register = async (req, res) => {
   }
 };
 
-// Login user
 const login = async (req, res) => {
   try {
     const { username, password } = req.body;
 
-    // Find user by username or email
     const user = await User.findOne({
       where: {
         [require("sequelize").Op.or]: [
@@ -64,13 +58,11 @@ const login = async (req, res) => {
       return res.status(401).json({ error: "Invalid username or password" });
     }
 
-    // Check password
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       return res.status(401).json({ error: "Invalid username or password" });
     }
 
-    // Create session
     req.session.user = {
       id: user.id,
       username: user.username,
@@ -78,7 +70,6 @@ const login = async (req, res) => {
       role: user.role,
     };
 
-    // Remove password from response
     const userResponse = user.toJSON();
     delete userResponse.password;
 
@@ -89,7 +80,6 @@ const login = async (req, res) => {
   }
 };
 
-// Logout user
 const logout = (req, res) => {
   req.session.destroy((err) => {
     if (err) {
@@ -97,12 +87,11 @@ const logout = (req, res) => {
       return res.status(500).json({ error: "Could not log out" });
     }
 
-    res.clearCookie("connect.sid"); // Clear session cookie
+    res.clearCookie("connect.sid");
     return res.json({ message: "Logged out successfully" });
   });
 };
 
-// Get current user
 const getCurrentUser = (req, res) => {
   if (req.session && req.session.user) {
     return res.json({ user: req.session.user });
@@ -111,11 +100,10 @@ const getCurrentUser = (req, res) => {
   }
 };
 
-// NEW: Get all users (admin only)
 const getAllUsers = async (req, res) => {
   try {
     const users = await User.findAll({
-      attributes: ["id", "username", "email", "role"], // exclude password
+      attributes: ["id", "username", "email", "role"],
       order: [["id", "DESC"]],
     });
 
@@ -126,7 +114,6 @@ const getAllUsers = async (req, res) => {
   }
 };
 
-// DELETE user (admin only)
 const deleteUser = async (req, res) => {
   const { id } = req.params;
 
