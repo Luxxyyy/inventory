@@ -65,7 +65,7 @@ function AddSource() {
         />
       </div>
 
-      <button type="button" className="btn btn-primary" onClick={handleSubmit}>
+      <button type="button" className="btn btn-success text-white" onClick={handleSubmit}>
         Add
       </button>
     </div>

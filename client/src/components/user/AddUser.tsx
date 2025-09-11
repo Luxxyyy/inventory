@@ -94,7 +94,7 @@ const AddUser: React.FC = () => {
           </select>
         </div>
 
-        <button type="submit" className="btn btn-primary">
+        <button type="submit" className="btn btn-success text-white">
           Create User
         </button>
       </form>

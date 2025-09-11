@@ -22,3 +22,20 @@ export async function addBalangay(
   const { data } = await http.post('/balangays', { balangay, source_id, longitude, latitude });
   return data;
 }
+
+export async function updateBalangay(
+  id: number,
+  balangay: string,
+  source_id: number,
+  longitude: string,
+  latitude: string
+) {
+  const { data } = await http.put(`/balangays/${id}`, {
+    balangay,
+    source_id,
+    longitude,
+    latitude,
+  });
+  return data;
+}
+

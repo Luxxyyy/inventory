@@ -33,3 +33,24 @@ export async function addPurok(
   });
   return data;
 }
+
+export async function updatePurok(
+  id: number,
+  purok: string,
+  balangay_id: number,
+  source_id: number,
+  latitude: string,
+  longitude: string
+) {
+  return await http.put(`/puroks/${id}`, {
+    purok,
+    balangay_id,
+    source_id,
+    latitude,
+    longitude,
+  });
+}
+
+export async function deletePurok(id: number) {
+  return await http.delete(`/puroks/${id}`);
+}

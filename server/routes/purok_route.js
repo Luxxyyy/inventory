@@ -63,4 +63,45 @@ router.post("/", async (req, res) => {
   }
 });
 
+router.put("/:id", async (req, res) => {
+  try {
+    const { purok, latitude, longitude, balangay_id, source_id } = req.body;
+    const { id } = req.params;
+
+    if (!purok || !latitude || !longitude || !balangay_id || !source_id) {
+      return res.status(400).json({ error: "All fields are required" });
+    }
+
+    const purokItem = await Purok.findByPk(id);
+    if (!purokItem) return res.status(404).json({ error: "Purok not found" });
+
+    await purokItem.update({
+      purok,
+      latitude,
+      longitude,
+      balangay_id,
+      source_id,
+    });
+
+    res.json({ message: "Purok updated successfully" });
+  } catch (error) {
+    console.error("Error updating purok:", error);
+    res.status(500).json({ error: "Update failed" });
+  }
+});
+
+router.delete("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const purok = await Purok.findByPk(id);
+    if (!purok) return res.status(404).json({ error: "Purok not found" });
+
+    await purok.destroy();
+    res.json({ message: "Purok deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting purok:", error);
+    res.status(500).json({ error: "Deletion failed" });
+  }
+});
+
 module.exports = router;

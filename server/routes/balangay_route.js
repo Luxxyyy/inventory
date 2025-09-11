@@ -63,4 +63,58 @@ router.post("/", async (req, res) => {
   }
 });
 
+router.put("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { balangay, source_id, latitude, longitude } = req.body;
+
+    if (!balangay || !source_id || !latitude || !longitude) {
+      return res.status(400).json({ error: "All fields are required" });
+    }
+
+    const existingBalangay = await Balangay.findByPk(id);
+    if (!existingBalangay) {
+      return res.status(404).json({ error: "Balangay not found" });
+    }
+
+    const source = await Source.findByPk(source_id);
+    if (!source) {
+      return res.status(400).json({ error: "Invalid source_id" });
+    }
+
+    await existingBalangay.update({
+      balangay,
+      source_id,
+      latitude,
+      longitude,
+    });
+
+    res.json({
+      message: "Balangay updated successfully",
+      balangay: existingBalangay,
+    });
+  } catch (error) {
+    console.error("Balangay update error:", error);
+    res.status(500).json({ error: "Failed to update balangay" });
+  }
+});
+
+router.delete("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const balangay = await Balangay.findByPk(id);
+    if (!balangay) {
+      return res.status(404).json({ error: "Balangay not found" });
+    }
+
+    await balangay.destroy();
+
+    res.json({ message: "Balangay deleted successfully" });
+  } catch (error) {
+    console.error("Balangay delete error:", error);
+    res.status(500).json({ error: "Failed to delete balangay" });
+  }
+});
+
 module.exports = router;
