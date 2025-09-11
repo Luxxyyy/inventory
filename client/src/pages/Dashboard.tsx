@@ -32,10 +32,18 @@ function Dashboard() {
   useEffect(() => {
     setLoading(true);
     Promise.all([getSources(), getBalangays(), getPuroks()])
-      .then(([src, bal, pur]) => {
-        setSources(src);
-        setBalangays(bal);
-        setPuroks(pur);
+      .then(([src, bal, pur]: any) => {
+        const srcArr: any[] = Array.isArray(src) ? src : Array.isArray(src?.data) ? src.data : [];
+        const balArr: any[] = Array.isArray(bal) ? bal : Array.isArray(bal?.data) ? bal.data : [];
+        const purArr: any[] = Array.isArray(pur) ? pur : Array.isArray(pur?.data) ? pur.data : [];
+
+        const validSrc = srcArr.filter((s: any) => typeof s?.id === "number" && typeof s?.source === "string");
+        const validBal = balArr.filter((b: any) => typeof b?.id === "number" && typeof b?.balangay === "string");
+        const validPur = purArr.filter((p: any) => typeof p?.id === "number" && typeof p?.purok === "string");
+
+        setSources(validSrc as Source[]);
+        setBalangays(validBal as Balangay[]);
+        setPuroks(validPur as Purok[]);
       })
       .catch((err) => {
         console.error(err);

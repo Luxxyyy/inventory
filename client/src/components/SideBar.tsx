@@ -5,12 +5,11 @@ import {
   FiChevronRight,
   FiMap,
   FiList,
-  FiUserPlus
+  FiUserPlus,
 } from "react-icons/fi";
-import { FaFaucet, FaMapMarkerAlt, FaMapPin  } from "react-icons/fa";
-import { useAuth } from "../contexts/AuthContext";
-import "../../src/design/sidebar.css";
-
+import { FaFaucet, FaMapMarkerAlt, FaMapPin } from "react-icons/fa";
+import { useAuth } from "../contexts/AuthContext"; 
+import "../../src/design/sidebar.css"; 
 interface SidebarProps {
   collapsed: boolean;
   setCollapsed: (val: boolean) => void;
@@ -30,8 +29,8 @@ const navItems: NavItem[] = [
   { label: "Source", path: "/source", icon: <FaFaucet />, section: "Manage" },
   { label: "Balangay", path: "/balangay", icon: <FaMapMarkerAlt />, section: "Manage" },
   { label: "Purok", path: "/purok", icon: <FaMapPin />, section: "Manage" },
-  { label: "Add User", path: "/add-user", icon: <FiUserPlus />, roles: ["admin", "manager"], section: "Admin" },
-  { label: "Logs", path: "/logs", icon: <FiUserPlus />, roles: ["admin", "manager"], section: "Admin" },
+  { label: "Add User", path: "/add-user", icon: <FiUserPlus />, roles: ["admin", "manager"], section: "Admin", },
+  { label: "Logs", path: "/logs", icon: <FiUserPlus />, roles: ["admin", "manager"], section: "Admin", },
 ];
 
 const SIDEBAR_WIDTH_COLLAPSED = 80;
@@ -43,22 +42,17 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed }) => {
 
   const isActive = (path: string) => location.pathname === path;
 
-  // Filter nav items by user role
   const visibleNavItems = navItems.filter((item) => {
     if (!item.roles) return true;
-    return item.roles.includes(user?.role);
+    return user?.role && item.roles.includes(user.role); 
   });
 
-  // Group items by section
-  const groupedItems = visibleNavItems.reduce(
-    (acc, item) => {
-      const group = item.section || "default";
-      if (!acc[group]) acc[group] = [];
-      acc[group].push(item);
-      return acc;
-    },
-    {} as Record<string, NavItem[]>
-  );
+  const groupedItems = visibleNavItems.reduce((acc, item) => {
+    const group = item.section || "default";
+    if (!acc[group]) acc[group] = [];
+    acc[group].push(item);
+    return acc;
+  }, {} as Record<string, NavItem[]>);
 
   return (
     <aside
@@ -79,9 +73,9 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed }) => {
         aria-label="User Info and Collapse toggle"
       >
         {!collapsed && user ? (
-          <div style={{ display: "flex", flexDirection: "column", lineHeight: 1.6 }}>
-            <span style={{ fontWeight: "bold", fontSize: "1.2rem" }}>{user.username}</span>
-            <span style={{ fontSize: "0.75rem", color: "#ccc" }}>{user.role}</span>
+          <div className="d-flex flex-column" style={{ lineHeight: 1.6 }}>
+            <span className="fw-bold fs-6">{user.username}</span>
+            <span className="text-secondary small">{user.role}</span>
           </div>
         ) : (
           <div style={{ height: "2rem" }} />
@@ -117,7 +111,7 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed }) => {
           ))}
 
           {Object.entries(groupedItems)
-            .filter(([group]) => group !== "default")
+            .filter(([section]) => section !== "default")
             .map(([section, items]) => (
               <React.Fragment key={section}>
                 {!collapsed && (

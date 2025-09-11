@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+// src/components/ListGroup.tsx
+import React, { useState, useEffect } from "react";
 import Modal from "./Modal";
 import { getFruits } from "../api/Fruitss";
 
@@ -7,7 +8,7 @@ function ListGroup() {
   const [description, setDescription] = useState<string[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [showModal, setShowModal] = useState(false);
-  
+
   const handleShowModal = (index: number) => {
     setSelectedIndex(index);
     setShowModal(true);
@@ -15,12 +16,17 @@ function ListGroup() {
 
   useEffect(() => {
     getFruits()
-        .then((data) => {
-            setItems(data.fruits);
-            setDescription(data.desc)})
-        .catch((err) => {
-            console.error("Error fetching fruits:", err);
-        setItems([]), setDescription([]);
+      .then((data) => {
+        const fruits = Array.isArray(data?.fruits) ? data.fruits : [];
+        // Filter null/undefined out of desc array
+        const descArr = Array.isArray(data?.desc) ? data.desc.filter((d): d is string => typeof d === "string") : [];
+        setItems(fruits);
+        setDescription(descArr);
+      })
+      .catch((err) => {
+        console.error("Error fetching fruits:", err);
+        setItems([]);
+        setDescription([]);
       });
   }, []);
 
@@ -50,10 +56,7 @@ function ListGroup() {
               <div className="card-body text-dark">
                 <h5 className="card-title">{item}</h5>
                 <p className="card-text">{description[index] || "No description"}</p>
-                <button
-                  className="btn btn-primary"
-                  onClick={() => handleShowModal(index)}
-                >
+                <button className="btn btn-primary" onClick={() => handleShowModal(index)}>
                   Show Modal
                 </button>
               </div>
@@ -62,8 +65,10 @@ function ListGroup() {
         </div>
       </div>
 
-      {showModal && (
-        <Modal item={items[selectedIndex]} onClose={() => setShowModal(false)} />
+      {showModal && selectedIndex >= 0 && (
+        <Modal onClose={() => setShowModal(false)} title={items[selectedIndex]}>
+          <p>{description[selectedIndex] || "No description available"}</p>
+        </Modal>
       )}
     </>
   );

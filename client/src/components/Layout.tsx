@@ -1,3 +1,4 @@
+// src/components/Layout.tsx
 import React, { useState } from "react";
 import { Navigate, Outlet } from "react-router-dom";
 import Sidebar from "./SideBar";
@@ -25,7 +26,8 @@ const Layout: React.FC = () => {
           overflow: "hidden",
         }}
       >
-        <PageHeader />
+        {/* Pass required prop 'collapsed' to PageHeader to satisfy type requirements */}
+        <PageHeader collapsed={collapsed} />
         <main
           className="bg-white text-dark main"
           style={{ flex: 1, overflowY: "auto", padding: "1rem" }}

@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { getSources } from "../../api/source_api";
 import http from "../../api/http";
 import Modal from "../Modal";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import '../../design/balangay.css';
+import "../../design/balangay.css";
+import type { Source } from "../../types/mapTypes";
 
 type BalangayType = {
   id: number;
@@ -16,9 +17,9 @@ type BalangayType = {
   source_name?: string | null;
 };
 
-const EditBalangay = () => {
+const EditBalangay: React.FC = () => {
   const [balangays, setBalangays] = useState<BalangayType[]>([]);
-  const [sources, setSources] = useState<{ id: number; source: string }[]>([]);
+  const [sources, setSources] = useState<Source[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [selectedBalangay, setSelectedBalangay] = useState<BalangayType | null>(null);
@@ -35,9 +36,11 @@ const EditBalangay = () => {
     try {
       setLoading(true);
       const { data } = await http.get("/balangays");
-      const sorted = data.sort((a: BalangayType, b: BalangayType) => (b.id ?? 0) - (a.id ?? 0));
-      setBalangays(sorted);
-    } catch {
+      const arr: any[] = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : [];
+      const sorted = arr.sort((a: any, b: any) => (b?.id ?? 0) - (a?.id ?? 0));
+      setBalangays(sorted as BalangayType[]);
+    } catch (err) {
+      console.error(err);
       setError("Failed to fetch balangays");
       toast.error("Failed to fetch balangays");
     } finally {
@@ -47,9 +50,12 @@ const EditBalangay = () => {
 
   const fetchSources = async () => {
     try {
-      const data = await getSources();
-      setSources(data);
-    } catch {
+      const data: any = await getSources();
+      const arr: any[] = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : [];
+      const valid = arr.filter((s: any) => typeof s?.id === "number" && typeof s?.source === "string");
+      setSources(valid as Source[]);
+    } catch (err) {
+      console.error(err);
       toast.error("Failed to fetch sources");
     }
   };
@@ -77,7 +83,7 @@ const EditBalangay = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setEditForm(prev => ({ ...prev, [name]: value }));
+    setEditForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleUpdate = async () => {
@@ -93,13 +99,14 @@ const EditBalangay = () => {
         balangay,
         latitude,
         longitude,
-        source_id: parseInt(source_id),
+        source_id: parseInt(source_id, 10),
       });
 
       toast.success("Balangay updated successfully");
       closeModal();
       fetchBalangays();
-    } catch {
+    } catch (err) {
+      console.error(err);
       setModalError("Failed to update balangay");
       toast.error("Failed to update balangay");
     }
@@ -113,7 +120,8 @@ const EditBalangay = () => {
       toast.success("Balangay deleted successfully");
       setBalangayToDelete(null);
       fetchBalangays();
-    } catch {
+    } catch (err) {
+      console.error(err);
       toast.error("Failed to delete balangay");
     }
   };
@@ -220,7 +228,7 @@ const EditBalangay = () => {
             >
               <option value="">Select source</option>
               {sources.map((src) => (
-                <option key={src.id} value={src.id}>
+                <option key={String(src.id)} value={String(src.id)}>
                   {src.source}
                 </option>
               ))}

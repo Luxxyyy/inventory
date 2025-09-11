@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from "react";
+// src/components/map/MapComponent2D.tsx
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "leaflet-draw";
@@ -50,9 +51,9 @@ const MapComponent2D: React.FC<{ center?: CenterType | null }> = ({ center }) =>
 
   const [loading, setLoading] = useState(false);
 
-  const { user } = useAuth(); // <-- Required to check role
+  const { user } = useAuth();
 
-  const createColoredMarker = React.useCallback(
+  const createColoredMarker = useCallback(
     (color: string) =>
       L.divIcon({
         className: "custom-marker",
@@ -65,18 +66,23 @@ const MapComponent2D: React.FC<{ center?: CenterType | null }> = ({ center }) =>
 
   const handleSave = async (data: typeof defaultDetails) => {
     if (!editingLayer) return;
-    const geojson = editingLayer.toGeoJSON();
-    const radius =
-      "getRadius" in editingLayer ? (editingLayer as any).getRadius() : null;
-    const type = geojson.geometry.type;
+
+    // toGeoJSON not present on L.Layer type in TS: cast to any
+    const geojson = (editingLayer as any)?.toGeoJSON ? (editingLayer as any).toGeoJSON() : null;
+
+    // getRadius may not exist on non-circle layers
+    const radius = typeof (editingLayer as any)?.getRadius === "function" ? (editingLayer as any).getRadius() : null;
+
+    const type = geojson?.geometry?.type ?? "Unknown";
     const payload = { type, geojson, radius, ...data };
 
     try {
-      let saved;
+      let saved: any;
       if (isEditing) {
         saved = await updateMapShape((editingLayer as any).dbId, payload);
       } else {
-        saved = await addMapShape(
+        // addMapShape signature may vary across projects; cast to any to avoid compile-time mismatch
+        saved = await (addMapShape as any)(
           type,
           geojson,
           radius,
@@ -87,12 +93,14 @@ const MapComponent2D: React.FC<{ center?: CenterType | null }> = ({ center }) =>
           data.size
         );
       }
-      (editingLayer as any).dbId = saved.id;
+
+      // attach db id and metadata on the layer
+      (editingLayer as any).dbId = saved?.id ?? (editingLayer as any).dbId;
       (editingLayer as any).metadata = payload;
 
       if (editingLayer instanceof L.Marker && data.color) {
-        editingLayer.setIcon(createColoredMarker(data.color));
-      } else if ("setStyle" in editingLayer && data.color) {
+        (editingLayer as L.Marker).setIcon(createColoredMarker(data.color));
+      } else if (data.color && "setStyle" in editingLayer) {
         (editingLayer as L.Path).setStyle({ color: data.color });
       }
 
@@ -111,6 +119,7 @@ const MapComponent2D: React.FC<{ center?: CenterType | null }> = ({ center }) =>
 
       toast.success(isEditing ? "Shape updated!" : "Shape saved!");
     } catch (err: any) {
+      console.error(err);
       toast.error((isEditing ? "Failed to update: " : "Failed to save: ") + (err?.message || ""));
     } finally {
       setModalOpen(false);
@@ -168,11 +177,13 @@ const MapComponent2D: React.FC<{ center?: CenterType | null }> = ({ center }) =>
               const popupEl = e.popup.getElement();
               if (!popupEl) return;
 
-              const editBtn = popupEl.querySelector(".edit-btn");
-              const historyBtn = popupEl.querySelector(".history-btn");
+              // querySelector returns Element | null — cast to HTMLElement
+              const editBtn = popupEl.querySelector(".edit-btn") as HTMLElement | null;
+              const historyBtn = popupEl.querySelector(".history-btn") as HTMLElement | null;
 
               if (editBtn && user?.role === "admin") {
-                L.DomEvent.on(editBtn, "click", () => {
+                // use addEventListener instead of L.DomEvent.on to avoid typing mismatch
+                editBtn.addEventListener("click", () => {
                   setEditingLayer(layer);
                   setFormData(layer.metadata || defaultDetails);
                   setIsEditing(true);
@@ -181,8 +192,9 @@ const MapComponent2D: React.FC<{ center?: CenterType | null }> = ({ center }) =>
               }
 
               if (historyBtn) {
-                L.DomEvent.on(historyBtn, "click", () => {
-                  setHistoryShapeId(layer.dbId);
+                historyBtn.addEventListener("click", () => {
+                  // layer.dbId may be undefined; use null fallback
+                  setHistoryShapeId((layer.dbId as number) ?? null);
                   setHistoryOpen(true);
                 });
               }
@@ -193,6 +205,7 @@ const MapComponent2D: React.FC<{ center?: CenterType | null }> = ({ center }) =>
         });
         toast.success("Shapes loaded");
       } catch (err: any) {
+        console.error(err);
         toast.error("Failed to load shapes: " + (err?.message || ""));
       } finally {
         setLoading(false);
@@ -226,11 +239,12 @@ const MapComponent2D: React.FC<{ center?: CenterType | null }> = ({ center }) =>
           await Promise.all(ids.map((id) => deleteMapShape(id)));
           toast.success("Shape(s) deleted");
         } catch (err: any) {
+          console.error(err);
           toast.error("Failed to delete shape(s): " + (err?.message || ""));
         }
       });
     }
-  }, [createColoredMarker, user]);
+  }, [createColoredMarker, user, drawnItems]);
 
   useEffect(() => {
     if (center && mapRef.current && center.latitude && center.longitude) {

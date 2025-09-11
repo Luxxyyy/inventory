@@ -1,3 +1,4 @@
+// src/components/map/MapComponent3D.tsx
 import React, { useEffect, useState } from "react";
 import {
   GoogleMap,
@@ -41,7 +42,12 @@ const MapComponent3D: React.FC<Props> = ({ center }) => {
   const [mapCenter, setMapCenter] = useState(defaultCenter);
 
   useEffect(() => {
-    getMapShapes().then(setShapes).catch(console.error);
+    getMapShapes()
+      .then((res) => setShapes(Array.isArray(res) ? res : []))
+      .catch((err) => {
+        console.error(err);
+        setShapes([]);
+      });
   }, []);
 
   useEffect(() => {
@@ -63,7 +69,8 @@ const MapComponent3D: React.FC<Props> = ({ center }) => {
 
   // Helper for polygons (get centroid)
   const getPolygonCentroid = (coordinates: number[][]) => {
-    let latSum = 0, lngSum = 0;
+    let latSum = 0,
+      lngSum = 0;
     coordinates.forEach(([lng, lat]) => {
       latSum += lat;
       lngSum += lng;
@@ -72,6 +79,30 @@ const MapComponent3D: React.FC<Props> = ({ center }) => {
       lat: latSum / coordinates.length,
       lng: lngSum / coordinates.length,
     };
+  };
+
+  // create a properly-typed icon if google maps is available
+  const createSvgIcon = (color?: string) => {
+    if (!color) return undefined;
+    try {
+      const svg = encodeURIComponent(
+        `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><circle cx="12" cy="12" r="10" fill="${color}" stroke="white" stroke-width="2"/></svg>`
+      );
+      // window.google may not be available at compile-time; guard and cast
+      const g = (window as any).google;
+      if (g && g.maps && typeof g.maps.Size === "function" && typeof g.maps.Point === "function") {
+        return {
+          url: `data:image/svg+xml;utf8,${svg}`,
+          scaledSize: new g.maps.Size(24, 24),
+          anchor: new g.maps.Point(12, 12),
+        } as any;
+      }
+      // Fallback: return a URL-only icon (some typings might still complain so we cast)
+      return { url: `data:image/svg+xml;utf8,${svg}` } as any;
+    } catch (err) {
+      console.error("createSvgIcon error", err);
+      return undefined;
+    }
   };
 
   return isLoaded ? (
@@ -86,9 +117,11 @@ const MapComponent3D: React.FC<Props> = ({ center }) => {
         const { geojson, title, description, status, color } = shape;
         if (!geojson?.geometry) return null;
 
+        const geom: any = geojson.geometry;
+
         // Point
-        if (geojson.geometry.type === "Point") {
-          const [lng, lat] = geojson.geometry.coordinates;
+        if (geom.type === "Point") {
+          const [lng, lat] = geom.coordinates as number[];
           return (
             <Marker
               key={idx}
@@ -97,21 +130,14 @@ const MapComponent3D: React.FC<Props> = ({ center }) => {
                 setSelectedShape(shape);
                 setInfoWindowPos({ lat, lng });
               }}
-              icon={
-                color
-                  ? {
-                      url: `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><circle cx="12" cy="12" r="10" fill="${color}" stroke="white" stroke-width="2"/></svg>`,
-                      scaledSize: { width: 24, height: 24 },
-                    }
-                  : undefined
-              }
+              icon={createSvgIcon(color)}
             />
           );
         }
 
         // MultiPoint
-        if (geojson.geometry.type === "MultiPoint") {
-          return geojson.geometry.coordinates.map(([lng, lat]: number[], i: number) => (
+        if (geom.type === "MultiPoint") {
+          return geom.coordinates.map(([lng, lat]: number[], i: number) => (
             <Marker
               key={`${idx}-mp-${i}`}
               position={{ lat, lng }}
@@ -119,24 +145,14 @@ const MapComponent3D: React.FC<Props> = ({ center }) => {
                 setSelectedShape(shape);
                 setInfoWindowPos({ lat, lng });
               }}
-              icon={
-                color
-                  ? {
-                      url: `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><circle cx="12" cy="12" r="10" fill="${color}" stroke="white" stroke-width="2"/></svg>`,
-                      scaledSize: { width: 24, height: 24 },
-                    }
-                  : undefined
-              }
+              icon={createSvgIcon(color)}
             />
           ));
         }
 
         // LineString
-        if (geojson.geometry.type === "LineString") {
-          const path = geojson.geometry.coordinates.map(([lng, lat]: number[]) => ({
-            lat,
-            lng,
-          }));
+        if (geom.type === "LineString") {
+          const path = geom.coordinates.map(([lng, lat]: number[]) => ({ lat, lng }));
           return (
             <Polyline
               key={idx}
@@ -147,19 +163,16 @@ const MapComponent3D: React.FC<Props> = ({ center }) => {
               }}
               onClick={() => {
                 setSelectedShape(shape);
-                setInfoWindowPos(getMidPoint(geojson.geometry.coordinates));
+                setInfoWindowPos(getMidPoint(geom.coordinates));
               }}
             />
           );
         }
 
         // MultiLineString
-        if (geojson.geometry.type === "MultiLineString") {
-          return geojson.geometry.coordinates.map((line: number[][], i: number) => {
-            const path = line.map(([lng, lat]: number[]) => ({
-              lat,
-              lng,
-            }));
+        if (geom.type === "MultiLineString") {
+          return geom.coordinates.map((line: number[][], i: number) => {
+            const path = line.map(([lng, lat]: number[]) => ({ lat, lng }));
             return (
               <Polyline
                 key={`${idx}-mls-${i}`}
@@ -178,13 +191,9 @@ const MapComponent3D: React.FC<Props> = ({ center }) => {
         }
 
         // Polygon
-        if (geojson.geometry.type === "Polygon") {
-          // Google Maps expects array of arrays of LatLng
-          const paths = geojson.geometry.coordinates.map((ring: number[][]) =>
-            ring.map(([lng, lat]: number[]) => ({ lat, lng }))
-          );
-          // Use centroid of first ring for InfoWindow
-          const centroid = getPolygonCentroid(geojson.geometry.coordinates[0]);
+        if (geom.type === "Polygon") {
+          const paths = geom.coordinates.map((ring: number[][]) => ring.map(([lng, lat]: number[]) => ({ lat, lng })));
+          const centroid = getPolygonCentroid(geom.coordinates[0]);
           return (
             <Polygon
               key={idx}
@@ -204,11 +213,9 @@ const MapComponent3D: React.FC<Props> = ({ center }) => {
         }
 
         // MultiPolygon
-        if (geojson.geometry.type === "MultiPolygon") {
-          return geojson.geometry.coordinates.map((poly: number[][][], i: number) => {
-            const paths = poly.map((ring: number[][]) =>
-              ring.map(([lng, lat]: number[]) => ({ lat, lng }))
-            );
+        if (geom.type === "MultiPolygon") {
+          return geom.coordinates.map((poly: number[][][], i: number) => {
+            const paths = poly.map((ring: number[][]) => ring.map(([lng, lat]: number[]) => ({ lat, lng })));
             const centroid = getPolygonCentroid(poly[0]);
             return (
               <Polygon
@@ -244,7 +251,6 @@ const MapComponent3D: React.FC<Props> = ({ center }) => {
             <strong>{selectedShape.title || "No Title"}</strong>
             <div>{selectedShape.description}</div>
             <div>Status: {selectedShape.status}</div>
-            {/* Add more details if needed */}
           </div>
         </InfoWindow>
       )}

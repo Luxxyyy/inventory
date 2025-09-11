@@ -1,33 +1,46 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { getSources } from "../../api/source_api";
 import { addBalangay } from "../../api/balangay_api";
+import type { Source } from "../../types/mapTypes";
 
 function AddBalangay() {
-  const [balangay, setBalangay] = useState('');
-  const [source, setSource] = useState('');
-  const [latitude, setLatitude] = useState('');
-  const [longitude, setLongitude] = useState('');
-  const [sources, setSources] = useState<{ id: number; source: string }[]>([]);
+  const [balangay, setBalangay] = useState("");
+  const [source, setSource] = useState("");
+  const [latitude, setLatitude] = useState("");
+  const [longitude, setLongitude] = useState("");
+  const [sources, setSources] = useState<Source[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   useEffect(() => {
     getSources()
-      .then((data) => setSources(data))
+      .then((data: any) => {
+        const arr: any[] = Array.isArray(data)
+          ? data
+          : Array.isArray(data?.data)
+          ? data.data
+          : [];
+
+        const valid = arr.filter(
+          (item: any) => typeof item?.id === "number" && typeof item?.source === "string"
+        );
+
+        setSources(valid as Source[]);
+      })
       .catch(() => setSources([]));
   }, []);
 
   const handleAdd = async () => {
-    setError('');
-    setSuccess('');
+    setError("");
+    setSuccess("");
 
     if (!balangay || !source || !latitude || !longitude) {
       setError("All fields are required!");
       return;
     }
 
-    const parsedSourceId = parseInt(source);
+    const parsedSourceId = parseInt(source, 10);
     if (isNaN(parsedSourceId)) {
       setError("Invalid source selected!");
       return;
@@ -38,11 +51,12 @@ function AddBalangay() {
       await addBalangay(balangay, parsedSourceId, longitude, latitude);
       setSuccess("Balangay added!");
 
-      setBalangay('');
-      setSource('');
-      setLatitude('');
-      setLongitude('');
-    } catch (error) {
+      setBalangay("");
+      setSource("");
+      setLatitude("");
+      setLongitude("");
+    } catch (err) {
+      console.error(err);
       setError("Failed to add balangay.");
     } finally {
       setLoading(false);
@@ -50,7 +64,7 @@ function AddBalangay() {
   };
 
   return (
-    <div className="container-fluid mx-4 my-3" style={{ maxWidth: '600px' }}>
+    <div className="container-fluid mx-4 my-3" style={{ maxWidth: "600px" }}>
       <h2>Add Balangay</h2>
 
       {error && <div className="alert alert-danger">{error}</div>}
@@ -78,7 +92,7 @@ function AddBalangay() {
         >
           <option value="">Select Source</option>
           {sources.map((src) => (
-            <option key={src.id} value={src.id}>
+            <option key={String(src.id)} value={String(src.id)}>
               {src.source}
             </option>
           ))}
