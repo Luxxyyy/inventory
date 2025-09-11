@@ -31,6 +31,7 @@ const navItems: NavItem[] = [
   { label: "Balangay", path: "/balangay", icon: <FaMapMarkerAlt />, section: "Manage" },
   { label: "Purok", path: "/purok", icon: <FaMapPin />, section: "Manage" },
   { label: "Add User", path: "/add-user", icon: <FiUserPlus />, roles: ["admin", "manager"], section: "Admin" },
+  { label: "Logs", path: "/logs", icon: <FiUserPlus />, roles: ["admin", "manager"], section: "Admin" },
 ];
 
 const SIDEBAR_WIDTH_COLLAPSED = 80;

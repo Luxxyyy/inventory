@@ -65,6 +65,9 @@ app.use("/api/users", userRoute);
 const pipeLogRoutes = require("./routes/pipe_log_route");
 app.use("/api/pipe-logs", pipeLogRoutes);
 
+const logRoutes = require("./routes/log_route");
+app.use("/api/logs", logRoutes);
+
 const User = require("./models/user_model");
 
 sequelize

@@ -10,6 +10,7 @@ import Login from "../pages/Login";
 import ProtectedRoute from "../components/ProtectedRoute";
 import User from "../pages/User";
 import Layout from "../components/Layout";
+import Logs from  "../pages/Logs";
 
 function AppRoutes() {
   return (
@@ -27,6 +28,14 @@ function AppRoutes() {
           element={
             <ProtectedRoute requiredRole="admin">
               <User />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="logs"
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <Logs />
             </ProtectedRoute>
           }
         />
