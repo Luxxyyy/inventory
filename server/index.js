@@ -4,10 +4,14 @@ const cors = require("cors");
 const session = require("express-session");
 const SequelizeStore = require("connect-session-sequelize")(session.Store);
 const sequelize = require("./db");
+const path = require("path");
 
 const app = express();
 const PORT = process.env.PORT || 8080;
 
+// ======================
+// Session Setup
+// ======================
 const sessionStore = new SequelizeStore({
   db: sequelize,
   tableName: "sessions",
@@ -15,10 +19,12 @@ const sessionStore = new SequelizeStore({
     return {
       data: defaults.data,
       expires: defaults.expires,
-      user_id: session.user_id,
+      user_id: session?.user?.id,
     };
   },
 });
+
+sessionStore.sync(); // Ensure sessions table exists
 
 app.use(
   session({
@@ -27,62 +33,83 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: false, // set true if using HTTPS in prod
+      secure: false, // true if using HTTPS
       httpOnly: true,
-      maxAge: 24 * 60 * 60 * 1000,
+      maxAge: 24 * 60 * 60 * 1000, // 1 day
     },
   })
 );
 
+// ======================
+// CORS Setup
+// ======================
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:5174",
+  "http://localhost",
+  "http://192.168.1.25", // <-- Added your frontend IP here
+  `http://${process.env.HOST || "192.168.1.253"}`,
+];
+
 const corsOptions = {
-  origin: ["http://localhost:5173", "http://localhost:5174"],
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true); // Allow non-browser requests (Postman, curl)
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.warn("❌ Blocked CORS request from:", origin);
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true,
+  credentials: true, // Required for session cookies
 };
+
 app.use(cors(corsOptions));
 app.use(express.json());
 
+// ======================
+// Middleware
+// ======================
 const { attachUser } = require("./middleware/auth_middleware");
 app.use(attachUser);
 
-// Routes
-const mapShapeRoutes = require("./routes/map_shape_route");
-app.use("/api/map-shapes", mapShapeRoutes);
+// ======================
+// API Routes
+// ======================
+app.use("/api/map-shapes", require("./routes/map_shape_route"));
+app.use("/api/sources", require("./routes/source_route"));
+app.use("/api/balangays", require("./routes/balangay_route"));
+app.use("/api/puroks", require("./routes/purok_route"));
+app.use("/api/auth", require("./routes/auth_route"));
+app.use("/api/users", require("./routes/user_route"));
+app.use("/api/pipe-logs", require("./routes/pipe_log_route"));
+app.use("/api/logs", require("./routes/log_route"));
 
-const sourceRoute = require("./routes/source_route");
-app.use("/api/sources", sourceRoute);
+// ======================
+// Serve React build
+// ======================
+app.use(express.static(path.join(__dirname, "public")));
+app.use((req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});
 
-const balangayRoute = require("./routes/balangay_route");
-app.use("/api/balangays", balangayRoute);
-
-const purokRoute = require("./routes/purok_route");
-app.use("/api/puroks", purokRoute);
-
-const authRoute = require("./routes/auth_route");
-app.use("/api/auth", authRoute);
-
-const userRoute = require("./routes/user_route");
-app.use("/api/users", userRoute);
-
-const pipeLogRoutes = require("./routes/pipe_log_route");
-app.use("/api/pipe-logs", pipeLogRoutes);
-
-const logRoutes = require("./routes/log_route");
-app.use("/api/logs", logRoutes);
-
+// ======================
+// DB + Server Init
+// ======================
 const User = require("./models/user_model");
 
 sequelize
   .sync()
   .then(async () => {
-    console.log("DB synced");
+    console.log("✅ DB synced");
 
+    // Create default admin if none exists
     const adminUser = await User.findOne({ where: { username: "admin" } });
     if (!adminUser) {
       const bcrypt = require("bcrypt");
-      const saltRounds = 10;
-      const hashedPassword = await bcrypt.hash("admin123", saltRounds);
+      const hashedPassword = await bcrypt.hash("admin123", 10);
 
       await User.create({
         username: "admin",
@@ -91,14 +118,14 @@ sequelize
         role: "admin",
       });
 
-      console.log("Default admin user created: admin/admin123");
+      console.log("✅ Default admin user created: admin / admin123");
     }
 
-    app.listen(PORT, () =>
-      console.log(`Server running at http://localhost:${PORT}`)
+    app.listen(PORT, "0.0.0.0", () =>
+      console.log(`🚀 Server running at http://localhost:${PORT}`)
     );
   })
   .catch((err) => {
-    console.error("Sequelize init error:", err);
+    console.error("❌ Sequelize init error:", err);
     process.exit(1);
   });

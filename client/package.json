@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "start:prod": "serve -s dist -l 5000"
   },
   "dependencies": {
     "@coreui/coreui": "^5.4.1",
