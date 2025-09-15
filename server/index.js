@@ -33,9 +33,9 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: false, // true if using HTTPS
+      secure: false,
       httpOnly: true,
-      maxAge: 24 * 60 * 60 * 1000, // 1 day
+      maxAge: 24 * 60 * 60 * 1000,
     },
   })
 );
@@ -47,13 +47,13 @@ const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:5174",
   "http://localhost",
-  "http://192.168.1.25", // <-- Added your frontend IP here
+  "http://192.168.1.28",
   `http://${process.env.HOST || "192.168.1.253"}`,
 ];
 
 const corsOptions = {
   origin: function (origin, callback) {
-    if (!origin) return callback(null, true); // Allow non-browser requests (Postman, curl)
+    if (!origin) return callback(null, true);
     if (allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
@@ -63,7 +63,7 @@ const corsOptions = {
   },
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true, // Required for session cookies
+  credentials: true,
 };
 
 app.use(cors(corsOptions));
@@ -105,7 +105,6 @@ sequelize
   .then(async () => {
     console.log("✅ DB synced");
 
-    // Create default admin if none exists
     const adminUser = await User.findOne({ where: { username: "admin" } });
     if (!adminUser) {
       const bcrypt = require("bcrypt");

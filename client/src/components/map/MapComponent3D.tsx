@@ -1,4 +1,3 @@
-// src/components/map/MapComponent3D.tsx
 import React, { useEffect, useState } from "react";
 import {
   GoogleMap,
@@ -59,7 +58,6 @@ const MapComponent3D: React.FC<Props> = ({ center }) => {
     }
   }, [center]);
 
-  // Helper to get InfoWindow position for lines/polygons
   const getMidPoint = (coordinates: number[][]) => {
     if (!coordinates.length) return mapCenter;
     const midIdx = Math.floor(coordinates.length / 2);
@@ -67,7 +65,6 @@ const MapComponent3D: React.FC<Props> = ({ center }) => {
     return { lat, lng };
   };
 
-  // Helper for polygons (get centroid)
   const getPolygonCentroid = (coordinates: number[][]) => {
     let latSum = 0,
       lngSum = 0;
@@ -81,14 +78,12 @@ const MapComponent3D: React.FC<Props> = ({ center }) => {
     };
   };
 
-  // create a properly-typed icon if google maps is available
   const createSvgIcon = (color?: string) => {
     if (!color) return undefined;
     try {
       const svg = encodeURIComponent(
         `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><circle cx="12" cy="12" r="10" fill="${color}" stroke="white" stroke-width="2"/></svg>`
       );
-      // window.google may not be available at compile-time; guard and cast
       const g = (window as any).google;
       if (g && g.maps && typeof g.maps.Size === "function" && typeof g.maps.Point === "function") {
         return {
@@ -97,7 +92,6 @@ const MapComponent3D: React.FC<Props> = ({ center }) => {
           anchor: new g.maps.Point(12, 12),
         } as any;
       }
-      // Fallback: return a URL-only icon (some typings might still complain so we cast)
       return { url: `data:image/svg+xml;utf8,${svg}` } as any;
     } catch (err) {
       console.error("createSvgIcon error", err);
@@ -107,19 +101,16 @@ const MapComponent3D: React.FC<Props> = ({ center }) => {
 
   return isLoaded ? (
     <GoogleMap mapContainerStyle={containerStyle} center={mapCenter} zoom={17}>
-      {/* Marker for selected center */}
       {center && center.latitude && center.longitude && (
         <Marker position={{ lat: Number(center.latitude), lng: Number(center.longitude) }} />
       )}
 
-      {/* Render shapes from database */}
       {shapes.map((shape, idx) => {
         const { geojson, title, description, status, color } = shape;
         if (!geojson?.geometry) return null;
 
         const geom: any = geojson.geometry;
 
-        // Point
         if (geom.type === "Point") {
           const [lng, lat] = geom.coordinates as number[];
           return (
@@ -135,7 +126,6 @@ const MapComponent3D: React.FC<Props> = ({ center }) => {
           );
         }
 
-        // MultiPoint
         if (geom.type === "MultiPoint") {
           return geom.coordinates.map(([lng, lat]: number[], i: number) => (
             <Marker
@@ -150,7 +140,6 @@ const MapComponent3D: React.FC<Props> = ({ center }) => {
           ));
         }
 
-        // LineString
         if (geom.type === "LineString") {
           const path = geom.coordinates.map(([lng, lat]: number[]) => ({ lat, lng }));
           return (
@@ -169,7 +158,6 @@ const MapComponent3D: React.FC<Props> = ({ center }) => {
           );
         }
 
-        // MultiLineString
         if (geom.type === "MultiLineString") {
           return geom.coordinates.map((line: number[][], i: number) => {
             const path = line.map(([lng, lat]: number[]) => ({ lat, lng }));
@@ -190,7 +178,6 @@ const MapComponent3D: React.FC<Props> = ({ center }) => {
           });
         }
 
-        // Polygon
         if (geom.type === "Polygon") {
           const paths = geom.coordinates.map((ring: number[][]) => ring.map(([lng, lat]: number[]) => ({ lat, lng })));
           const centroid = getPolygonCentroid(geom.coordinates[0]);
@@ -212,7 +199,6 @@ const MapComponent3D: React.FC<Props> = ({ center }) => {
           );
         }
 
-        // MultiPolygon
         if (geom.type === "MultiPolygon") {
           return geom.coordinates.map((poly: number[][][], i: number) => {
             const paths = poly.map((ring: number[][]) => ring.map(([lng, lat]: number[]) => ({ lat, lng })));

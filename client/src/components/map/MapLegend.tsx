@@ -15,16 +15,12 @@ const MapLegend: React.FC = React.memo(() => {
     <div
       className="map-legend shadow-sm"
       style={{
-        position: "absolute",
-        bottom: "20px",
-        right: "25px",
-        backgroundColor: "rgba(255, 255, 255, 0.80)",
+        backgroundColor: "rgba(255, 255, 255, 0.9)",
         padding: "12px",
         borderRadius: "8px",
         maxHeight: "200px",
         overflowY: "auto",
-        zIndex: 1000,
-        width: "90%", 
+        width: "90%",
         maxWidth: "400px",
       }}
     >

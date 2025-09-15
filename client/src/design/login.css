@@ -1,7 +1,7 @@
 .login-body {
   background: 
     linear-gradient(to right, rgba(79, 205, 255, 0.5), rgba(0, 0, 0, 0.5)),
-    url('sample.jpg');
+    url('/sample.jpg');
     background-size: cover;
     background-position: center;
 }
