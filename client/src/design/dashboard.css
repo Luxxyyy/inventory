@@ -92,8 +92,7 @@
     box-shadow: 0 2px 8px rgba(0,0,0,0.15);
   }
 
-  /* Hide only the switch map button on mobile */
-  .map-controls button.hidden-mobile {
+  .map-controls .hidden-mobile {
     display: none !important;
   }
 

@@ -3,3 +3,8 @@
   font-family: Georgia, 'Times New Roman', Times, serif;
   box-sizing: border-box;
 }
+
+.toast-below-header {
+  margin-top: 70px;
+  z-index: 9999 !important;
+}

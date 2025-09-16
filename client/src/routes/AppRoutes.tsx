@@ -19,26 +19,11 @@ function AppRoutes() {
       <Route path="/" element={<Layout />}>
         <Route index element={<Dashboard />} />
         <Route path="list" element={<ListGroup />} />
-        <Route path="source" element={<Source />} />
-        <Route path="balangay" element={<Balangay />} />
-        <Route path="consumer" element={<Consumer />} />
-        <Route path="purok" element={<Purok />} />
-        <Route
-          path="add-user"
-          element={
-            <ProtectedRoute requiredRole="admin">
-              <User />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="logs"
-          element={
-            <ProtectedRoute requiredRole="admin">
-              <Logs />
-            </ProtectedRoute>
-          }
-        />
+        <Route path="source" element={ <ProtectedRoute requiredRole="admin"> <Source /> </ProtectedRoute> }/>
+        <Route path="balangay" element={ <ProtectedRoute requiredRole="admin"> <Balangay /> </ProtectedRoute> }/>
+        <Route path="purok" element={ <ProtectedRoute requiredRole="admin"> <Purok /> </ProtectedRoute> }/>
+        <Route path="add-user" element={ <ProtectedRoute requiredRole="admin"> <User /> </ProtectedRoute> }/>
+        <Route path="logs" element={ <ProtectedRoute requiredRole="admin"> <Logs /> </ProtectedRoute> }/>
       </Route>
     </Routes>
   );

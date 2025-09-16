@@ -114,9 +114,7 @@ const Dashboard = () => {
         />
       </div>
 
-      <div
-        className={`map-legend-wrapper ${is2DMap ? "legend-2d" : "legend-3d"}`}
-      >
+      <div className={`map-legend-wrapper ${is2DMap ? "legend-2d" : "legend-3d"}`}>
         <MapLegend />
       </div>
     </div>

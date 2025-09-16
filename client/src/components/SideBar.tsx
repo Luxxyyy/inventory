@@ -22,25 +22,13 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { label: "Map", path: "/", icon: <FiMap /> },
-  { label: "Lists", path: "/list", icon: <FiList /> },
-  { label: "Source", path: "/source", icon: <FaFaucet />, section: "Manage" },
-  { label: "Balangay", path: "/balangay", icon: <FaMapMarkerAlt />, section: "Manage" },
-  { label: "Purok", path: "/purok", icon: <FaMapPin />, section: "Manage" },
-  {
-    label: "Add User",
-    path: "/add-user",
-    icon: <FiUserPlus />,
-    roles: ["admin", "manager"],
-    section: "Admin",
-  },
-  {
-    label: "Logs",
-    path: "/logs",
-    icon: <FiUserPlus />,
-    roles: ["admin", "manager"],
-    section: "Admin",
-  },
+  { label: "Map", path: "/", icon: <FiMap />, roles: ["admin", "user"] },
+  { label: "Lists", path: "/list", icon: <FiList />, roles: ["admin", "user"] },
+  { label: "Source", path: "/source", icon: <FaFaucet />, roles: ["admin", "manager"], section: "Manage" },
+  { label: "Balangay", path: "/balangay", icon: <FaMapMarkerAlt />, roles: ["admin", "manager"], section: "Manage" },
+  { label: "Purok", path: "/purok", icon: <FaMapPin />, roles: ["admin", "manager"], section: "Manage" },
+  { label: "Add User", path: "/add-user", icon: <FiUserPlus />, roles: ["admin", "manager"], section: "Admin" },
+  { label: "Logs", path: "/logs", icon: <FiUserPlus />, roles: ["admin", "manager"], section: "Admin" },
 ];
 
 const MOBILE_BREAKPOINT = 768;
@@ -116,7 +104,7 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed }) => {
               position: "absolute",
               top: 50,
               left: 10,
-              width: SIDEBAR_WIDTH_EXPANDED, // wider dropdown for readability
+              width: SIDEBAR_WIDTH_EXPANDED,
               maxHeight: "80vh",
               overflowY: "auto",
               zIndex: 2000,
@@ -152,7 +140,6 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed }) => {
     );
   }
 
-  // Desktop sidebar
   return (
     <aside
       className={`text-white d-flex flex-column bg-dark ${

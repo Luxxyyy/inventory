@@ -24,7 +24,7 @@ const sessionStore = new SequelizeStore({
   },
 });
 
-sessionStore.sync(); // Ensure sessions table exists
+sessionStore.sync();
 
 app.use(
   session({
@@ -47,7 +47,7 @@ const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:5174",
   "http://localhost",
-  "http://192.168.1.28",
+  "http://192.168.1.51",
   `http://${process.env.HOST || "192.168.1.253"}`,
 ];
 
