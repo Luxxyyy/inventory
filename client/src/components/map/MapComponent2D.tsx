@@ -23,7 +23,10 @@ import { ShapeDetails } from "../../types/mapShape_type";
 import "../../design/map.css";
 import { useAuth } from "../../contexts/AuthContext";
 import { RiStickyNoteAddLine } from "react-icons/ri";
-import { createRoot } from "react-dom/client";
+import { PiNoteThin } from "react-icons/pi";
+import { createRoot, Root } from "react-dom/client";
+import ReactDOMServer from "react-dom/server";
+
 
 const defaultDetails: ShapeDetails = {
   title: "",
@@ -48,6 +51,7 @@ const MapComponent2D: React.FC<{ center?: CenterType | null }> = ({ center }) =>
   const drawnItems = useRef<L.FeatureGroup>(new L.FeatureGroup()).current;
   const notesLayer = useRef<L.FeatureGroup>(new L.FeatureGroup()).current;
   const markerRef = useRef<L.Marker | null>(null);
+  const noteRootRef = useRef<Root | null>(null);
 
   const [shapeModalOpen, setShapeModalOpen] = useState(false);
   const [editingLayer, setEditingLayer] = useState<CustomLayer | null>(null);
@@ -80,6 +84,20 @@ const MapComponent2D: React.FC<{ center?: CenterType | null }> = ({ center }) =>
         html: `<div style="background:${color}; width:16px; height:16px; border-radius:50%; border:2px solid white;"></div>`,
         iconSize: [16, 16],
         iconAnchor: [8, 8],
+      }),
+    []
+  );
+
+  const createNoteIcon = useCallback(
+    (color = "black") =>
+      L.divIcon({
+        className: "note-icon-div",
+        html: ReactDOMServer.renderToString(
+          <PiNoteThin size={32} color={color} />
+        ),
+        iconSize: [32, 32],
+        iconAnchor: [16, 32],
+        popupAnchor: [0, -25],
       }),
     []
   );
@@ -155,12 +173,7 @@ const MapComponent2D: React.FC<{ center?: CenterType | null }> = ({ center }) =>
       if (savedNote) {
         if (!savedNote.isDone) {
           const newNoteMarker = L.marker([savedNote.latitude, savedNote.longitude], {
-            icon: L.icon({
-              iconUrl: "https://cdn-icons-png.flaticon.com/512/3208/3208573.png",
-              iconSize: [32, 32],
-              iconAnchor: [16, 32],
-              popupAnchor: [0, -25],
-            }),
+            icon: createNoteIcon(),
           });
           
           let popupContent = `
@@ -220,16 +233,7 @@ const MapComponent2D: React.FC<{ center?: CenterType | null }> = ({ center }) =>
           L.DomEvent.on(buttonContainer, 'click', L.DomEvent.stop);
           L.DomEvent.on(buttonContainer, 'dblclick', L.DomEvent.stop);
           
-          const root = createRoot(buttonContainer);
-          root.render(
-            <RiStickyNoteAddLine 
-              style={{ fontSize: "24px", cursor: "pointer", color: "#333", display: "block", margin: "4px" }} 
-              onClick={() => {
-                console.log("Note button clicked!");
-                setIsCreatingNote(true);
-              }}
-            />
-          );
+          noteRootRef.current = createRoot(buttonContainer);
 
           return container;
         },
@@ -311,12 +315,7 @@ const MapComponent2D: React.FC<{ center?: CenterType | null }> = ({ center }) =>
         notes.forEach((note: any) => {
           if (!note.isDone) {
             const marker = L.marker([note.latitude, note.longitude], {
-              icon: L.icon({
-                iconUrl: "https://cdn-icons-png.flaticon.com/512/3208/3208573.png",
-                iconSize: [32, 32],
-                iconAnchor: [16, 32],
-                popupAnchor: [0, -25],
-              }),
+              icon: createNoteIcon(),
             });
 
             let popupContent = `
@@ -385,7 +384,27 @@ const MapComponent2D: React.FC<{ center?: CenterType | null }> = ({ center }) =>
         }
       });
     }
-  }, [createColoredMarker, user, drawnItems, notesLayer]);
+  }, [createColoredMarker, createNoteIcon, user, drawnItems, notesLayer]);
+
+  useEffect(() => {
+    if (noteRootRef.current) {
+      noteRootRef.current.render(
+        <RiStickyNoteAddLine 
+          style={{ 
+            fontSize: "24px", 
+            cursor: "pointer", 
+            color: isCreatingNote ? "red" : "#333", 
+            display: "block", 
+            margin: "4px" 
+          }} 
+          onClick={() => {
+            console.log("Note button clicked!");
+            setIsCreatingNote(true);
+          }}
+        />
+      );
+    }
+  }, [isCreatingNote]);
 
   useEffect(() => {
     if (center && mapRef.current && center.latitude && center.longitude) {
