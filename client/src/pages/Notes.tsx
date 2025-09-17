@@ -1,7 +1,17 @@
+// src/components/admin/Notes.tsx
+
 import { useEffect, useState, useCallback } from "react";
 import http from "../api/http";
 import "../design/logs.css";
 import { toast, ToastContainer } from "react-toastify";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Button,
+} from "@mui/material";
 
 type NoteEntry = {
   id: number;
@@ -26,14 +36,21 @@ const Notes = () => {
   const [error, setError] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [noteToMarkDoneId, setNoteToMarkDoneId] = useState<number | null>(null);
 
-  // Function to fetch notes from the API
+  // Function to fetch notes from the API and sort them
   const fetchNotes = useCallback(() => {
     setLoading(true);
     http
       .get("/notes")
       .then((res) => {
-        setNotes(res.data);
+        const sortedNotes = res.data.sort((a: NoteEntry, b: NoteEntry) => {
+          if (!a.isDone && b.isDone) return -1;
+          if (a.isDone && !b.isDone) return 1;
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        });
+        setNotes(sortedNotes);
         setError("");
       })
       .catch(() => {
@@ -48,15 +65,31 @@ const Notes = () => {
     fetchNotes();
   }, [fetchNotes]);
 
-  // Handle marking a note as done
-  const handleMarkAsDone = async (id: number) => {
+  // Handler to open the confirmation dialog
+  const handleOpenConfirm = (id: number) => {
+    setNoteToMarkDoneId(id);
+    setOpen(true);
+  };
+
+  // Handler to close the confirmation dialog
+  const handleCloseConfirm = () => {
+    setOpen(false);
+    setNoteToMarkDoneId(null);
+  };
+
+  // Handler to perform the action after confirmation
+  const handleConfirmDone = async () => {
+    if (noteToMarkDoneId === null) return;
+
     try {
-      await http.patch(`/notes/${id}/done`);
+      await http.put(`/notes/${noteToMarkDoneId}`, { isDone: true });
       toast.success("Note marked as done!");
-      fetchNotes(); // Re-fetch notes to update the list
+      fetchNotes();
+      handleCloseConfirm();
     } catch (err) {
       console.error(err);
       toast.error("Failed to mark note as done.");
+      handleCloseConfirm();
     }
   };
 
@@ -113,12 +146,14 @@ const Notes = () => {
                 <td>{new Date(note.created_at).toLocaleString()}</td>
                 <td>
                   {!note.isDone && (
-                    <button
-                      className="btn btn-sm btn-success"
-                      onClick={() => handleMarkAsDone(note.id)}
+                    <Button
+                      variant="contained"
+                      color="success"
+                      size="small"
+                      onClick={() => handleOpenConfirm(note.id)}
                     >
                       Done
-                    </button>
+                    </Button>
                   )}
                 </td>
               </tr>
@@ -160,6 +195,29 @@ const Notes = () => {
           Next &raquo;
         </button>
       </div>
+
+      {/* Material-UI Confirmation Dialog */}
+      <Dialog
+        open={open}
+        onClose={handleCloseConfirm}
+        aria-labelledby="confirm-dialog-title"
+        aria-describedby="confirm-dialog-description"
+      >
+        <DialogTitle id="confirm-dialog-title">Confirm Action</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="confirm-dialog-description">
+            Are you sure you want to mark this note as done? This action cannot be undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseConfirm} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleConfirmDone} color="primary" autoFocus>
+            Done
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };

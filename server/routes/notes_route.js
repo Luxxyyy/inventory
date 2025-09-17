@@ -2,7 +2,7 @@
 const express = require("express");
 const router = express.Router();
 const Note = require("../models/note_model");
-const { attachUser } = require("../middleware/auth_middleware"); // <-- CORRECTED PATH
+const { attachUser } = require("../middleware/auth_middleware");
 
 // Create a new note
 router.post("/", attachUser, async (req, res) => {
@@ -27,13 +27,15 @@ router.post("/", attachUser, async (req, res) => {
   }
 });
 
-// Get all notes, filtered by 'isDone' status
+// Get all notes (pending and done)
 router.get("/", async (req, res) => {
   try {
+    // --- START OF THE FIX ---
+    // The `where` clause is removed to fetch ALL notes.
     const notes = await Note.findAll({
-      where: { isDone: false },
       include: ["User"], // Assuming a Note.belongsTo(User) association
     });
+    // --- END OF THE FIX ---
     res.status(200).json(notes);
   } catch (error) {
     console.error("Error fetching notes:", error);
