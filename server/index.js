@@ -86,6 +86,7 @@ app.use("/api/auth", require("./routes/auth_route"));
 app.use("/api/users", require("./routes/user_route"));
 app.use("/api/pipe-logs", require("./routes/pipe_log_route"));
 app.use("/api/logs", require("./routes/log_route"));
+app.use("/api/notes", require("./routes/notes_route")); // <-- ADD THIS LINE
 
 // ======================
 // Serve React build

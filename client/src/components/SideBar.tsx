@@ -29,6 +29,7 @@ const navItems: NavItem[] = [
   { label: "Purok", path: "/purok", icon: <FaMapPin />, roles: ["admin", "manager"], section: "Manage" },
   { label: "Add User", path: "/add-user", icon: <FiUserPlus />, roles: ["admin", "manager"], section: "Admin" },
   { label: "Logs", path: "/logs", icon: <FiUserPlus />, roles: ["admin", "manager"], section: "Admin" },
+  { label: "Notes", path: "/notes", icon: <FiUserPlus />, roles: ["admin", "manager"], section: "Admin" },
 ];
 
 const MOBILE_BREAKPOINT = 768;

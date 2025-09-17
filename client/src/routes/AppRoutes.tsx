@@ -3,7 +3,6 @@ import { Routes, Route } from "react-router-dom";
 import ListGroup from "../components/ListGroup";
 import Dashboard from "../pages/Dashboard";
 import Source from "../pages/Source";
-import Consumer from "../pages/Consumer";
 import Balangay from "../pages/Balangay";
 import Purok from "../pages/Purok";
 import Login from "../pages/Login";
@@ -11,6 +10,7 @@ import ProtectedRoute from "../components/ProtectedRoute";
 import User from "../pages/User";
 import Layout from "../components/Layout";
 import Logs from  "../pages/Logs";
+import Notes from "../pages/Notes";
 
 function AppRoutes() {
   return (
@@ -24,6 +24,7 @@ function AppRoutes() {
         <Route path="purok" element={ <ProtectedRoute requiredRole="admin"> <Purok /> </ProtectedRoute> }/>
         <Route path="add-user" element={ <ProtectedRoute requiredRole="admin"> <User /> </ProtectedRoute> }/>
         <Route path="logs" element={ <ProtectedRoute requiredRole="admin"> <Logs /> </ProtectedRoute> }/>
+        <Route path="notes" element={ <ProtectedRoute requiredRole="admin"> <Notes /> </ProtectedRoute> }/>
       </Route>
     </Routes>
   );
