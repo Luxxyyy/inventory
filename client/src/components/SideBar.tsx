@@ -9,6 +9,7 @@ import {
   FiMenu,
   FiX,
 } from "react-icons/fi";
+import { BsChatSquareQuote, BsFillEnvelopeFill } from "react-icons/bs";
 import { FaFaucet, FaMapMarkerAlt, FaMapPin } from "react-icons/fa";
 import { useAuth } from "../contexts/AuthContext";
 import { toast } from "react-toastify";
@@ -37,8 +38,8 @@ const navItems: NavItem[] = [
   { label: "Balangay", path: "/balangay", icon: <FaMapMarkerAlt />, roles: ["admin", "manager"], section: "Manage" },
   { label: "Purok", path: "/purok", icon: <FaMapPin />, roles: ["admin", "manager"], section: "Manage" },
   { label: "Add User", path: "/add-user", icon: <FiUserPlus />, roles: ["admin", "manager"], section: "Admin" },
-  { label: "Logs", path: "/logs", icon: <FiUserPlus />, roles: ["admin", "manager"], section: "Admin" },
-  { label: "Notes", path: "/notes", icon: <FiUserPlus />, roles: ["admin", "manager"], section: "Admin" },
+  { label: "Logs", path: "/logs", icon: <BsChatSquareQuote />, roles: ["admin", "manager"], section: "Admin" },
+  { label: "Notes", path: "/notes", icon: <BsFillEnvelopeFill />, roles: ["admin", "manager"], section: "Admin" },
 ];
 
 const MOBILE_BREAKPOINT = 768;
