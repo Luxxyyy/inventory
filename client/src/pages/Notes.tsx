@@ -1,5 +1,3 @@
-// src/components/admin/Notes.tsx
-
 import { useEffect, useState, useCallback } from "react";
 import http from "../api/http";
 import "../design/logs.css";
@@ -19,6 +17,7 @@ type NoteEntry = {
   title: string;
   message: string;
   image: string | null;
+  full_image: string | null; // <-- Added new field to type definition
   isDone: boolean;
   latitude: number;
   longitude: number;
@@ -36,10 +35,13 @@ const Notes = () => {
   const [error, setError] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(false);
+
   const [open, setOpen] = useState(false);
   const [noteToMarkDoneId, setNoteToMarkDoneId] = useState<number | null>(null);
 
-  // Function to fetch notes from the API and sort them
+  const [imageModalOpen, setImageModalOpen] = useState(false);
+  const [enlargedImage, setEnlargedImage] = useState<string | null>(null);
+
   const fetchNotes = useCallback(() => {
     setLoading(true);
     http
@@ -65,19 +67,16 @@ const Notes = () => {
     fetchNotes();
   }, [fetchNotes]);
 
-  // Handler to open the confirmation dialog
   const handleOpenConfirm = (id: number) => {
     setNoteToMarkDoneId(id);
     setOpen(true);
   };
 
-  // Handler to close the confirmation dialog
   const handleCloseConfirm = () => {
     setOpen(false);
     setNoteToMarkDoneId(null);
   };
 
-  // Handler to perform the action after confirmation
   const handleConfirmDone = async () => {
     if (noteToMarkDoneId === null) return;
 
@@ -93,13 +92,22 @@ const Notes = () => {
     }
   };
 
-  // Calculate pagination data
+  const handleOpenImageModal = (imageSrc: string) => {
+    setEnlargedImage(imageSrc);
+    setImageModalOpen(true);
+  };
+
+  const handleCloseImageModal = () => {
+    setImageModalOpen(false);
+    setEnlargedImage(null);
+  };
+
   const totalPages = Math.ceil(notes.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const currentNotes = notes.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
   const goToPage = (page: number) => {
-    if (page >= 1 && page <= totalPages) setCurrentPage(page);
+    if (page >= 1 && page >= 1 && page <= totalPages) setCurrentPage(page);
   };
 
   return (
@@ -132,7 +140,13 @@ const Notes = () => {
                     <img
                       src={note.image}
                       alt="Note"
-                      style={{ width: "50px", height: "50px", objectFit: "cover" }}
+                      onClick={() => handleOpenImageModal(note.full_image!)}
+                      style={{
+                        width: "50px",
+                        height: "50px",
+                        objectFit: "cover",
+                        cursor: "pointer",
+                      }}
                     />
                   )}
                 </td>
@@ -162,7 +176,6 @@ const Notes = () => {
         </table>
       </div>
 
-      {/* Pagination */}
       <div className="d-flex justify-content-center align-items-center mt-3">
         <button
           className="btn btn-sm btn-outline-secondary me-2"
@@ -196,7 +209,6 @@ const Notes = () => {
         </button>
       </div>
 
-      {/* Material-UI Confirmation Dialog */}
       <Dialog
         open={open}
         onClose={handleCloseConfirm}
@@ -215,6 +227,32 @@ const Notes = () => {
           </Button>
           <Button onClick={handleConfirmDone} color="primary" autoFocus>
             Done
+          </Button>
+        </DialogActions>
+      </Dialog>
+      
+      <Dialog
+        open={imageModalOpen}
+        onClose={handleCloseImageModal}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogContent style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          {enlargedImage && (
+            <img
+              src={enlargedImage}
+              alt="Enlarged Note"
+              style={{
+                maxWidth: '100%',
+                maxHeight: '80vh',
+                objectFit: 'contain'
+              }}
+            />
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseImageModal} color="primary">
+            Close
           </Button>
         </DialogActions>
       </Dialog>

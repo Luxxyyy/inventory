@@ -1,3 +1,5 @@
+// src/components/MapComponent2D.tsx
+
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -228,7 +230,10 @@ const MapComponent2D: React.FC<{ center?: CenterType | null }> = ({
         edit: { featureGroup: drawnItems },
       });
       map.addControl(drawControl);
-
+    }
+    
+    // Condition to add the Note Control and related listeners for 'admin' or 'engr'
+    if (user?.role === "admin" || user?.role === "engr") {
       const NoteControl = L.Control.extend({
         onAdd: function (map: L.Map) {
           const container = L.DomUtil.create(
@@ -254,6 +259,14 @@ const MapComponent2D: React.FC<{ center?: CenterType | null }> = ({
       });
 
       map.addControl(new NoteControl({ position: "topleft" }));
+
+      map.on("click", (e: any) => {
+        if (isCreatingNoteRef.current) {
+          setNoteCoords(e.latlng);
+          setNoteModalOpen(true);
+          setIsCreatingNote(false);
+        }
+      });
     }
 
     const loadShapes = async () => {
@@ -335,7 +348,11 @@ const MapComponent2D: React.FC<{ center?: CenterType | null }> = ({
       }
     };
 
+    // Condition to load notes only for 'admin' or 'engr'
     const loadNotes = async () => {
+      if (user?.role !== "admin" && user?.role !== "engr") {
+        return; // Exit early if the user is not an admin or engr
+      }
       setLoading(true);
       try {
         notesLayer.clearLayers();
@@ -374,14 +391,6 @@ const MapComponent2D: React.FC<{ center?: CenterType | null }> = ({
     loadShapes();
     loadNotes();
 
-    map.on("click", (e: any) => {
-      if (isCreatingNoteRef.current) {
-        setNoteCoords(e.latlng);
-        setNoteModalOpen(true);
-        setIsCreatingNote(false);
-      }
-    });
-
     if (user?.role === "admin") {
       map.on(L.Draw.Event.CREATED, (e: any) => {
         drawnItems.addLayer(e.layer);
@@ -415,7 +424,7 @@ const MapComponent2D: React.FC<{ center?: CenterType | null }> = ({
   }, [createColoredMarker, createNoteIcon, user, drawnItems, notesLayer]);
 
   useEffect(() => {
-    if (noteRootRef.current) {
+    if (noteRootRef.current && (user?.role === "admin" || user?.role === "engr")) {
       noteRootRef.current.render(
         <RiStickyNoteAddLine
           style={{
@@ -432,7 +441,7 @@ const MapComponent2D: React.FC<{ center?: CenterType | null }> = ({
         />
       );
     }
-  }, [isCreatingNote]);
+  }, [isCreatingNote, user]);
 
   useEffect(() => {
     if (center && mapRef.current && center.latitude && center.longitude) {

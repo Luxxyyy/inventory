@@ -32,8 +32,8 @@ interface SocketNote {
 }
 
 const navItems: NavItem[] = [
-  { label: "Map", path: "/", icon: <FiMap />, roles: ["admin", "user"] },
-  { label: "Lists", path: "/list", icon: <FiList />, roles: ["admin", "user"] },
+  { label: "Map", path: "/", icon: <FiMap />, roles: ["admin", "engr", "user"] },
+  { label: "Lists", path: "/list", icon: <FiList />, roles: ["admin", "engr", "user"] },
   { label: "Source", path: "/source", icon: <FaFaucet />, roles: ["admin", "manager"], section: "Manage" },
   { label: "Balangay", path: "/balangay", icon: <FaMapMarkerAlt />, roles: ["admin", "manager"], section: "Manage" },
   { label: "Purok", path: "/purok", icon: <FaMapPin />, roles: ["admin", "manager"], section: "Manage" },

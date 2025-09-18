@@ -27,7 +27,11 @@ const Note = sequelize.define(
       allowNull: false,
     },
     image: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT("long"),
+      allowNull: true,
+    },
+    full_image: {
+      type: DataTypes.TEXT("long"),
       allowNull: true,
     },
     isDone: {
@@ -52,7 +56,6 @@ const Note = sequelize.define(
   }
 );
 
-// Define the relationship: A Note belongs to a User
 Note.belongsTo(User, { foreignKey: "user_id" });
 
 module.exports = Note;

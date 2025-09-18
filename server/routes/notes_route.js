@@ -1,14 +1,13 @@
-// server/routes/notes_route.js
-
 const express = require("express");
 const router = express.Router();
 const Note = require("../models/note_model");
+const User = require("../models/user_model");
 const { attachUser } = require("../middleware/auth_middleware");
 
-// Create a new note
 router.post("/", attachUser, async (req, res) => {
   try {
-    const { title, message, latitude, longitude, image, isDone } = req.body;
+    const { title, message, latitude, longitude, image, fullImage, isDone } =
+      req.body;
     const userId = req.user.id;
 
     const newNote = await Note.create({
@@ -17,19 +16,17 @@ router.post("/", attachUser, async (req, res) => {
       latitude,
       longitude,
       image,
+      full_image: fullImage,
       isDone: isDone || false,
       user_id: userId,
     });
 
-    // Fetch the note with the associated user data for the notification
     const populatedNote = await Note.findByPk(newNote.id, {
       include: ["User"],
     });
 
-    // Get the socket.io instance and emit a real-time event
     const io = req.app.get("io");
     if (io) {
-      // Emit 'new_note' event to all connected clients
       io.emit("new_note", populatedNote);
     }
 
@@ -40,11 +37,16 @@ router.post("/", attachUser, async (req, res) => {
   }
 });
 
-// Get all notes (pending and done)
 router.get("/", async (req, res) => {
   try {
     const notes = await Note.findAll({
-      include: ["User"],
+      order: [["created_at", "DESC"]],
+      include: [
+        {
+          model: User,
+          attributes: ["username", "role"],
+        },
+      ],
     });
     res.status(200).json(notes);
   } catch (error) {
@@ -53,11 +55,10 @@ router.get("/", async (req, res) => {
   }
 });
 
-// Update a note (e.g., mark as done)
 router.put("/:id", attachUser, async (req, res) => {
   try {
     const { id } = req.params;
-    const { isDone, title, message } = req.body;
+    const { isDone, title, message, image, fullImage } = req.body;
 
     const note = await Note.findByPk(id);
 
@@ -65,30 +66,46 @@ router.put("/:id", attachUser, async (req, res) => {
       return res.status(404).json({ error: "Note not found." });
     }
 
-    note.title = title || note.title;
-    note.message = message || note.message;
+    if (note.user_id !== req.user.id && req.user.role !== "admin") {
+      return res.status(403).json({ message: "Forbidden" });
+    }
+
+    note.title = title !== undefined ? title : note.title;
+    note.message = message !== undefined ? message : note.message;
     note.isDone = isDone !== undefined ? isDone : note.isDone;
+    note.image = image !== undefined ? image : note.image;
+    note.full_image = fullImage !== undefined ? fullImage : note.full_image;
 
     await note.save();
 
-    res.status(200).json(note);
+    const populatedNote = await Note.findByPk(note.id, {
+      include: ["User"],
+    });
+
+    res.status(200).json(populatedNote);
   } catch (error) {
     console.error("Error updating note:", error);
     res.status(500).json({ error: "Failed to update note." });
   }
 });
 
-// Delete a note
 router.delete("/:id", attachUser, async (req, res) => {
   try {
     const { id } = req.params;
-    const deleted = await Note.destroy({ where: { id } });
 
-    if (deleted) {
-      res.status(204).send("Note deleted successfully.");
-    } else {
-      res.status(404).json({ error: "Note not found." });
+    const note = await Note.findByPk(id);
+
+    if (!note) {
+      return res.status(404).json({ error: "Note not found." });
     }
+
+    if (note.user_id !== req.user.id && req.user.role !== "admin") {
+      return res.status(403).json({ message: "Forbidden" });
+    }
+
+    await note.destroy();
+
+    res.status(204).send("Note deleted successfully.");
   } catch (error) {
     console.error("Error deleting note:", error);
     res.status(500).json({ error: "Failed to delete note." });

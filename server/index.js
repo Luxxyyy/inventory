@@ -5,8 +5,6 @@ const session = require("express-session");
 const SequelizeStore = require("connect-session-sequelize")(session.Store);
 const sequelize = require("./db");
 const path = require("path");
-
-// --- START OF SOCKET.IO SETUP ---
 const http = require("http");
 const { Server } = require("socket.io");
 
@@ -89,7 +87,12 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-app.use(express.json());
+
+// ======================
+// Increase Payload Limit
+// ======================
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
 // ======================
 // Middleware

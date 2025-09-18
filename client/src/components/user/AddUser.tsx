@@ -91,6 +91,7 @@ const AddUser: React.FC = () => {
           >
             <option value="user">User</option>
             <option value="admin">Admin</option>
+            <option value="engr">Engineer</option>
           </select>
         </div>
 

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
 import { FaPaperclip, FaTimes } from "react-icons/fa";
 import "../../design/noteModal.css";
+import Resizer from "react-image-file-resizer";
 
 interface NoteModalProps {
   show: boolean;
@@ -10,6 +11,7 @@ interface NoteModalProps {
     title: string;
     message: string;
     image: string | null;
+    fullImage: string | null;
     latitude: number;
     longitude: number;
   }) => void;
@@ -24,24 +26,41 @@ const NoteModal: React.FC<NoteModalProps> = ({
 }) => {
   const [title, setTitle] = useState("");
   const [message, setMessage] = useState("");
-  const [image, setImage] = useState<string | null>(null);
+  const [image, setImage] = useState<string | null>(null); // This will hold the thumbnail
+  const [fullImage, setFullImage] = useState<string | null>(null); // This will hold the full-res image
 
   useEffect(() => {
     if (show) {
       setTitle("");
       setMessage("");
       setImage(null);
+      setFullImage(null); // Reset the new state
     }
   }, [show]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // Step 1: Read the original image data to display and save for later.
       const reader = new FileReader();
       reader.onloadend = () => {
-        setImage(reader.result as string);
+        setFullImage(reader.result as string);
       };
       reader.readAsDataURL(file);
+
+      // Step 2: Resize the image to 100x100 for the thumbnail.
+      Resizer.imageFileResizer(
+        file,
+        100, // Max width for thumbnail
+        100, // Max height for thumbnail
+        "JPEG",
+        80,
+        0,
+        (uri) => {
+          setImage(uri as string); // Save the thumbnail to state
+        },
+        "base64"
+      );
     }
   };
 
@@ -53,6 +72,7 @@ const NoteModal: React.FC<NoteModalProps> = ({
       title,
       message,
       image,
+      fullImage, // <-- Pass the full-res image here
       latitude: initialCoords.lat,
       longitude: initialCoords.lng,
     });
@@ -104,6 +124,7 @@ const NoteModal: React.FC<NoteModalProps> = ({
               </Button>
               {image && (
                 <div className="ms-3 image-preview-container">
+                  {/* Display the thumbnail (100x100) here */}
                   <img src={image} alt="Preview" className="image-preview" />
                   <Button
                     variant="link"

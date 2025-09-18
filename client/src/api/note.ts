@@ -1,12 +1,13 @@
 import http from './http';
 
 type NewNoteData = {
-  title: string;
-  message: string;
-  image?: string | null; 
-  isDone?: boolean;
-  latitude: number;
-  longitude: number;
+  title: string;
+  message: string;
+  image?: string | null; 
+  fullImage?: string | null; 
+  isDone?: boolean;
+  latitude: number;
+  longitude: number;
 };
 
 export const getNotes = async () => {
