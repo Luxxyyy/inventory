@@ -1,4 +1,5 @@
 // server/routes/notes_route.js
+
 const express = require("express");
 const router = express.Router();
 const Note = require("../models/note_model");
@@ -20,7 +21,19 @@ router.post("/", attachUser, async (req, res) => {
       user_id: userId,
     });
 
-    res.status(201).json(newNote);
+    // Fetch the note with the associated user data for the notification
+    const populatedNote = await Note.findByPk(newNote.id, {
+      include: ["User"],
+    });
+
+    // Get the socket.io instance and emit a real-time event
+    const io = req.app.get("io");
+    if (io) {
+      // Emit 'new_note' event to all connected clients
+      io.emit("new_note", populatedNote);
+    }
+
+    res.status(201).json(populatedNote);
   } catch (error) {
     console.error("Error creating note:", error);
     res.status(500).json({ error: "Failed to create note." });
@@ -30,12 +43,9 @@ router.post("/", attachUser, async (req, res) => {
 // Get all notes (pending and done)
 router.get("/", async (req, res) => {
   try {
-    // --- START OF THE FIX ---
-    // The `where` clause is removed to fetch ALL notes.
     const notes = await Note.findAll({
-      include: ["User"], // Assuming a Note.belongsTo(User) association
+      include: ["User"],
     });
-    // --- END OF THE FIX ---
     res.status(200).json(notes);
   } catch (error) {
     console.error("Error fetching notes:", error);

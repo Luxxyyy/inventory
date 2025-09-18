@@ -2,6 +2,8 @@ import React from "react";
 import { useLocation } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import AppRoutes from "./routes/AppRoutes";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const App: React.FC = () => {
   const location = useLocation();
@@ -21,6 +23,7 @@ const App: React.FC = () => {
       ) : (
         <AppRoutes />
       )}
+      <ToastContainer />
     </AuthProvider>
   );
 };

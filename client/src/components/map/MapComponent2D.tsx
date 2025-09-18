@@ -1,4 +1,3 @@
-// src/components/map/MapComponent2D.tsx
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -10,11 +9,8 @@ import {
   deleteMapShape,
   updateMapShape,
 } from "../../api/mapShape";
-import {
-  addNote,
-  getNotes,
-} from "../../api/note";
-import { toast, ToastContainer } from "react-toastify";
+import { addNote, getNotes } from "../../api/note";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ShapeDetailsModal from "./ShapeDetailsModal";
 import PipeHistoryModal from "./PipeHistoryModal";
@@ -26,7 +22,6 @@ import { RiStickyNoteAddLine } from "react-icons/ri";
 import { PiNoteThin } from "react-icons/pi";
 import { createRoot, Root } from "react-dom/client";
 import ReactDOMServer from "react-dom/server";
-
 
 const defaultDetails: ShapeDetails = {
   title: "",
@@ -46,7 +41,9 @@ type CenterType = {
   longitude?: string;
 };
 
-const MapComponent2D: React.FC<{ center?: CenterType | null }> = ({ center }) => {
+const MapComponent2D: React.FC<{ center?: CenterType | null }> = ({
+  center,
+}) => {
   const mapRef = useRef<L.Map | null>(null);
   const drawnItems = useRef<L.FeatureGroup>(new L.FeatureGroup()).current;
   const notesLayer = useRef<L.FeatureGroup>(new L.FeatureGroup()).current;
@@ -105,8 +102,13 @@ const MapComponent2D: React.FC<{ center?: CenterType | null }> = ({ center }) =>
   const handleSave = async (data: typeof defaultDetails) => {
     if (!editingLayer) return;
 
-    const geojson = (editingLayer as any)?.toGeoJSON ? (editingLayer as any).toGeoJSON() : null;
-    const radius = typeof (editingLayer as any)?.getRadius === "function" ? (editingLayer as any).getRadius() : null;
+    const geojson = (editingLayer as any)?.toGeoJSON
+      ? (editingLayer as any).toGeoJSON()
+      : null;
+    const radius =
+      typeof (editingLayer as any)?.getRadius === "function"
+        ? (editingLayer as any).getRadius()
+        : null;
     const type = geojson?.geometry?.type ?? "Unknown";
     const payload = { type, geojson, radius, ...data };
 
@@ -152,7 +154,10 @@ const MapComponent2D: React.FC<{ center?: CenterType | null }> = ({ center }) =>
       toast.success(isEditing ? "Shape updated!" : "Shape saved!");
     } catch (err: any) {
       console.error(err);
-      toast.error((isEditing ? "Failed to update: " : "Failed to save: ") + (err?.message || ""));
+      toast.error(
+        (isEditing ? "Failed to update: " : "Failed to save: ") +
+          (err?.message || "")
+      );
     } finally {
       setShapeModalOpen(false);
       setEditingLayer(null);
@@ -172,10 +177,13 @@ const MapComponent2D: React.FC<{ center?: CenterType | null }> = ({ center }) =>
       const savedNote = await addNote(data);
       if (savedNote) {
         if (!savedNote.isDone) {
-          const newNoteMarker = L.marker([savedNote.latitude, savedNote.longitude], {
-            icon: createNoteIcon(),
-          });
-          
+          const newNoteMarker = L.marker(
+            [savedNote.latitude, savedNote.longitude],
+            {
+              icon: createNoteIcon(),
+            }
+          );
+
           let popupContent = `
             <div>
               <strong>${savedNote.title || "Untitled Note"}</strong><br/>
@@ -209,7 +217,9 @@ const MapComponent2D: React.FC<{ center?: CenterType | null }> = ({ center }) =>
     const map = L.map("map", { center: [7.730655, 125.099958], zoom: 17 });
     mapRef.current = map;
 
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(
+      map
+    );
     map.addLayer(drawnItems);
     map.addLayer(notesLayer);
 
@@ -226,13 +236,17 @@ const MapComponent2D: React.FC<{ center?: CenterType | null }> = ({ center }) =>
             "leaflet-bar leaflet-control leaflet-control-custom"
           );
           container.style.zIndex = "1001";
-          
-          const buttonContainer = L.DomUtil.create("div", "note-control-btn", container);
-          
+
+          const buttonContainer = L.DomUtil.create(
+            "div",
+            "note-control-btn",
+            container
+          );
+
           L.DomEvent.disableClickPropagation(buttonContainer);
-          L.DomEvent.on(buttonContainer, 'click', L.DomEvent.stop);
-          L.DomEvent.on(buttonContainer, 'dblclick', L.DomEvent.stop);
-          
+          L.DomEvent.on(buttonContainer, "click", L.DomEvent.stop);
+          L.DomEvent.on(buttonContainer, "dblclick", L.DomEvent.stop);
+
           noteRootRef.current = createRoot(buttonContainer);
 
           return container;
@@ -246,58 +260,72 @@ const MapComponent2D: React.FC<{ center?: CenterType | null }> = ({ center }) =>
       setLoading(true);
       try {
         const shapes = await getMapShapes();
-        shapes.forEach(({ id, geojson, title, description, status, color, size }: any) => {
-          const layer = L.geoJSON(geojson).getLayers()[0] as CustomLayer;
-          if (layer) {
-            layer.dbId = id;
-            layer.metadata = { title, description, status, color, size };
+        shapes.forEach(
+          ({
+            id,
+            geojson,
+            title,
+            description,
+            status,
+            color,
+            size,
+          }: any) => {
+            const layer = L.geoJSON(geojson).getLayers()[0] as CustomLayer;
+            if (layer) {
+              layer.dbId = id;
+              layer.metadata = { title, description, status, color, size };
 
-            if (layer instanceof L.Marker && color) {
-              (layer as L.Marker).setIcon(createColoredMarker(color));
-            } else if (color && "setStyle" in layer) {
-              (layer as L.Path).setStyle({ color: color });
-            }
+              if (layer instanceof L.Marker && color) {
+                (layer as L.Marker).setIcon(createColoredMarker(color));
+              } else if (color && "setStyle" in layer) {
+                (layer as L.Path).setStyle({ color: color });
+              }
 
-            layer.bindPopup(`
-              <div>
-                <strong>${title || "Untitled"}</strong><br/>
-                ${description || ""}<br/>
-                <em>Status:</em> ${status || "N/A"}<br/>
-                <em>Size:</em> ${size || "N/A"}<br/>
-                <div class="mt-2 d-flex gap-2">
-                  <button class="btn btn-sm btn-primary edit-btn">Edit</button>
-                  <button class="btn btn-sm btn-dark history-btn">History</button>
+              layer.bindPopup(`
+                <div>
+                  <strong>${title || "Untitled"}</strong><br/>
+                  ${description || ""}<br/>
+                  <em>Status:</em> ${status || "N/A"}<br/>
+                  <em>Size:</em> ${size || "N/A"}<br/>
+                  <div class="mt-2 d-flex gap-2">
+                    <button class="btn btn-sm btn-primary edit-btn">Edit</button>
+                    <button class="btn btn-sm btn-dark history-btn">History</button>
+                  </div>
                 </div>
-              </div>
-            `);
+              `);
 
-            layer.on("popupopen", (e) => {
-              const popupEl = e.popup.getElement();
-              if (!popupEl) return;
+              layer.on("popupopen", (e) => {
+                const popupEl = e.popup.getElement();
+                if (!popupEl) return;
 
-              const editBtn = popupEl.querySelector(".edit-btn") as HTMLElement | null;
-              const historyBtn = popupEl.querySelector(".history-btn") as HTMLElement | null;
+                const editBtn = popupEl.querySelector(
+                  ".edit-btn"
+                ) as HTMLElement | null;
+                const historyBtn = popupEl.querySelector(
+                  ".history-btn"
+                ) as HTMLElement | null;
 
-              if (editBtn && user?.role === "admin") {
-                editBtn.addEventListener("click", () => {
-                  setEditingLayer(layer);
-                  setFormData(layer.metadata || defaultDetails);
-                  setIsEditing(true);
-                  setShapeModalOpen(true);
-                });
-              }
+                if (editBtn && user?.role === "admin") {
+                  editBtn.addEventListener("click", () => {
+                    setEditingLayer(layer);
+                    setFormData(layer.metadata || defaultDetails);
+                    setIsEditing(true);
+                    setShapeModalOpen(true);
+                  });
+                }
 
-              if (historyBtn) {
-                historyBtn.addEventListener("click", () => {
-                  setHistoryShapeId((layer.dbId as number) ?? null);
-                  setHistoryOpen(true);
-                });
-              }
-            });
+                if (historyBtn) {
+                  historyBtn.addEventListener("click", () => {
+                    setHistoryShapeId((layer.dbId as number) ?? null);
+                    setHistoryOpen(true);
+                  });
+                }
+              });
 
-            drawnItems.addLayer(layer);
+              drawnItems.addLayer(layer);
+            }
           }
-        });
+        );
         toast.success("Shapes loaded");
       } catch (err: any) {
         console.error(err);
@@ -345,7 +373,7 @@ const MapComponent2D: React.FC<{ center?: CenterType | null }> = ({ center }) =>
 
     loadShapes();
     loadNotes();
-    
+
     map.on("click", (e: any) => {
       if (isCreatingNoteRef.current) {
         setNoteCoords(e.latlng);
@@ -389,14 +417,14 @@ const MapComponent2D: React.FC<{ center?: CenterType | null }> = ({ center }) =>
   useEffect(() => {
     if (noteRootRef.current) {
       noteRootRef.current.render(
-        <RiStickyNoteAddLine 
-          style={{ 
-            fontSize: "24px", 
-            cursor: "pointer", 
-            color: isCreatingNote ? "red" : "#333", 
-            display: "block", 
-            margin: "4px" 
-          }} 
+        <RiStickyNoteAddLine
+          style={{
+            fontSize: "24px",
+            cursor: "pointer",
+            color: isCreatingNote ? "red" : "#333",
+            display: "block",
+            margin: "4px",
+          }}
           onClick={() => {
             console.log("Note button clicked!");
             setIsCreatingNote(true);
@@ -422,9 +450,16 @@ const MapComponent2D: React.FC<{ center?: CenterType | null }> = ({ center }) =>
 
   return (
     <>
-      <ToastContainer />
       {loading && <div className="loading-indicator">Loading map shapes...</div>}
-      <div id="map" style={{ height: "100%", minHeight: "400px", width: "100%", maxWidth: "100vw" }} />
+      <div
+        id="map"
+        style={{
+          height: "100%",
+          minHeight: "400px",
+          width: "100%",
+          maxWidth: "100vw",
+        }}
+      />
       <ShapeDetailsModal
         show={shapeModalOpen}
         onClose={() => setShapeModalOpen(false)}

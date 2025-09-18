@@ -11,6 +11,8 @@ import {
 } from "react-icons/fi";
 import { FaFaucet, FaMapMarkerAlt, FaMapPin } from "react-icons/fa";
 import { useAuth } from "../contexts/AuthContext";
+import { toast } from "react-toastify";
+import io from "socket.io-client";
 import "../../src/design/sidebar.css";
 
 interface NavItem {
@@ -19,6 +21,13 @@ interface NavItem {
   icon: JSX.Element;
   roles?: string[];
   section?: string;
+}
+interface SocketNote {
+  User?: {
+    username: string;
+  };
+  title?: string;
+  message?: string;
 }
 
 const navItems: NavItem[] = [
@@ -41,9 +50,13 @@ interface SidebarProps {
   setCollapsed: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
+const socket = io("http://localhost:8080");
+
 const Sidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed }) => {
   const location = useLocation();
   const { user } = useAuth();
+
+  const [newNotesCount, setNewNotesCount] = useState(0);
 
   const [isMobile, setIsMobile] = useState(window.innerWidth <= MOBILE_BREAKPOINT);
   const [mobileDropdownOpen, setMobileDropdownOpen] = useState(false);
@@ -52,7 +65,6 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed }) => {
     function handleResize() {
       const mobile = window.innerWidth <= MOBILE_BREAKPOINT;
       setIsMobile(mobile);
-
       if (mobile) {
         setCollapsed(true);
         setMobileDropdownOpen(false);
@@ -63,19 +75,38 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed }) => {
     }
     window.addEventListener("resize", handleResize);
     handleResize();
-
     return () => window.removeEventListener("resize", handleResize);
   }, [setCollapsed]);
 
+  useEffect(() => {
+    socket.on('connect', () => {
+      console.log('Connected to WebSocket server');
+    });
+
+    socket.on('new_note', (note: SocketNote) => {
+      toast.info(`📝 New note added by ${note.User?.username || 'a user'}!`);
+      setNewNotesCount(prev => prev + 1);
+    });
+
+    return () => {
+      socket.off('new_note');
+      socket.off('connect');
+    };
+  }, []);
+
+  useEffect(() => {
+    if (location.pathname === '/notes') {
+      setNewNotesCount(0);
+    }
+  }, [location.pathname]);
+
   const isActive = (path: string) => location.pathname === path;
 
-  // Filter nav items by user roles
   const visibleNavItems = navItems.filter((item) => {
     if (!item.roles) return true;
     return user?.role && item.roles.includes(user.role);
   });
 
-  // Group nav items by section
   const groupedItems = visibleNavItems.reduce((acc, item) => {
     const group = item.section || "default";
     if (!acc[group]) acc[group] = [];
@@ -131,6 +162,11 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed }) => {
                   >
                     {item.icon}
                     <span className="ms-2">{item.label}</span>
+                    {item.label === "Notes" && newNotesCount > 0 && (
+                      <span className="badge rounded-pill bg-danger ms-auto">
+                        {newNotesCount}
+                      </span>
+                    )}
                   </Link>
                 </li>
               ))}
@@ -200,6 +236,11 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed }) => {
               >
                 {item.icon}
                 {!collapsed && item.label}
+                {item.label === "Notes" && newNotesCount > 0 && (
+                  <span className="badge rounded-pill bg-danger ms-auto">
+                    {newNotesCount}
+                  </span>
+                )}
               </Link>
             </li>
           ))}
@@ -225,6 +266,11 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed }) => {
                     >
                       {item.icon}
                       {!collapsed && item.label}
+                      {item.label === "Notes" && newNotesCount > 0 && (
+                        <span className="badge rounded-pill bg-danger ms-auto">
+                          {newNotesCount}
+                        </span>
+                      )}
                     </Link>
                   </li>
                 ))}
