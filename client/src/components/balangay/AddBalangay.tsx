@@ -65,13 +65,13 @@ function AddBalangay() {
 
   return (
     <div className="container-fluid mx-4 my-3" style={{ maxWidth: "600px" }}>
-      <h2>Add Balangay</h2>
+      <h2>Add Barangay</h2>
 
       {error && <div className="alert alert-danger">{error}</div>}
       {success && <div className="alert alert-success">{success}</div>}
 
       <div className="mb-3">
-        <label htmlFor="balangayInput" className="form-label">Balangay</label>
+        <label htmlFor="balangayInput" className="form-label">Barangay</label>
         <input
           type="text"
           className="form-control"

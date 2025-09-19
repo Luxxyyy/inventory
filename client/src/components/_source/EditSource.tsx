@@ -106,8 +106,7 @@ const EditSource = () => {
     };
 
     return (
-        <div className="container mx-auto my-4" style={{ maxWidth: 900 }}>
-            <h2 className="mb-4">Edit Sources</h2>
+        <div className="container mx-auto my-4" style={{ maxWidth: "95%" }}>
             {loading && (
                 <div className="d-flex justify-content-center my-5">
                     <div className="spinner-border text-primary" role="status" aria-label="Loading">

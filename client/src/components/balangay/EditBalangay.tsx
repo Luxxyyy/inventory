@@ -127,8 +127,7 @@ const EditBalangay: React.FC = () => {
     };
 
     return (
-        <div className="container mx-auto my-4" style={{ maxWidth: 900 }}>
-            <h2 className="mb-4">Edit Balangays</h2>
+        <div className="container mx-auto my-4" style={{ maxWidth: "95%" }}>
             {loading ? (
                 <div className="d-flex justify-content-center my-5">
                     <div className="spinner-border text-primary" role="status" />
@@ -141,7 +140,7 @@ const EditBalangay: React.FC = () => {
                         <table className="table table-hover mb-0">
                             <thead className="sticky-top balangay-header">
                                 <tr>
-                                    <th>Balangay</th>
+                                    <th>Barangay</th>
                                     <th>Latitude</th>
                                     <th>Longitude</th>
                                     <th>Source</th>
@@ -183,7 +182,7 @@ const EditBalangay: React.FC = () => {
             {selectedBalangay && (
                 <Modal onClose={closeModal} title="Edit Balangay">
                     <div className="mb-3">
-                        <label className="form-label">Balangay</label>
+                        <label className="form-label">Barangay</label>
                         <input
                             name="balangay"
                             type="text"

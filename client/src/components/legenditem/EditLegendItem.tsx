@@ -110,7 +110,7 @@ const EditLegendItem: React.FC = () => {
   };
 
   return (
-    <div className="container mx-auto my-4" style={{ maxWidth: 900 }}>
+    <div className="container mx-auto my-4" style={{ maxWidth: "95%" }}>
       {loading ? (
         <div className="d-flex justify-content-center my-5">
           <Spinner animation="border" role="status" />

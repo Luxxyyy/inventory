@@ -159,8 +159,7 @@ const EditPurok = () => {
     };
 
     return (
-        <div className="container my-4" style={{ maxWidth: 900 }}>
-            <h2 className="mb-4">Manage Puroks</h2>
+        <div className="container my-4" style={{ maxWidth: "95%" }}>
             {loading ? (
                 <div className="text-center my-5">
                     <div className="spinner-border text-primary" role="status" />
@@ -179,7 +178,7 @@ const EditPurok = () => {
                                     <th>Purok</th>
                                     <th>Latitude</th>
                                     <th>Longitude</th>
-                                    <th>Balangay</th>
+                                    <th>Barangay</th>
                                     <th>Source</th>
                                     <th className="text-center">Actions</th>
                                 </tr>
@@ -216,7 +215,7 @@ const EditPurok = () => {
             {selectedPurok && (
                 <Modal onClose={closeModal} title="Edit Purok">
                     <div className="mb-3">
-                        <label className="form-label">Purok</label>
+                        <label className="form-label">Purok/Balangay</label>
                         <input
                             name="purok"
                             className="form-control"
@@ -243,14 +242,14 @@ const EditPurok = () => {
                         />
                     </div>
                     <div className="mb-3">
-                        <label className="form-label">Balangay</label>
+                        <label className="form-label">Barangay</label>
                         <select
                             name="balangay_id"
                             className="form-select"
                             value={editForm.balangay_id}
                             onChange={handleInputChange}
                         >
-                            <option value="">Select Balangay</option>
+                            <option value="">Select Barangay</option>
                             {balangays.map((b) => (
                                 <option key={b.id} value={b.id}>
                                     {b.balangay}

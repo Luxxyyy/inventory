@@ -30,6 +30,14 @@ const User = sequelize.define(
       type: DataTypes.ENUM("admin", "user", "engr"),
       defaultValue: "user",
     },
+    image: {
+      type: DataTypes.TEXT("long"),
+      allowNull: true,
+    },
+    full_image: {
+      type: DataTypes.TEXT("long"),
+      allowNull: true,
+    },
   },
   {
     tableName: "users",

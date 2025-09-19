@@ -6,6 +6,8 @@ export interface User {
   username: string;
   email: string;
   role: string;
+  image?: string | null; // data URL thumbnail (50x50)
+  full_image?: string | null; // full-size data URL
 }
 
 export interface LoginCredentials {
@@ -18,6 +20,8 @@ export interface RegisterData {
   email: string;
   password: string;
   role?: string;
+  image?: string | null; // thumbnail data URL
+  full_image?: string | null; // full image data URL
 }
 
 class AuthService {
@@ -56,6 +60,7 @@ class AuthService {
   // Register a new user (admin only)
   async register(userData: RegisterData): Promise<User> {
     try {
+      // registered route used by frontend admin form
       const response = await http.post('/auth/register', userData);
       return response.data.user;
     } catch (error) {

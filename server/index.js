@@ -127,10 +127,13 @@ app.use((req, res) => {
 // ======================
 const User = require("./models/user_model");
 
+// NOTE:
+// Using `alter: true` will try to automatically adjust the DB schema to match models.
+// This is convenient in development but not recommended in production without migrations.
 sequelize
-  .sync()
+  .sync({ alter: true })
   .then(async () => {
-    console.log("✅ DB synced");
+    console.log("✅ DB synced (alter:true)");
 
     const adminUser = await User.findOne({ where: { username: "admin" } });
     if (!adminUser) {

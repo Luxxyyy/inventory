@@ -1,5 +1,3 @@
-// src/components/MapComponent2D.tsx
-
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";

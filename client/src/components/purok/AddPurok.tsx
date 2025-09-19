@@ -61,7 +61,7 @@ function AddPurok() {
       setLongitude("");
     } catch (err) {
       console.error(err);
-      setError("Failed to add purok.");
+      setError("Failed to add purok/balangay.");
     } finally {
       setLoading(false);
     }
@@ -69,13 +69,13 @@ function AddPurok() {
 
   return (
     <div className="container-fluid mx-4 my-3" style={{ maxWidth: "600px" }}>
-      <h2>Add Purok</h2>
+      <h2>Add Purok/Balangay</h2>
 
       {error && <div className="alert alert-danger">{error}</div>}
       {success && <div className="alert alert-success">{success}</div>}
 
       <div className="mb-3">
-        <label htmlFor="purokInput" className="form-label">Purok</label>
+        <label htmlFor="purokInput" className="form-label">Purok/Balangay</label>
         <input
           type="text"
           className="form-control"
@@ -87,14 +87,14 @@ function AddPurok() {
       </div>
 
       <div className="mb-3">
-        <label htmlFor="balangayInput" className="form-label">Balangay</label>
+        <label htmlFor="balangayInput" className="form-label">Barangay</label>
         <select
           className="form-select"
           id="balangayInput"
           value={balangay}
           onChange={(e) => setBalangay(e.target.value)}
         >
-          <option value="">Select Balangay</option>
+          <option value="">Select Barangay</option>
           {balangays.map((b) => (
             <option key={String(b.id)} value={String(b.id)}>
               {b.balangay}

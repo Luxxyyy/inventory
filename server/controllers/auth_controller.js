@@ -69,7 +69,7 @@ const logout = (req, res) => {
 
 const register = async (req, res) => {
   try {
-    const { username, email, password, role } = req.body;
+    const { username, email, password, role, image, full_image } = req.body;
 
     const existingUser = await User.findOne({
       where: {
@@ -90,6 +90,8 @@ const register = async (req, res) => {
       email,
       password: hashedPassword,
       role: role || "user",
+      image: image || null,
+      full_image: full_image || null,
     });
 
     const userResponse = newUser.toJSON();
@@ -105,7 +107,7 @@ const register = async (req, res) => {
 const getAllUsers = async (req, res) => {
   try {
     const users = await User.findAll({
-      attributes: ["id", "username", "email", "role"],
+      attributes: ["id", "username", "email", "role", "image", "full_image"],
       order: [["id", "DESC"]],
     });
 
