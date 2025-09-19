@@ -1,4 +1,4 @@
-export const titleColorMap: Record<string, string> = {
+const titleColorMap = {
   "AVIAR VALVE ASSEMBLY": "blue",
   "BLOW-OFF VALVE": "burlywood",
   "BREAK PRESSURE CHAMBER": "orange",
@@ -8,13 +8,13 @@ export const titleColorMap: Record<string, string> = {
   "GATE VALVE": "coral",
   "GROUND RESERVIOR": "green",
   "PVC BEND": "bisque",
-  "REDUCER": "indianred",
+  REDUCER: "indianred",
   "SADDLE CLAMP": "yellow",
-  "TEE": "aqua",
-  "TRANSMISSION PIPELINE": ""
-}
+  TEE: "aqua",
+  "TRANSMISSION PIPELINE": "",
+};
 
-export const sizeColorMap: Record<string, string> = {
+const sizeColorMap = {
   "250mm x 200mm": "",
   "250mm x 50mm": "",
   "200mm x 150mm": "",
@@ -34,4 +34,9 @@ export const sizeColorMap: Record<string, string> = {
   "100mm": "steelblue",
   "75mm": "blue",
   "50mm": "aqua",
+};
+
+module.exports = {
+  titleColorMap,
+  sizeColorMap,
 };

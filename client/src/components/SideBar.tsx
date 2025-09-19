@@ -34,12 +34,13 @@ interface SocketNote {
 const navItems: NavItem[] = [
   { label: "Map", path: "/", icon: <FiMap />, roles: ["admin", "engr", "user"] },
   { label: "Lists", path: "/list", icon: <FiList />, roles: ["admin", "engr", "user"] },
-  { label: "Source", path: "/source", icon: <FaFaucet />, roles: ["admin", "manager"], section: "Manage" },
-  { label: "Balangay", path: "/balangay", icon: <FaMapMarkerAlt />, roles: ["admin", "manager"], section: "Manage" },
+  { label: "Source", path: "/source", icon: <FaFaucet />, roles: ["admin"], section: "Manage" },
+  { label: "Balangay", path: "/balangay", icon: <FaMapMarkerAlt />, roles: ["admin"], section: "Manage" },
   { label: "Purok", path: "/purok", icon: <FaMapPin />, roles: ["admin", "manager"], section: "Manage" },
-  { label: "Add User", path: "/add-user", icon: <FiUserPlus />, roles: ["admin", "manager"], section: "Admin" },
-  { label: "Logs", path: "/logs", icon: <BsChatSquareQuote />, roles: ["admin", "manager"], section: "Admin" },
-  { label: "Notes", path: "/notes", icon: <BsFillEnvelopeFill />, roles: ["admin", "manager"], section: "Admin" },
+  { label: "Add User", path: "/add-user", icon: <FiUserPlus />, roles: ["admin"], section: "Admin" },
+  { label: "Add Legend", path: "/legend", icon: <FiUserPlus />, roles: ["admin"], section: "Admin" },
+  { label: "Logs", path: "/logs", icon: <BsChatSquareQuote />, roles: ["admin"], section: "Admin" },
+  { label: "Notes", path: "/notes", icon: <BsFillEnvelopeFill />, roles: ["admin"], section: "Admin" },
 ];
 
 const MOBILE_BREAKPOINT = 768;

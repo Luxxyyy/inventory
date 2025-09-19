@@ -17,7 +17,7 @@ type NoteEntry = {
   title: string;
   message: string;
   image: string | null;
-  full_image: string | null; // <-- Added new field to type definition
+  full_image: string | null;
   isDone: boolean;
   latitude: number;
   longitude: number;

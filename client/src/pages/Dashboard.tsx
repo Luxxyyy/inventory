@@ -1,4 +1,6 @@
 import React, { useEffect, useState, useMemo, Suspense } from "react";
+import { Button, Spinner } from "react-bootstrap";
+import { Link } from 'react-router-dom';
 import SharedDropdown from "../components/map/SharedDropdown";
 import MapLegend from "../components/map/MapLegend";
 import { getSources } from "../api/source_api";
@@ -28,6 +30,7 @@ const Dashboard = () => {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [legendVersion, setLegendVersion] = useState(0); 
 
   useEffect(() => {
     setLoading(true);
@@ -68,19 +71,16 @@ const Dashboard = () => {
   return (
     <div className="dashboard-container">
       <div className="map-container">
-        <Suspense fallback={<div>Loading map...</div>}>
+        <Suspense fallback={
+          <div className="d-flex justify-content-center align-items-center" style={{ height: '100%' }}>
+            <Spinner animation="border" /> Loading map...
+          </div>
+        }>
           {is2DMap ? <MapComponent2D center={center} /> : <MapComponent3D center={center} />}
         </Suspense>
       </div>
-
-      <div
-        className={`map-controls ${is2DMap ? "controls-2d" : "controls-3d"}`}
-        style={{
-          flexWrap: "wrap",
-          gap: "0.5rem",
-          maxWidth: "100vw",
-        }}
-      >
+      
+      <div className={`map-controls ${is2DMap ? "controls-2d" : "controls-3d"}`} style={{ flexWrap: "wrap", gap: "0.5rem", maxWidth: "100vw" }}>
         <button
           className="btn btn-primary me-2 mb-2 hidden-mobile"
           onClick={() => setIs2DMap((prev) => !prev)}
@@ -115,7 +115,7 @@ const Dashboard = () => {
       </div>
 
       <div className={`map-legend-wrapper ${is2DMap ? "legend-2d" : "legend-3d"}`}>
-        <MapLegend />
+        <MapLegend key={legendVersion} />
       </div>
     </div>
   );

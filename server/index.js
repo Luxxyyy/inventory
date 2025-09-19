@@ -112,6 +112,7 @@ app.use("/api/users", require("./routes/user_route"));
 app.use("/api/pipe-logs", require("./routes/pipe_log_route"));
 app.use("/api/logs", require("./routes/log_route"));
 app.use("/api/notes", require("./routes/notes_route"));
+app.use("/api/legend", require("./routes/legend_route"));
 
 // ======================
 // Serve React build
