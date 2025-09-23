@@ -15,7 +15,7 @@ exports.getAllShapes = async (req, res) => {
 // Create shape
 exports.createShape = async (req, res) => {
   try {
-    const { type, geojson, radius, title, description, status, color } =
+    const { type, geojson, radius, title, description, status, color, size } =
       req.body;
 
     const shape = await MapShape.create({
@@ -26,9 +26,9 @@ exports.createShape = async (req, res) => {
       description,
       status,
       color,
+      size,
     });
 
-    // Log action
     await logAction({
       action: "create",
       model: type || "Shape",
@@ -54,7 +54,6 @@ exports.updateShape = async (req, res) => {
 
     await shape.update(updates);
 
-    // Log action
     await logAction({
       action: "update",
       model: shape.type || "Shape",
@@ -78,7 +77,6 @@ exports.deleteShape = async (req, res) => {
 
     await shape.destroy();
 
-    // Log action
     await logAction({
       action: "delete",
       model: shape.type || "Shape",
