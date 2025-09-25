@@ -21,12 +21,14 @@ const login = async (req, res) => {
       return res.status(401).json({ error: "Invalid username or password" });
     }
 
-    // ✅ Set session user
+    // ✅ Set session user including image and full_image
     req.session.user = {
       id: user.id,
       username: user.username,
       email: user.email,
       role: user.role,
+      image: user.image || null, // added image
+      full_image: user.full_image || null, // added full_image
     };
 
     // ✅ Force session save before sending response

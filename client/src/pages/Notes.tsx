@@ -126,9 +126,7 @@ const Notes = () => {
   return (
     <div className="container my-4" style={{ maxWidth: "95%" }}>
       <ToastContainer />
-      <Typography variant="h5" gutterBottom>
-        Map Notes
-      </Typography>
+      <h2 className="mb-3">Notes Management</h2>
 
       {error && <Alert severity="error">{error}</Alert>}
       {loading && <Alert severity="info">Loading notes...</Alert>}

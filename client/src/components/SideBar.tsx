@@ -23,6 +23,7 @@ interface NavItem {
   roles?: string[];
   section?: string;
 }
+
 interface SocketNote {
   User?: {
     username: string;
@@ -57,11 +58,15 @@ const socket = io("http://localhost:8080");
 const Sidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed }) => {
   const location = useLocation();
   const { user } = useAuth();
-
   const [newNotesCount, setNewNotesCount] = useState(0);
-
   const [isMobile, setIsMobile] = useState(window.innerWidth <= MOBILE_BREAKPOINT);
   const [mobileDropdownOpen, setMobileDropdownOpen] = useState(false);
+
+  // Helper to capitalize first letter
+  const capitalizeFirstLetter = (str?: string) => {
+    if (!str) return "";
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  };
 
   useEffect(() => {
     function handleResize() {
@@ -75,29 +80,30 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed }) => {
         setMobileDropdownOpen(false);
       }
     }
+
     window.addEventListener("resize", handleResize);
     handleResize();
     return () => window.removeEventListener("resize", handleResize);
   }, [setCollapsed]);
 
   useEffect(() => {
-    socket.on('connect', () => {
-      console.log('Connected to WebSocket server');
+    socket.on("connect", () => {
+      console.log("Connected to WebSocket server");
     });
 
-    socket.on('new_note', (note: SocketNote) => {
-      toast.info(`📝 New note added by ${note.User?.username || 'a user'}!`);
-      setNewNotesCount(prev => prev + 1);
+    socket.on("new_note", (note: SocketNote) => {
+      toast.info(`📝 New note added by ${note.User?.username || "a user"}!`);
+      setNewNotesCount((prev) => prev + 1);
     });
 
     return () => {
-      socket.off('new_note');
-      socket.off('connect');
+      socket.off("new_note");
+      socket.off("connect");
     };
   }, []);
 
   useEffect(() => {
-    if (location.pathname === '/notes') {
+    if (location.pathname === "/notes") {
       setNewNotesCount(0);
     }
   }, [location.pathname]);
@@ -129,7 +135,6 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed }) => {
         >
           {mobileDropdownOpen ? <FiX size={24} /> : <FiMenu size={24} />}
         </button>
-
         {mobileDropdownOpen && (
           <nav
             id="mobile-sidebar-menu"
@@ -146,10 +151,7 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed }) => {
             }}
             aria-label="Mobile sidebar navigation dropdown"
           >
-            <ul
-              className="nav flex-column"
-              style={{ padding: 0, margin: 0, listStyle: "none" }}
-            >
+            <ul className="nav flex-column" style={{ padding: 0, margin: 0, listStyle: "none" }}>
               {visibleNavItems.map((item) => (
                 <li className="nav-item text-center" key={item.path}>
                   <Link
@@ -165,9 +167,7 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed }) => {
                     {item.icon}
                     <span className="ms-2">{item.label}</span>
                     {item.label === "Notes" && newNotesCount > 0 && (
-                      <span className="badge rounded-pill bg-danger ms-auto">
-                        {newNotesCount}
-                      </span>
+                      <span className="badge rounded-pill bg-danger ms-auto">{newNotesCount}</span>
                     )}
                   </Link>
                 </li>
@@ -201,14 +201,47 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed }) => {
         aria-label="User Info and Collapse toggle"
       >
         {!collapsed && user ? (
-          <div className="d-flex flex-column" style={{ lineHeight: 1.6 }}>
-            <span className="fw-bold fs-6">{user.username}</span>
-            <span className="text-secondary small">{user.role}</span>
+          <div className="d-flex align-items-center gap-2">
+            {user.image ? (
+              <img
+                src={
+                  user.image.startsWith("data:") || user.image.startsWith("http")
+                    ? user.image
+                    : `data:image/jpeg;base64,${user.image}`
+                }
+                alt="Profile"
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: "50%",
+                  objectFit: "cover",
+                }}
+              />
+            ) : (
+              <div
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: "50%",
+                  backgroundColor: "#6c757d",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: "#fff",
+                  fontWeight: "bold",
+                }}
+              >
+                {user.username?.[0]?.toUpperCase()}
+              </div>
+            )}
+            <div className="d-flex flex-column" style={{ lineHeight: 1.2 }}>
+              <span className="fw-bold fs-6">{capitalizeFirstLetter(user.username)}</span>
+              <span className="text-secondary small">{capitalizeFirstLetter(user.role)}</span>
+            </div>
           </div>
         ) : (
           <div style={{ height: "2rem" }} />
         )}
-
         <button
           className="btn btn-sm btn-outline-light"
           onClick={() => setCollapsed(!collapsed)}
@@ -220,11 +253,7 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed }) => {
         </button>
       </header>
 
-      <nav
-        className="flex-grow-1 px-2 py-3"
-        role="navigation"
-        aria-label="Primary navigation"
-      >
+      <nav className="flex-grow-1 px-2 py-3" role="navigation" aria-label="Primary navigation">
         <ul className="nav flex-column">
           {groupedItems["default"]?.map((item) => (
             <li className="nav-item" key={item.path}>
@@ -239,9 +268,7 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed }) => {
                 {item.icon}
                 {!collapsed && item.label}
                 {item.label === "Notes" && newNotesCount > 0 && (
-                  <span className="badge rounded-pill bg-danger ms-auto">
-                    {newNotesCount}
-                  </span>
+                  <span className="badge rounded-pill bg-danger ms-auto">{newNotesCount}</span>
                 )}
               </Link>
             </li>
@@ -252,9 +279,7 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed }) => {
             .map(([section, items]) => (
               <React.Fragment key={section}>
                 {!collapsed && (
-                  <h6 className="mt-3 mb-2 px-2 text-secondary text-uppercase">
-                    {section}
-                  </h6>
+                  <h6 className="mt-3 mb-2 px-2 text-secondary text-uppercase">{section}</h6>
                 )}
                 {items.map((item) => (
                   <li className="nav-item" key={item.path}>
@@ -269,9 +294,7 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed }) => {
                       {item.icon}
                       {!collapsed && item.label}
                       {item.label === "Notes" && newNotesCount > 0 && (
-                        <span className="badge rounded-pill bg-danger ms-auto">
-                          {newNotesCount}
-                        </span>
+                        <span className="badge rounded-pill bg-danger ms-auto">{newNotesCount}</span>
                       )}
                     </Link>
                   </li>
