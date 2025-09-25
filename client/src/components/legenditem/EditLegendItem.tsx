@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from "react";
-import { Form, Button, Spinner, Alert } from "react-bootstrap";
+import React, { useEffect, useState } from "react";
 import {
   getLegendItems,
   updateLegendItem,
@@ -8,7 +7,26 @@ import {
 import Modal from "../Modal";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import "../../design/balangay.css";
+
+// MUI Components
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Paper from '@mui/material/Paper';
+import Button from '@mui/material/Button';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import Pagination from '@mui/material/Pagination';
+import Stack from '@mui/material/Stack';
+import TextField from '@mui/material/TextField';
+import Select, { SelectChangeEvent } from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+import InputLabel from '@mui/material/InputLabel';
+import FormControl from '@mui/material/FormControl';
+import Alert from '@mui/material/Alert';
 
 type LegendItem = {
   id: number;
@@ -32,24 +50,27 @@ const EditLegendItem: React.FC = () => {
   });
   const [modalError, setModalError] = useState("");
 
+  const [page, setPage] = useState(1);
+  const rowsPerPage = 15;
+
+  useEffect(() => {
+    fetchLegendItems();
+  }, []);
+
   const fetchLegendItems = async () => {
     try {
       setLoading(true);
+      setError("");
       const data = await getLegendItems();
-      const items: LegendItem[] = data;
-      setLegendItems(items);
+      const sortedItems = data.sort((a: LegendItem, b: LegendItem) => b.id - a.id);
+      setLegendItems(sortedItems);
     } catch (err) {
-      console.error(err);
       setError("Failed to fetch legend items");
       toast.error("Failed to fetch legend items");
     } finally {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    fetchLegendItems();
-  }, []);
 
   const openEditModal = (item: LegendItem) => {
     setSelectedItem(item);
@@ -67,35 +88,46 @@ const EditLegendItem: React.FC = () => {
     setModalError("");
   };
 
-  const handleInputChange = (e: React.ChangeEvent<any>) => {
+  // ✅ For TextField and color input
+  const handleTextFieldChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setEditForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // ✅ For MUI Select
+  const handleSelectChange = (event: SelectChangeEvent) => {
+    const { name, value } = event.target;
+    setEditForm((prev) => ({ ...prev, [name!]: value }));
   };
 
   const handleUpdate = async () => {
     const { label, type, color, cssClass } = editForm;
 
-    if (!label || !type) {
-      setModalError("Label and Color are required.");
+    if (!label.trim() || !type.trim() || !color.trim()) {
+      setModalError("Label, Type, and Color are required.");
       return;
     }
 
     try {
       if (selectedItem?.id) {
-        await updateLegendItem(selectedItem.id, label, type, color, cssClass);
+        await updateLegendItem(
+          selectedItem.id,
+          label.trim(),
+          type.trim() as "line" | "dot",
+          color.trim(),
+          cssClass.trim()
+        );
       }
-
       toast.success("Legend item updated successfully");
       closeModal();
       fetchLegendItems();
     } catch (err) {
-      console.error(err);
       setModalError("Failed to update legend item");
       toast.error("Failed to update legend item");
     }
   };
 
-  const handleDelete = async () => {
+  const confirmDelete = async () => {
     if (!itemToDelete?.id) return;
 
     try {
@@ -104,155 +136,162 @@ const EditLegendItem: React.FC = () => {
       setItemToDelete(null);
       fetchLegendItems();
     } catch (err) {
-      console.error(err);
       toast.error("Failed to delete legend item");
     }
   };
+
+  const handlePageChange = (_: React.ChangeEvent<unknown>, value: number) => {
+    setPage(value);
+  };
+
+  const paginatedItems = legendItems.slice(
+    (page - 1) * rowsPerPage,
+    page * rowsPerPage
+  );
 
   return (
     <div className="container mx-auto my-4" style={{ maxWidth: "95%" }}>
       {loading ? (
         <div className="d-flex justify-content-center my-5">
-          <Spinner animation="border" role="status" />
-        </div>
-      ) : error ? (
-        <div className="alert alert-danger">{error}</div>
-      ) : (
-        <div className="card shadow-sm">
-          <div
-            className="table-responsive"
-            style={{ maxHeight: 400, overflowY: "auto" }}
-          >
-            <table className="table table-hover mb-0">
-              <thead className="sticky-top balangay-header">
-                <tr>
-                  <th>Label</th>
-                  <th>Type</th>
-                  <th>Color</th>
-                  <th>CSS Class</th>
-                  <th className="text-center">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {legendItems.map((item) => (
-                  <tr key={item.id}>
-                    <td>{item.label}</td>
-                    <td>{item.type}</td>
-                    <td>
-                      <div
-                        style={{
-                          width: "20px",
-                          height: "20px",
-                          backgroundColor: item.color,
-                          border: "1px solid #ccc",
-                        }}
-                      />
-                    </td>
-                    <td>{item.cssClass || "-"}</td>
-                    <td className="text-center">
-                      <button
-                        className="btn btn-sm btn-success text-white me-2"
-                        onClick={() => openEditModal(item)}
-                      >
-                        Edit
-                      </button>
-                      <button
-                        className="btn btn-sm btn-danger text-white"
-                        onClick={() => setItemToDelete(item)}
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="spinner-border text-primary" role="status" aria-label="Loading">
+            <span className="visually-hidden">Loading...</span>
           </div>
         </div>
+      ) : error ? (
+        <Alert severity="error">{error}</Alert>
+      ) : (
+        <>
+          {legendItems.length === 0 ? (
+            <p>No legend items found.</p>
+          ) : (
+            <>
+              <TableContainer component={Paper} sx={{ maxHeight: 750 }}>
+                <Table stickyHeader aria-label="legend items table" size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell sx={{ fontWeight: 'bold', fontSize: '1rem', backgroundColor: '#17a2b8', color: 'white' }}>Label</TableCell>
+                      <TableCell sx={{ fontWeight: 'bold', fontSize: '1rem', backgroundColor: '#17a2b8', color: 'white' }}>Type</TableCell>
+                      <TableCell sx={{ fontWeight: 'bold', fontSize: '1rem', backgroundColor: '#17a2b8', color: 'white' }}>Color</TableCell>
+                      <TableCell sx={{ fontWeight: 'bold', fontSize: '1rem', backgroundColor: '#17a2b8', color: 'white' }}>CSS Class</TableCell>
+                      <TableCell align="center" sx={{ fontWeight: 'bold', fontSize: '1rem', backgroundColor: '#17a2b8', color: 'white' }}>Actions</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {paginatedItems.map(({ id, label, type, color, cssClass }) => (
+                      <TableRow key={id} hover>
+                        <TableCell>{label}</TableCell>
+                        <TableCell>{type}</TableCell>
+                        <TableCell>
+                          <div
+                            style={{
+                              width: "20px",
+                              height: "20px",
+                              backgroundColor: color,
+                              border: "1px solid #ccc",
+                            }}
+                          />
+                        </TableCell>
+                        <TableCell>{cssClass || "-"}</TableCell>
+                        <TableCell align="center">
+                          <Button
+                            variant="contained"
+                            size="small"
+                            onClick={() => openEditModal({ id, label, type, color, cssClass })}
+                            sx={{ mr: 1 }}
+                          >
+                            <EditIcon sx={{ fontSize: '1rem' }} />
+                          </Button>
+                          <Button
+                            variant="contained"
+                            color="error"
+                            size="small"
+                            onClick={() => setItemToDelete({ id, label, type, color, cssClass })}
+                            sx={{ fontSize: '.75rem' }}
+                          >
+                            <DeleteIcon sx={{ fontSize: '1rem' }} />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+
+              <Pagination
+                count={Math.ceil(legendItems.length / rowsPerPage)}
+                page={page}
+                onChange={handlePageChange}
+                color="primary"
+                sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}
+              />
+            </>
+          )}
+        </>
       )}
+
+      {/* Edit Modal */}
       {selectedItem && (
         <Modal onClose={closeModal} title="Edit Legend Item">
-          <Form>
-            <Form.Group className="mb-3">
-              <Form.Label>Label</Form.Label>
-              <Form.Control
-                name="label"
-                type="text"
-                value={editForm.label}
-                onChange={handleInputChange}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Type</Form.Label>
-              <Form.Select
+          <form noValidate>
+            <TextField
+              fullWidth
+              label="Label"
+              name="label"
+              value={editForm.label}
+              onChange={handleTextFieldChange}
+              margin="normal"
+              autoFocus
+            />
+            <FormControl fullWidth margin="normal">
+              <InputLabel id="type-label">Type</InputLabel>
+              <Select
+                labelId="type-label"
+                label="Type"
                 name="type"
                 value={editForm.type}
-                onChange={handleInputChange}
+                onChange={handleSelectChange}
               >
-                <option value="line">Line</option>
-                <option value="dot">Dot</option>
-              </Form.Select>
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Color</Form.Label>
-              <Form.Control
-                name="color"
-                type="color"
-                value={editForm.color}
-                onChange={handleInputChange}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>CSS Class</Form.Label>
-              <Form.Control
-                name="cssClass"
-                type="text"
-                value={editForm.cssClass}
-                onChange={handleInputChange}
-              />
-            </Form.Group>
-            {modalError && <Alert variant="danger">{modalError}</Alert>}
-            <div className="d-flex justify-content-end">
-              <Button
-                variant="primary"
-                onClick={closeModal}
-                className="me-2 text-white"
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="success"
-                onClick={handleUpdate}
-                className="text-white"
-              >
-                Save
-              </Button>
-            </div>
-          </Form>
+                <MenuItem value="line">Line</MenuItem>
+                <MenuItem value="dot">Dot</MenuItem>
+              </Select>
+            </FormControl>
+            <TextField
+              fullWidth
+              label="Color"
+              name="color"
+              type="color"
+              value={editForm.color}
+              onChange={handleTextFieldChange}
+              margin="normal"
+              sx={{ height: 56 }}
+            />
+            <TextField
+              fullWidth
+              label="CSS Class"
+              name="cssClass"
+              value={editForm.cssClass}
+              onChange={handleTextFieldChange}
+              margin="normal"
+            />
+            {modalError && <Alert severity="error" sx={{ mt: 1 }}>{modalError}</Alert>}
+            <Stack direction="row" justifyContent="flex-end" spacing={1} sx={{ mt: 2 }}>
+              <Button variant="outlined" onClick={closeModal}>Cancel</Button>
+              <Button variant="contained" onClick={handleUpdate}>Save</Button>
+            </Stack>
+          </form>
         </Modal>
       )}
+
+      {/* Delete Confirmation Modal */}
       {itemToDelete && (
         <Modal onClose={() => setItemToDelete(null)} title="Confirm Delete">
           <p>
-            Are you sure you want to delete{" "}
-            <strong>{itemToDelete.label}</strong>?
+            Are you sure you want to delete <strong>{itemToDelete.label}</strong>?
           </p>
-          <div className="d-flex justify-content-end">
-            <Button
-              variant="primary"
-              onClick={() => setItemToDelete(null)}
-              className="me-2"
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="danger"
-              onClick={handleDelete}
-              className="text-white"
-            >
-              Confirm Delete
-            </Button>
-          </div>
+          <Stack direction="row" justifyContent="flex-end" spacing={1} sx={{ mt: 2 }}>
+            <Button variant="outlined" onClick={() => setItemToDelete(null)}>Cancel</Button>
+            <Button variant="contained" color="error" onClick={confirmDelete}>Confirm Delete</Button>
+          </Stack>
         </Modal>
       )}
     </div>

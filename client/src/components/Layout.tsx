@@ -8,6 +8,7 @@ import PageFooter from "./PageFooter";
 import { useAuth } from "../contexts/AuthContext";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import '../design/layout.css'
 
 const MOBILE_BREAKPOINT = 768;
 

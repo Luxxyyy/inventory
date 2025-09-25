@@ -1,14 +1,28 @@
 import { useEffect, useState, useCallback } from "react";
 import http from "../api/http";
-import "../design/logs.css";
 import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
+// MUI Components
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Alert,
+  Typography,
+  Pagination,
+  Stack,
+  Button,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogContentText,
   DialogActions,
-  Button,
+  Chip,
 } from "@mui/material";
 
 type NoteEntry = {
@@ -86,7 +100,6 @@ const Notes = () => {
       fetchNotes();
       handleCloseConfirm();
     } catch (err) {
-      console.error(err);
       toast.error("Failed to mark note as done.");
       handleCloseConfirm();
     }
@@ -106,36 +119,40 @@ const Notes = () => {
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const currentNotes = notes.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
-  const goToPage = (page: number) => {
-    if (page >= 1 && page >= 1 && page <= totalPages) setCurrentPage(page);
+  const handlePageChange = (_: React.ChangeEvent<unknown>, page: number) => {
+    setCurrentPage(page);
   };
 
   return (
-    <div className="container-fluid mt-4">
+    <div className="container my-4" style={{ maxWidth: "95%" }}>
       <ToastContainer />
-      <h2>Map Notes</h2>
-      {error && <div className="alert alert-danger">{error}</div>}
-      {loading && <div className="loading-indicator">Loading notes...</div>}
-      <div className="table-responsive">
-        <table className="table table-striped table-hover">
-          <thead className="logs-header">
-            <tr>
-              <th>User</th>
-              <th>Title</th>
-              <th>Message</th>
-              <th>Image</th>
-              <th>Status</th>
-              <th>Created At</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
+      <Typography variant="h5" gutterBottom>
+        Map Notes
+      </Typography>
+
+      {error && <Alert severity="error">{error}</Alert>}
+      {loading && <Alert severity="info">Loading notes...</Alert>}
+
+      <TableContainer component={Paper} sx={{ maxHeight: 750 }}>
+        <Table stickyHeader size="small" aria-label="notes table">
+          <TableHead>
+            <TableRow>
+              <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#17a2b8', color: 'white' }}>User</TableCell>
+              <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#17a2b8', color: 'white' }}>Title</TableCell>
+              <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#17a2b8', color: 'white' }}>Message</TableCell>
+              <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#17a2b8', color: 'white' }}>Image</TableCell>
+              <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#17a2b8', color: 'white' }}>Status</TableCell>
+              <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#17a2b8', color: 'white' }}>Created At</TableCell>
+              <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#17a2b8', color: 'white' }}>Actions</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
             {currentNotes.map((note) => (
-              <tr key={note.id}>
-                <td>{note.User?.username}</td>
-                <td>{note.title}</td>
-                <td>{note.message}</td>
-                <td>
+              <TableRow key={note.id} hover>
+                <TableCell>{note.User?.username}</TableCell>
+                <TableCell>{note.title}</TableCell>
+                <TableCell>{note.message}</TableCell>
+                <TableCell>
                   {note.image && (
                     <img
                       src={note.image}
@@ -146,19 +163,20 @@ const Notes = () => {
                         height: "50px",
                         objectFit: "cover",
                         cursor: "pointer",
+                        borderRadius: 4,
                       }}
                     />
                   )}
-                </td>
-                <td>
-                  {note.isDone ? (
-                    <span className="badge bg-success">Done</span>
-                  ) : (
-                    <span className="badge bg-warning text-dark">Pending</span>
-                  )}
-                </td>
-                <td>{new Date(note.created_at).toLocaleString()}</td>
-                <td>
+                </TableCell>
+                <TableCell>
+                  <Chip
+                    label={note.isDone ? "Done" : "Pending"}
+                    color={note.isDone ? "success" : "warning"}
+                    size="small"
+                  />
+                </TableCell>
+                <TableCell>{new Date(note.created_at).toLocaleString()}</TableCell>
+                <TableCell>
                   {!note.isDone && (
                     <Button
                       variant="contained"
@@ -169,46 +187,24 @@ const Notes = () => {
                       Done
                     </Button>
                   )}
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
-      </div>
+          </TableBody>
+        </Table>
+      </TableContainer>
 
-      <div className="d-flex justify-content-center align-items-center mt-3">
-        <button
-          className="btn btn-sm btn-outline-secondary me-2"
-          disabled={currentPage === 1}
-          onClick={() => goToPage(currentPage - 1)}
-        >
-          &laquo; Prev
-        </button>
-        {[...Array(totalPages)].map((_, i) => {
-          const page = i + 1;
-          return (
-            <button
-              key={page}
-              className={`btn btn-sm me-1 ${
-                currentPage === page
-                  ? "btn-primary text-white"
-                  : "btn-outline-primary"
-              }`}
-              onClick={() => goToPage(page)}
-            >
-              {page}
-            </button>
-          );
-        })}
-        <button
-          className="btn btn-sm btn-outline-secondary ms-2"
-          disabled={currentPage === totalPages}
-          onClick={() => goToPage(currentPage + 1)}
-        >
-          Next &raquo;
-        </button>
-      </div>
+      {/* MUI Pagination */}
+      <Stack direction="row" justifyContent="center" mt={3}>
+        <Pagination
+          count={totalPages}
+          page={currentPage}
+          onChange={handlePageChange}
+          color="primary"
+        />
+      </Stack>
 
+      {/* Confirm Done Dialog */}
       <Dialog
         open={open}
         onClose={handleCloseConfirm}
@@ -230,22 +226,25 @@ const Notes = () => {
           </Button>
         </DialogActions>
       </Dialog>
-      
+
+      {/* Image Viewer Dialog */}
       <Dialog
         open={imageModalOpen}
         onClose={handleCloseImageModal}
         maxWidth="md"
         fullWidth
       >
-        <DialogContent style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <DialogContent
+          sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}
+        >
           {enlargedImage && (
             <img
               src={enlargedImage}
               alt="Enlarged Note"
               style={{
-                maxWidth: '100%',
-                maxHeight: '80vh',
-                objectFit: 'contain'
+                maxWidth: "100%",
+                maxHeight: "80vh",
+                objectFit: "contain",
               }}
             />
           )}

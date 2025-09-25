@@ -4,7 +4,29 @@ import { User as UserType } from "../../services/authService";
 import Modal from "../../components/Modal";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import "../../design/user.css";
+
+import {
+  Box,
+  Button,
+  CircularProgress,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  TextField,
+  Select,
+  MenuItem,
+  InputLabel,
+  FormControl,
+  Typography,
+  Stack,
+  Pagination,
+} from "@mui/material";
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const EditUsers: React.FC = () => {
   const [users, setUsers] = useState<UserType[]>([]);
@@ -14,12 +36,18 @@ const EditUsers: React.FC = () => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [userToEdit, setUserToEdit] = useState<UserType | null>(null);
 
+  // Pagination state
+  const [page, setPage] = useState(1);
+  const rowsPerPage = 10;
+
   const fetchUsers = async () => {
     setLoading(true);
     setError("");
     try {
       const response = await http.get<UserType[]>("/users");
-      setUsers(response.data);
+      // Sort users descending by id (optional)
+      const sortedUsers = response.data.sort((a, b) => (b.id ?? 0) - (a.id ?? 0));
+      setUsers(sortedUsers);
     } catch {
       setError("Failed to fetch users");
       toast.error("⚠️ Failed to fetch users");
@@ -31,6 +59,16 @@ const EditUsers: React.FC = () => {
   useEffect(() => {
     fetchUsers();
   }, []);
+
+  // Paginate users
+  const paginatedUsers = users.slice(
+    (page - 1) * rowsPerPage,
+    page * rowsPerPage
+  );
+
+  const handlePageChange = (event: React.ChangeEvent<unknown>, value: number) => {
+    setPage(value);
+  };
 
   const confirmDelete = async () => {
     if (!userToDelete) return;
@@ -47,7 +85,7 @@ const EditUsers: React.FC = () => {
       });
   };
 
-  const handleUpdateUser = async (updatedUser: Partial<UserType>) => {
+  const handleUpdateUser = async (updatedUser: Partial<UserType> & { password?: string }) => {
     if (!userToEdit) return;
 
     try {
@@ -60,197 +98,229 @@ const EditUsers: React.FC = () => {
     }
   };
 
-  if (loading) return <p>Loading...</p>;
-  if (error) return <div className="alert alert-danger">{error}</div>;
+  if (loading)
+    return (
+      <Box display="flex" justifyContent="center" mt={5}>
+        <CircularProgress />
+      </Box>
+    );
+
+  if (error)
+    return (
+      <Box m={3}>
+        <Typography color="error" variant="h6">
+          {error}
+        </Typography>
+      </Box>
+    );
 
   return (
-    <div className="container-fluid my-4 px-0">
-      <div className="card shadow-sm w-100">
-        <div
-          className="table-responsive"
-          style={{ maxHeight: 400, overflowY: "auto" }}
-        >
-          <table className="table table-hover mb-0 w-100">
-            <thead className="sticky-top user-header">
-              <tr>
-                <th>Profile</th>
-                <th>Username</th>
-                <th>Email</th>
-                <th>Role</th>
-                <th className="text-center">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {users.map((u) => (
-                <tr key={u.id}>
-                  <td>
-                    <img
-                      src={u.image || ""}
-                      alt={`${u.username}-thumb`}
-                      width={50}
-                      height={50}
-                      style={{
-                        objectFit: "cover",
-                        cursor: u.full_image || u.image ? "pointer" : "default",
-                        borderRadius: 4,
-                      }}
-                      onClick={() => {
-                        if (u.full_image || u.image) {
-                          setSelectedImage(u.full_image || u.image || null);
-                        }
-                      }}
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).style.display = "none";
-                      }}
-                    />
-                  </td>
-                  <td>{u.username}</td>
-                  <td>{u.email}</td>
-                  <td>{u.role}</td>
-                  <td className="text-center">
-                    <button
-                      className="btn btn-sm btn-primary me-2"
-                      onClick={() => setUserToEdit(u)}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      className="btn btn-sm btn-danger text-white"
-                      onClick={() => setUserToDelete(u)}
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
+    <Box m={3}>
+      <Paper elevation={3}>
+        <TableContainer sx={{ maxHeight: 400 }}>
+          <Table stickyHeader aria-label="users table">
+            <TableHead>
+              <TableRow>
+                <TableCell sx={{ fontWeight: 'bold', fontSize: '1rem', backgroundColor: '#17a2b8', color: 'white' }}>Profile</TableCell>
+                <TableCell sx={{ fontWeight: 'bold', fontSize: '1rem', backgroundColor: '#17a2b8', color: 'white' }}>Username</TableCell>
+                <TableCell sx={{ fontWeight: 'bold', fontSize: '1rem', backgroundColor: '#17a2b8', color: 'white' }}>Email</TableCell>
+                <TableCell sx={{ fontWeight: 'bold', fontSize: '1rem', backgroundColor: '#17a2b8', color: 'white' }}>Role</TableCell>
+                <TableCell sx={{ fontWeight: 'bold', fontSize: '1rem', backgroundColor: '#17a2b8', color: 'white' }} align="center">Actions</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {paginatedUsers.map((u) => (
+                <TableRow key={u.id} hover>
+                  <TableCell >
+                    {u.image ? (
+                      <Box
+                        component="img"
+                        src={u.image}
+                        alt={`${u.username}-thumb`}
+                        sx={{
+                          width: 50,
+                          height: 50,
+                          objectFit: "cover",
+                          borderRadius: 1,
+                          cursor: u.full_image || u.image ? "pointer" : "default",
+                        }}
+                        onClick={() => {
+                          if (u.full_image || u.image) {
+                            setSelectedImage(u.full_image || u.image || null);
+                          }
+                        }}
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = "none";
+                        }}
+                      />
+                    ) : (
+                      <Box
+                        sx={{
+                          width: 50,
+                          height: 50,
+                          bgcolor: "grey.300",
+                          borderRadius: 1,
+                        }}
+                      />
+                    )}
+                  </TableCell>
+                  <TableCell>{u.username}</TableCell>
+                  <TableCell>{u.email}</TableCell>
+                  <TableCell sx={{ textTransform: "capitalize" }}>{u.role}</TableCell>
+                  <TableCell align="center">
+                    <Stack direction="row" spacing={1} justifyContent="center">
+                      <Button
+                        size="small"
+                        variant="contained"
+                        onClick={() => setUserToEdit(u)}
+                      >
+                        <EditIcon sx={{ fontSize: '1rem' }} />
+                      </Button>
+                      <Button
+                        size="small"
+                        variant="contained"
+                        color="error"
+                        onClick={() => setUserToDelete(u)}
+                      >
+                        <DeleteIcon sx={{ fontSize: '1rem' }} />
+                      </Button>
+                    </Stack>
+                  </TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Paper>
 
-      {/* Delete confirmation modal */}
+      {/* Pagination */}
+      <Pagination
+        count={Math.ceil(users.length / rowsPerPage)}
+        page={page}
+        onChange={handlePageChange}
+        color="primary"
+        sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}
+      />
+
+      {/* Delete Confirmation Modal */}
       {userToDelete && (
         <Modal onClose={() => setUserToDelete(null)} title="Confirm Delete">
-          <p>
-            Are you sure you want to delete{" "}
-            <strong>{userToDelete.username}</strong>?
-          </p>
-          <div className="d-flex justify-content-end">
-            <button
-              className="btn btn-primary me-2"
-              onClick={() => setUserToDelete(null)}
-            >
+          <Typography mb={2}>
+            Are you sure you want to delete <strong>{userToDelete.username}</strong>?
+          </Typography>
+          <Box display="flex" justifyContent="flex-end" gap={2}>
+            <Button variant="outlined" onClick={() => setUserToDelete(null)}>
               Cancel
-            </button>
-            <button
-              className="btn btn-danger text-white"
-              onClick={confirmDelete}
-            >
+            </Button>
+            <Button variant="contained" color="error" onClick={confirmDelete}>
               Confirm Delete
-            </button>
-          </div>
+            </Button>
+          </Box>
         </Modal>
       )}
 
-      {/* Profile image modal */}
+      {/* Profile Image Modal */}
       {selectedImage && (
         <Modal onClose={() => setSelectedImage(null)} title="Profile Image">
-          <div style={{ textAlign: "center" }}>
-            <img
+          <Box textAlign="center">
+            <Box
+              component="img"
               src={selectedImage}
               alt="full"
-              style={{ maxWidth: "100%", maxHeight: "60vh", borderRadius: 8 }}
+              sx={{ maxWidth: "100%", maxHeight: "60vh", borderRadius: 2 }}
             />
-            <div className="mt-3">
-              <a
-                className="btn btn-outline-secondary me-2"
-                href={selectedImage}
+            <Box mt={3}>
+              <Button
+                variant="outlined"
+                component="a"
+                href={selectedImage || ""}
                 download="profile-image.png"
                 target="_blank"
                 rel="noreferrer"
               >
                 Open in new tab
-              </a>
-            </div>
-          </div>
+              </Button>
+            </Box>
+          </Box>
         </Modal>
       )}
 
-      {/* Edit user modal */}
+      {/* Edit User Modal */}
       {userToEdit && (
-        <Modal
-          onClose={() => setUserToEdit(null)}
-          title={`Edit User: ${userToEdit.username}`}
-          width="800px"
-        >
-          <form
+        <Modal onClose={() => setUserToEdit(null)} title={`Edit User: ${userToEdit.username}`} width="800px">
+          <Box
+            component="form"
             onSubmit={(e) => {
               e.preventDefault();
-              const formData = new FormData(e.currentTarget as HTMLFormElement);
-              const updatedUser = {
+              const formData = new FormData(e.currentTarget);
+              const updatedUser: Partial<UserType> & { password?: string } = {
                 username: formData.get("username") as string,
                 email: formData.get("email") as string,
                 role: formData.get("role") as string,
-                password: formData.get("password") as string || undefined,
               };
+              const password = formData.get("password") as string;
+              if (password.trim() !== "") {
+                updatedUser.password = password;
+              }
               handleUpdateUser(updatedUser);
             }}
+            noValidate
+            autoComplete="off"
+            sx={{ mt: 1 }}
           >
-            <div className="mb-3">
-              <label className="form-label">Username</label>
-              <input
-                name="username"
-                defaultValue={userToEdit.username}
-                className="form-control"
-                required
-              />
-            </div>
+            <TextField
+              fullWidth
+              label="Username"
+              name="username"
+              defaultValue={userToEdit.username}
+              margin="normal"
+              required
+            />
 
-            <div className="mb-3">
-              <label className="form-label">Email</label>
-              <input
-                type="email"
-                name="email"
-                defaultValue={userToEdit.email}
-                className="form-control"
-                required
-              />
-            </div>
+            <TextField
+              fullWidth
+              label="Email"
+              name="email"
+              type="email"
+              defaultValue={userToEdit.email}
+              margin="normal"
+              required
+            />
 
-            <div className="mb-3">
-              <label className="form-label">Password (leave blank to keep unchanged)</label>
-              <input type="password" name="password" className="form-control" />
-            </div>
+            <TextField
+              fullWidth
+              label="Password (leave blank to keep unchanged)"
+              name="password"
+              type="password"
+              margin="normal"
+            />
 
-            <div className="mb-3">
-              <label className="form-label">Role</label>
-              <select
+            <FormControl fullWidth margin="normal">
+              <InputLabel id="role-label">Role</InputLabel>
+              <Select
+                labelId="role-label"
                 name="role"
                 defaultValue={userToEdit.role}
-                className="form-select"
+                label="Role"
               >
-                <option value="user">User</option>
-                <option value="admin">Admin</option>
-                <option value="engr">Engineer</option>
-              </select>
-            </div>
+                <MenuItem value="user">User</MenuItem>
+                <MenuItem value="admin">Admin</MenuItem>
+                <MenuItem value="engr">Engineer</MenuItem>
+              </Select>
+            </FormControl>
 
-            <div className="d-flex justify-content-end">
-              <button
-                type="button"
-                className="btn btn-secondary me-2"
-                onClick={() => setUserToEdit(null)}
-              >
+            <Box display="flex" justifyContent="flex-end" mt={3} gap={2}>
+              <Button variant="outlined" onClick={() => setUserToEdit(null)}>
                 Cancel
-              </button>
-              <button type="submit" className="btn btn-primary">
+              </Button>
+              <Button variant="contained" type="submit">
                 Save Changes
-              </button>
-            </div>
-          </form>
+              </Button>
+            </Box>
+          </Box>
         </Modal>
       )}
-    </div>
+    </Box>
   );
 };
 

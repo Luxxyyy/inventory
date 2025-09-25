@@ -6,6 +6,20 @@ import '../../design/source.css';
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
+// MUI Components
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Paper from '@mui/material/Paper';
+import Button from '@mui/material/Button';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import Pagination from '@mui/material/Pagination';
+import Stack from '@mui/material/Stack';
+
 const EditSource = () => {
     const [sources, setSources] = useState<SourceType[]>([]);
     const [loading, setLoading] = useState(true);
@@ -17,8 +31,10 @@ const EditSource = () => {
         longitude: ""
     });
     const [modalError, setModalError] = useState("");
-
     const [sourceToDelete, setSourceToDelete] = useState<SourceType | null>(null);
+
+    const [page, setPage] = useState(1);
+    const rowsPerPage = 10;
 
     const fetchSources = async () => {
         setLoading(true);
@@ -105,6 +121,15 @@ const EditSource = () => {
         }));
     };
 
+    const handlePageChange = (event: React.ChangeEvent<unknown>, value: number) => {
+        setPage(value);
+    };
+
+    const paginatedSources = sources.slice(
+        (page - 1) * rowsPerPage,
+        page * rowsPerPage
+    );
+
     return (
         <div className="container mx-auto my-4" style={{ maxWidth: "95%" }}>
             {loading && (
@@ -120,50 +145,54 @@ const EditSource = () => {
                     {sources.length === 0 ? (
                         <p>No sources found.</p>
                     ) : (
-                        <div className="card shadow-sm">
-                            <div
-                                className="table-responsive"
-                                style={{ maxHeight: 400, overflowY: "auto" }}
-                            >
-                                <table className="table table-hover mb-0">
-                                    <thead className="sticky-top source-header">
-                                        <tr>
-                                            <th>Source</th>
-                                            <th>Latitude</th>
-                                            <th>Longitude</th>
-                                            <th className="text-center">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {sources.map(({ id, source, latitude, longitude }) => (
-                                            <tr key={id}>
-                                                <td>{source}</td>
-                                                <td>{latitude}</td>
-                                                <td>{longitude}</td>
-                                                <td className="text-center">
-                                                    <button
-                                                        className="btn btn-sm btn-success me-2 text-white"
-                                                        onClick={() =>
-                                                            openEditModal({ id, source, latitude, longitude })
-                                                        }
+                        <>
+                            <TableContainer component={Paper} sx={{ maxHeight: 750 }}>
+                                <Table stickyHeader aria-label="sources table">
+                                    <TableHead>
+                                        <TableRow>
+                                            <TableCell sx={{ fontWeight: 'bold', fontSize: '1rem', backgroundColor: '#17a2b8', color: 'white' }}>Source</TableCell>
+                                            <TableCell sx={{ fontWeight: 'bold', fontSize: '1rem', backgroundColor: '#17a2b8', color: 'white' }}>Latitude</TableCell>
+                                            <TableCell sx={{ fontWeight: 'bold', fontSize: '1rem', backgroundColor: '#17a2b8', color: 'white' }}>Longitude</TableCell>
+                                            <TableCell align="center" sx={{ fontWeight: 'bold', fontSize: '1rem', backgroundColor: '#17a2b8', color: 'white' }}>Actions</TableCell>
+                                        </TableRow>
+                                    </TableHead>
+                                    <TableBody>
+                                        {paginatedSources.map(({ id, source, latitude, longitude }) => (
+                                            <TableRow key={id}>
+                                                <TableCell>{source}</TableCell>
+                                                <TableCell>{latitude}</TableCell>
+                                                <TableCell>{longitude}</TableCell>
+                                                <TableCell align="center">
+                                                    <Button
+                                                        variant="contained"
+                                                        onClick={() => openEditModal({ id, source, latitude, longitude })}
+                                                        sx={{ mr: 1 }}
                                                     >
-                                                        Edit
-                                                    </button>
-                                                    <button
-                                                        className="btn btn-sm source-button btn-danger text-white"
-                                                        onClick={() =>
-                                                            openDeleteModal({ id, source, latitude, longitude })
-                                                        }
+                                                        <EditIcon sx={{ fontSize: '1rem' }} />
+                                                    </Button>
+                                                    <Button
+                                                        variant="contained"
+                                                        color="error"
+                                                        onClick={() => openDeleteModal({ id, source, latitude, longitude })}
+                                                        sx={{ fontSize: '.75rem' }}
                                                     >
-                                                        Delete
-                                                    </button>
-                                                </td>
-                                            </tr>
+                                                        <DeleteIcon sx={{ fontSize: '1rem' }} />
+                                                    </Button>
+                                                </TableCell>
+                                            </TableRow>
                                         ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
+                                    </TableBody>
+                                </Table>
+                            </TableContainer>
+
+                            <Pagination
+                                count={Math.ceil(sources.length / rowsPerPage)}
+                                page={page}
+                                onChange={handlePageChange}
+                                color="primary"
+                                sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}
+                            />
+                        </>
                     )}
                 </>
             )}
@@ -215,10 +244,7 @@ const EditSource = () => {
                 </Modal>
             )}
             {sourceToDelete && (
-                <Modal
-                    onClose={cancelDelete}
-                    title="Confirm Delete"
-                >
+                <Modal onClose={cancelDelete} title="Confirm Delete">
                     <p>
                         Are you sure you want to delete <strong>{sourceToDelete.source}</strong>?
                     </p>

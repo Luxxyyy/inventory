@@ -1,6 +1,20 @@
 import { useEffect, useState } from "react";
 import http from "../api/http";
-import "../design/logs.css";
+
+// MUI Components
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Alert,
+  Typography,
+  Pagination,
+  Stack,
+} from "@mui/material";
 
 type LogEntry = {
   id: number;
@@ -14,7 +28,7 @@ type LogEntry = {
   };
 };
 
-const ITEMS_PER_PAGE = 15;
+const ITEMS_PER_PAGE = 19;
 
 const Logs = () => {
   const [logs, setLogs] = useState<LogEntry[]>([]);
@@ -28,93 +42,74 @@ const Logs = () => {
       .catch(() => setError("Failed to load logs."));
   }, []);
 
-  // Calculate pagination data
   const totalPages = Math.ceil(logs.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const currentLogs = logs.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
-  const goToPage = (page: number) => {
-    if (page >= 1 && page <= totalPages) setCurrentPage(page);
+  const handlePageChange = (_: React.ChangeEvent<unknown>, page: number) => {
+    setCurrentPage(page);
   };
 
   return (
-    <div className="container-fluid mt-4">
-      <h2>Activity Logs</h2>
-      {error && <div className="alert alert-danger">{error}</div>}
-      <div className="table-responsive">
-        <table className="table table-striped table-hover">
-          <thead className="logs-header">
-            <tr>
-              <th>User</th>
-              <th>Role</th>
-              <th>Action</th>
-              <th>Model</th>
-              <th>Description</th>
-              <th>Timestamp</th>
-            </tr>
-          </thead>
-          <tbody>
+    <div className="container my-4" style={{ maxWidth: "95%" }}>
+      <h2 className="mb-3">Logs Management</h2>
+
+      {error && <Alert severity="error">{error}</Alert>}
+
+      <TableContainer component={Paper} sx={{ maxHeight: 750 }}>
+        <Table stickyHeader size="small" aria-label="logs table">
+          <TableHead>
+            <TableRow>
+              <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#17a2b8', color: 'white' }}>User</TableCell>
+              <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#17a2b8', color: 'white' }}>Role</TableCell>
+              <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#17a2b8', color: 'white' }}>Action</TableCell>
+              <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#17a2b8', color: 'white' }}>Model</TableCell>
+              <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#17a2b8', color: 'white' }}>Description</TableCell>
+              <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#17a2b8', color: 'white' }}>Timestamp</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
             {currentLogs.map((log) => (
-              <tr key={log.id}>
-                <td>{log.User?.username}</td>
-                <td>{log.User?.role}</td>
-                <td
-                  className={`text-capitalize fw-bold ${
-                    log.action === "delete"
-                      ? "text-danger"
-                      : log.action === "update"
-                      ? "text-primary"
-                      : log.action === "create"
-                      ? "text-success"
-                      : ""
-                  }`}
-                >
-                  {log.action}
-                </td>
-                <td>{log.model}</td>
-                <td>{log.description}</td>
-                <td>{new Date(log.created_at).toLocaleString()}</td>
-              </tr>
+              <TableRow key={log.id} hover>
+                <TableCell>{log.User?.username}</TableCell>
+                <TableCell>{log.User?.role}</TableCell>
+                <TableCell>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      fontWeight: 'bold',
+                      textTransform: 'capitalize',
+                      color:
+                        log.action === "create"
+                          ? "success.main"
+                          : log.action === "update"
+                          ? "primary.main"
+                          : log.action === "delete"
+                          ? "error.main"
+                          : "text.primary",
+                    }}
+                  >
+                    {log.action}
+                  </Typography>
+                </TableCell>
+                <TableCell>{log.model}</TableCell>
+                <TableCell>{log.description}</TableCell>
+                <TableCell>{new Date(log.created_at).toLocaleString()}</TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
-      </div>
+          </TableBody>
+        </Table>
+      </TableContainer>
 
-      {/* Pagination */}
-      <div className="d-flex justify-content-center align-items-center mt-3">
-        <button
-          className="btn btn-sm btn-outline-secondary me-2"
-          disabled={currentPage === 1}
-          onClick={() => goToPage(currentPage - 1)}
-        >
-          &laquo; Prev
-        </button>
-
-        {[...Array(totalPages)].map((_, i) => {
-          const page = i + 1;
-          return (
-            <button
-              key={page}
-              className={`btn btn-sm me-1 ${
-                currentPage === page
-                  ? "btn-primary text-white"
-                  : "btn-outline-primary"
-              }`}
-              onClick={() => goToPage(page)}
-            >
-              {page}
-            </button>
-          );
-        })}
-
-        <button
-          className="btn btn-sm btn-outline-secondary ms-2"
-          disabled={currentPage === totalPages}
-          onClick={() => goToPage(currentPage + 1)}
-        >
-          Next &raquo;
-        </button>
-      </div>
+      {/* MUI Pagination */}
+      <Stack direction="row" justifyContent="center" mt={3}>
+        <Pagination
+          count={totalPages}
+          page={currentPage}
+          onChange={handlePageChange}
+          color="primary"
+        />
+      </Stack>
     </div>
   );
 };
