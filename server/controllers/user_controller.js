@@ -4,7 +4,6 @@ const bcrypt = require("bcrypt");
 
 async function getAllUsers(req, res) {
   try {
-    // return essential attributes including image fields
     const users = await User.findAll({
       attributes: ["id", "username", "email", "role", "image", "full_image"],
       order: [["id", "ASC"]],
@@ -23,18 +22,13 @@ async function createUser(req, res) {
       return res.status(400).json({ error: "All fields are required" });
     }
 
-    // check duplicates
     const existing = await User.findOne({
       where: {
-        // note: more robust check could use Op.or for username/email separately
         username,
         email,
       },
     });
-    // Note: above check may not work as intended; however DB unique constraints still apply.
-    // We'll rely on DB constraint as well.
 
-    // hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = await User.create({
@@ -79,7 +73,6 @@ async function updateUser(req, res) {
 
     const updateData = { username, email, role };
 
-    // handle password update
     if (password && password.trim().length > 0) {
       updateData.password = await bcrypt.hash(password, 10);
     }

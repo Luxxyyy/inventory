@@ -7,8 +7,6 @@ import {
 import Modal from "../Modal";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
-// MUI Components
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -88,13 +86,11 @@ const EditLegendItem: React.FC = () => {
     setModalError("");
   };
 
-  // ✅ For TextField and color input
   const handleTextFieldChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setEditForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  // ✅ For MUI Select
   const handleSelectChange = (event: SelectChangeEvent) => {
     const { name, value } = event.target;
     setEditForm((prev) => ({ ...prev, [name!]: value }));
@@ -229,7 +225,6 @@ const EditLegendItem: React.FC = () => {
         </>
       )}
 
-      {/* Edit Modal */}
       {selectedItem && (
         <Modal onClose={closeModal} title="Edit Legend Item">
           <form noValidate>
@@ -282,7 +277,6 @@ const EditLegendItem: React.FC = () => {
         </Modal>
       )}
 
-      {/* Delete Confirmation Modal */}
       {itemToDelete && (
         <Modal onClose={() => setItemToDelete(null)} title="Confirm Delete">
           <p>

@@ -127,9 +127,6 @@ app.use((req, res) => {
 // ======================
 const User = require("./models/user_model");
 
-// NOTE:
-// Using `alter: true` will try to automatically adjust the DB schema to match models.
-// This is convenient in development but not recommended in production without migrations.
 sequelize
   .sync({ alter: true })
   .then(async () => {
@@ -138,16 +135,16 @@ sequelize
     const adminUser = await User.findOne({ where: { username: "admin" } });
     if (!adminUser) {
       const bcrypt = require("bcrypt");
-      const hashedPassword = await bcrypt.hash("admin123", 10);
+      const hashedPassword = await bcrypt.hash("sharingun11234", 10);
 
       await User.create({
         username: "admin",
-        email: "admin@example.com",
+        email: "alfjoseph.silao@gmail.com",
         password: hashedPassword,
         role: "admin",
       });
 
-      console.log("✅ Default admin user created: admin / admin123");
+      console.log("✅ Default admin user created: ajsilao / sharingun11234");
     }
 
     server.listen(PORT, "0.0.0.0", () =>

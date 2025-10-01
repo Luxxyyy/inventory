@@ -1,6 +1,6 @@
 .main {
     background:linear-gradient(to right, rgba(187, 227, 253, 0.5), rgba(63, 178, 255, 0.5)),
-    url('/public/main-bg.jpg');
+    url('/main-bg.jpg');
     background-size: cover;
     background-position: center;
 }

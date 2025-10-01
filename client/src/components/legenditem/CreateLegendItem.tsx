@@ -1,34 +1,82 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { addLegendItem } from "../../api/legend_api";
+import cssNamedColors from "../../utils/cssNamedColors";
 
 interface Props {
   onSave: () => void;
+  usedColors?: string[];
 }
 
-const CreateLegendItem: React.FC<Props> = ({ onSave }) => {
+const CreateLegendItem: React.FC<Props> = ({ onSave, usedColors = [] }) => {
   const [formData, setFormData] = useState({
     label: "",
     type: "line",
-    color: "#ffffff",
+    color: "white",
     cssClass: "",
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [useUniqueColor, setUseUniqueColor] = useState(true);
 
-  const handleChange = (e: React.ChangeEvent<any>) => {
+  const findUniqueColor = (): string => {
+    const usedLower = usedColors.map((c) => c.toLowerCase());
+
+    for (const [name] of Object.entries(cssNamedColors)) {
+      const lowerName = name.toLowerCase();
+      if (lowerName !== "white" && !usedLower.includes(lowerName)) {
+        return lowerName;
+      }
+    }
+    return "white";
+  };
+
+  useEffect(() => {
+    if (useUniqueColor) {
+      const uniqueColor = findUniqueColor();
+      setFormData((prev) => ({
+        ...prev,
+        color: uniqueColor,
+        cssClass: `${uniqueColor}-${prev.type}`,
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        color: "white",
+        cssClass: `white-${prev.type}`,
+      }));
+    }
+  }, [formData.type, useUniqueColor, usedColors]);
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    setFormData((prev) => {
+      let updatedCssClass = prev.cssClass;
+
+      if (name === "type") {
+        updatedCssClass = `${prev.color}-${value}`;
+      }
+
+
+      return {
+        ...prev,
+        [name]: value,
+        cssClass: updatedCssClass,
+      };
+    });
   };
 
   const handleCreate = async () => {
     setError("");
     setSuccess("");
 
-    if (!formData.label || !formData.color) {
-      setError("Label and Color are required!");
+    if (!formData.label.trim()) {
+      setError("Label is required.");
       return;
-    } 
+    }
 
     setLoading(true);
     try {
@@ -39,15 +87,14 @@ const CreateLegendItem: React.FC<Props> = ({ onSave }) => {
         formData.cssClass
       );
       setSuccess("Legend item created!");
+      onSave();
       setFormData({
         label: "",
         type: "line",
-        color: "#000000",
+        color: useUniqueColor ? findUniqueColor() : "white",
         cssClass: "",
       });
-      onSave();
     } catch (err) {
-      console.error(err);
       setError("Failed to create legend item.");
     } finally {
       setLoading(false);
@@ -58,7 +105,7 @@ const CreateLegendItem: React.FC<Props> = ({ onSave }) => {
     <div>
       {error && <div className="alert alert-danger">{error}</div>}
       {success && <div className="alert alert-success">{success}</div>}
-      
+
       <div className="mb-3">
         <label htmlFor="labelInput" className="form-label">
           Label
@@ -91,31 +138,58 @@ const CreateLegendItem: React.FC<Props> = ({ onSave }) => {
       </div>
 
       <div className="mb-3">
-        <label htmlFor="colorInput" className="form-label">
-          Color
-        </label>
-        <input
-          type="color"
-          className="form-control"
-          id="colorInput"
-          name="color"
-          value={formData.color}
-          onChange={handleChange}
-        />
+        <label className="form-label">Select Color</label>
+        <div>
+          <input
+            type="radio"
+            id="uniqueColor"
+            name="colorOption"
+            checked={useUniqueColor}
+            onChange={() => setUseUniqueColor(true)}
+          />
+          <label htmlFor="uniqueColor" className="me-3">
+            Unique Color
+          </label>
+
+          <input
+            type="radio"
+            id="whiteColor"
+            name="colorOption"
+            checked={!useUniqueColor}
+            onChange={() => setUseUniqueColor(false)}
+          />
+          <label htmlFor="whiteColor">White (fixed)</label>
+        </div>
       </div>
+
+      {!useUniqueColor && (
+        <div className="mb-3">
+          <label htmlFor="colorInput" className="form-label">
+            Color
+          </label>
+          <input
+            type="text"
+            className="form-control"
+            id="colorInput"
+            name="color"
+            value="#ffffff"
+            readOnly
+            style={{ cursor: "not-allowed" }}
+          />
+        </div>
+      )}
 
       <div className="mb-3">
         <label htmlFor="cssClassInput" className="form-label">
-          CSS Class (optional)
+          CSS Class (auto generated)
         </label>
         <input
           type="text"
           className="form-control"
           id="cssClassInput"
-          placeholder="e.g., blue-dot"
           name="cssClass"
           value={formData.cssClass}
-          onChange={handleChange}
+          readOnly
         />
       </div>
 
