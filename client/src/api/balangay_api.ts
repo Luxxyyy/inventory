@@ -6,6 +6,7 @@ export type BalangayResponse = {
   longitude: (string | null)[];
   latitude: (string | null)[];
   date_added: (string | null)[];
+  source_id: (string | null)[];
 };
 
 export async function getBalangays(): Promise<BalangayResponse> {

@@ -49,7 +49,6 @@ interface SidebarProps {
   setCollapsed: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-// Helper functions for capitalization
 const capitalize = (s: string) => {
   if (!s) return s;
   return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
@@ -66,6 +65,7 @@ const navItems: NavItem[] = [
   { label: "Map", path: "/", icon: <FiMap />, roles: ["admin", "engr", "user"] },
   { label: "Summary", path: "/list", icon: <FiList />, roles: ["admin", "engr", "user"] },
   { label: "Source", path: "/source", icon: <FaFaucet />, roles: ["admin"], section: "Manage" },
+  { label: "Sheet", path: "/sheet", icon: <FaFaucet />, roles: ["admin"], section: "Manage" },
   { label: "Barangay", path: "/balangay", icon: <FaMapMarkerAlt />, roles: ["admin"], section: "Manage" },
   { label: "Purok/Balangay", path: "/purok", icon: <FaMapPin />, roles: ["admin", "manager"], section: "Manage" },
   { label: "Add User", path: "/add-user", icon: <FiUserPlus />, roles: ["admin"], section: "Admin" },

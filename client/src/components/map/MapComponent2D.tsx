@@ -349,7 +349,7 @@ const MapComponent2D: React.FC<{ center?: CenterType | null }> = ({
     // Condition to load notes only for 'admin' or 'engr'
     const loadNotes = async () => {
       if (user?.role !== "admin" && user?.role !== "engr") {
-        return; // Exit early if the user is not an admin or engr
+        return;
       }
       setLoading(true);
       try {
@@ -389,6 +389,7 @@ const MapComponent2D: React.FC<{ center?: CenterType | null }> = ({
     loadShapes();
     loadNotes();
 
+    // Event handlers for drawing, editing, and deleting shapes
     if (user?.role === "admin") {
       map.on(L.Draw.Event.CREATED, (e: any) => {
         drawnItems.addLayer(e.layer);

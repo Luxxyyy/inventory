@@ -113,6 +113,7 @@ app.use("/api/pipe-logs", require("./routes/pipe_log_route"));
 app.use("/api/logs", require("./routes/log_route"));
 app.use("/api/notes", require("./routes/notes_route"));
 app.use("/api/legend", require("./routes/legend_route"));
+app.use("/api/sheets", require("./routes/sheet_route"));
 
 // ======================
 // Serve React build
@@ -128,9 +129,9 @@ app.use((req, res) => {
 const User = require("./models/user_model");
 
 sequelize
-  .sync({ alter: true })
+  .authenticate()
   .then(async () => {
-    console.log("✅ DB synced (alter:true)");
+    console.log("✅ DB connection established");
 
     const adminUser = await User.findOne({ where: { username: "admin" } });
     if (!adminUser) {
