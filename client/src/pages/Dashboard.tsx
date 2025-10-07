@@ -56,7 +56,8 @@ const Dashboard = () => {
     return getCenterFromSelection(
       selection.source,
       selection.balangay,
-      selection.purok
+      selection.purok,
+      selection.sheet
     );
   }, [selection]);
 
@@ -101,32 +102,15 @@ const Dashboard = () => {
           onSelect={(src) =>
             setSelection({
               source: src,
+              sheet: null,
               balangay: null,
               purok: null,
-              sheet: null,
             })
           }
           disabledCheck={(src) => !src.latitude || !src.longitude}
         />
 
-        {/* Balangay Dropdown (only shown when a source is selected) */}
-        {selection.source && (
-          <SharedDropdown
-            label="Balangay"
-            items={balangays.filter((b) => b.source_id === selection.source?.id)}
-            getLabel={(b) => b.balangay}
-            onSelect={(bal) =>
-              setSelection((prev) => ({
-                ...prev,
-                balangay: bal,
-                purok: null,
-              }))
-            }
-            disabledCheck={(b) => !b.latitude || !b.longitude}
-          />
-        )}
-
-        {/* Sheet Dropdown (only shown when a source is selected) */}
+        {/* Sheet Dropdown */}
         {selection.source && (
           <SharedDropdown
             label="Sheet"
@@ -135,24 +119,44 @@ const Dashboard = () => {
             onSelect={(sheet) =>
               setSelection((prev) => ({
                 ...prev,
-                sheet: sheet,
+                sheet,
               }))
             }
             disabledCheck={(s) => !s.latitude || !s.longitude}
           />
         )}
 
-        {/* Purok Dropdown - only if Balangay is selected */}
+        {/* Balangay Dropdown */}
+        {selection.source && (
+          <SharedDropdown
+            label="Balangay"
+            items={balangays.filter((b) => b.source_id === selection.source?.id)}
+            getLabel={(b) => b.balangay}
+            onSelect={(bal) =>
+              setSelection({
+                source: selection.source,
+                sheet: null,
+                balangay: bal,
+                purok: null,
+              })
+            }
+            disabledCheck={(b) => !b.latitude || !b.longitude}
+          />
+        )}
+
+        {/* Purok Dropdown */}
         {selection.balangay && (
           <SharedDropdown
             label="Purok"
             items={puroks.filter((p) => p.balangay_id === selection.balangay?.id)}
             getLabel={(p) => p.purok}
             onSelect={(pur) =>
-              setSelection((prev) => ({
-                ...prev,
+              setSelection({
+                source: selection.source,
+                sheet: null,
+                balangay: selection.balangay,
                 purok: pur,
-              }))
+              })
             }
             disabledCheck={(p) => !p.latitude || !p.longitude}
           />

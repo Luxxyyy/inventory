@@ -8,6 +8,8 @@ import {
   FiUserPlus,
   FiMenu,
   FiX,
+  FiMapPin,
+  FiSquare,
 } from "react-icons/fi";
 import { BsChatSquareQuote, BsFillEnvelopeFill } from "react-icons/bs";
 import { FaFaucet, FaMapMarkerAlt, FaMapPin } from "react-icons/fa";
@@ -65,11 +67,11 @@ const navItems: NavItem[] = [
   { label: "Map", path: "/", icon: <FiMap />, roles: ["admin", "engr", "user"] },
   { label: "Summary", path: "/list", icon: <FiList />, roles: ["admin", "engr", "user"] },
   { label: "Source", path: "/source", icon: <FaFaucet />, roles: ["admin"], section: "Manage" },
-  { label: "Sheet", path: "/sheet", icon: <FaFaucet />, roles: ["admin"], section: "Manage" },
+  { label: "Sheet", path: "/sheet", icon: <FiSquare   />, roles: ["admin"], section: "Manage" },
   { label: "Barangay", path: "/balangay", icon: <FaMapMarkerAlt />, roles: ["admin"], section: "Manage" },
   { label: "Purok/Balangay", path: "/purok", icon: <FaMapPin />, roles: ["admin", "manager"], section: "Manage" },
   { label: "Add User", path: "/add-user", icon: <FiUserPlus />, roles: ["admin"], section: "Admin" },
-  { label: "Add Legend", path: "/legend", icon: <FiUserPlus />, roles: ["admin"], section: "Admin" },
+  { label: "Add Legend", path: "/legend", icon: <FiMapPin  />, roles: ["admin"], section: "Admin" },
   { label: "Logs", path: "/logs", icon: <BsChatSquareQuote />, roles: ["admin"], section: "Admin" },
   { label: "Notes", path: "/notes", icon: <BsFillEnvelopeFill />, roles: ["admin"], section: "Admin" },
 ];

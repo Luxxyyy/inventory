@@ -4,27 +4,28 @@ import {
   updateLegendItem,
   deleteLegendItem,
 } from "../../api/legend_api";
+import cssNamedColors from "../../utils/cssNamedColors";
 import Modal from "../Modal";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import Paper from '@mui/material/Paper';
-import Button from '@mui/material/Button';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import Pagination from '@mui/material/Pagination';
-import Stack from '@mui/material/Stack';
-import TextField from '@mui/material/TextField';
-import Select, { SelectChangeEvent } from '@mui/material/Select';
-import MenuItem from '@mui/material/MenuItem';
-import InputLabel from '@mui/material/InputLabel';
-import FormControl from '@mui/material/FormControl';
-import Alert from '@mui/material/Alert';
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableContainer from "@mui/material/TableContainer";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import Paper from "@mui/material/Paper";
+import Button from "@mui/material/Button";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
+import Pagination from "@mui/material/Pagination";
+import Stack from "@mui/material/Stack";
+import TextField from "@mui/material/TextField";
+import Select, { SelectChangeEvent } from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
+import InputLabel from "@mui/material/InputLabel";
+import FormControl from "@mui/material/FormControl";
+import Alert from "@mui/material/Alert";
 
 type LegendItem = {
   id: number;
@@ -43,7 +44,7 @@ const EditLegendItem: React.FC = () => {
   const [editForm, setEditForm] = useState({
     label: "",
     type: "line",
-    color: "#ffffff",
+    color: "",
     cssClass: "",
   });
   const [modalError, setModalError] = useState("");
@@ -60,7 +61,9 @@ const EditLegendItem: React.FC = () => {
       setLoading(true);
       setError("");
       const data = await getLegendItems();
-      const sortedItems = data.sort((a: LegendItem, b: LegendItem) => b.id - a.id);
+      const sortedItems = data.sort(
+        (a: LegendItem, b: LegendItem) => b.id - a.id
+      );
       setLegendItems(sortedItems);
     } catch (err) {
       setError("Failed to fetch legend items");
@@ -86,7 +89,9 @@ const EditLegendItem: React.FC = () => {
     setModalError("");
   };
 
-  const handleTextFieldChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleTextFieldChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     setEditForm((prev) => ({ ...prev, [name]: value }));
   };
@@ -94,6 +99,15 @@ const EditLegendItem: React.FC = () => {
   const handleSelectChange = (event: SelectChangeEvent) => {
     const { name, value } = event.target;
     setEditForm((prev) => ({ ...prev, [name!]: value }));
+  };
+
+  const handleColorChange = (event: SelectChangeEvent<string>) => {
+    const selectedColor = event.target.value;
+    setEditForm((prev) => ({
+      ...prev,
+      color: selectedColor,
+      cssClass: `${selectedColor}-${prev.type}`,
+    }));
   };
 
   const handleUpdate = async () => {
@@ -110,7 +124,7 @@ const EditLegendItem: React.FC = () => {
           selectedItem.id,
           label.trim(),
           type.trim() as "line" | "dot",
-          color.trim(),
+          color.trim(), // Save as named color
           cssClass.trim()
         );
       }
@@ -149,7 +163,11 @@ const EditLegendItem: React.FC = () => {
     <div className="container mx-auto my-4" style={{ maxWidth: "95%" }}>
       {loading ? (
         <div className="d-flex justify-content-center my-5">
-          <div className="spinner-border text-primary" role="status" aria-label="Loading">
+          <div
+            className="spinner-border text-primary"
+            role="status"
+            aria-label="Loading"
+          >
             <span className="visually-hidden">Loading...</span>
           </div>
         </div>
@@ -162,53 +180,113 @@ const EditLegendItem: React.FC = () => {
           ) : (
             <>
               <TableContainer component={Paper} sx={{ maxHeight: 750 }}>
-                <Table stickyHeader aria-label="legend items table" size="small">
+                <Table
+                  stickyHeader
+                  aria-label="legend items table"
+                  size="small"
+                >
                   <TableHead>
                     <TableRow>
-                      <TableCell sx={{ fontWeight: 'bold', fontSize: '1rem', backgroundColor: '#17a2b8', color: 'white' }}>Label</TableCell>
-                      <TableCell sx={{ fontWeight: 'bold', fontSize: '1rem', backgroundColor: '#17a2b8', color: 'white' }}>Type</TableCell>
-                      <TableCell sx={{ fontWeight: 'bold', fontSize: '1rem', backgroundColor: '#17a2b8', color: 'white' }}>Color</TableCell>
-                      <TableCell sx={{ fontWeight: 'bold', fontSize: '1rem', backgroundColor: '#17a2b8', color: 'white' }}>CSS Class</TableCell>
-                      <TableCell align="center" sx={{ fontWeight: 'bold', fontSize: '1rem', backgroundColor: '#17a2b8', color: 'white' }}>Actions</TableCell>
+                      <TableCell
+                        sx={{
+                          fontWeight: "bold",
+                          fontSize: "1rem",
+                          backgroundColor: "#17a2b8",
+                          color: "white",
+                        }}
+                      >
+                        Label
+                      </TableCell>
+                      <TableCell
+                        sx={{
+                          fontWeight: "bold",
+                          fontSize: "1rem",
+                          backgroundColor: "#17a2b8",
+                          color: "white",
+                        }}
+                      >
+                        Type
+                      </TableCell>
+                      <TableCell
+                        sx={{
+                          fontWeight: "bold",
+                          fontSize: "1rem",
+                          backgroundColor: "#17a2b8",
+                          color: "white",
+                        }}
+                      >
+                        Color
+                      </TableCell>
+                      <TableCell
+                        sx={{
+                          fontWeight: "bold",
+                          fontSize: "1rem",
+                          backgroundColor: "#17a2b8",
+                          color: "white",
+                        }}
+                      >
+                        CSS Class
+                      </TableCell>
+                      <TableCell
+                        align="center"
+                        sx={{
+                          fontWeight: "bold",
+                          fontSize: "1rem",
+                          backgroundColor: "#17a2b8",
+                          color: "white",
+                        }}
+                      >
+                        Actions
+                      </TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {paginatedItems.map(({ id, label, type, color, cssClass }) => (
-                      <TableRow key={id} hover>
-                        <TableCell>{label}</TableCell>
-                        <TableCell>{type}</TableCell>
-                        <TableCell>
-                          <div
-                            style={{
-                              width: "20px",
-                              height: "20px",
-                              backgroundColor: color,
-                              border: "1px solid #ccc",
-                            }}
-                          />
-                        </TableCell>
-                        <TableCell>{cssClass || "-"}</TableCell>
-                        <TableCell align="center">
-                          <Button
-                            variant="contained"
-                            size="small"
-                            onClick={() => openEditModal({ id, label, type, color, cssClass })}
-                            sx={{ mr: 1 }}
-                          >
-                            <EditIcon sx={{ fontSize: '1rem' }} />
-                          </Button>
-                          <Button
-                            variant="contained"
-                            color="error"
-                            size="small"
-                            onClick={() => setItemToDelete({ id, label, type, color, cssClass })}
-                            sx={{ fontSize: '.75rem' }}
-                          >
-                            <DeleteIcon sx={{ fontSize: '1rem' }} />
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                    {paginatedItems.map(
+                      ({ id, label, type, color, cssClass }) => (
+                        <TableRow key={id} hover>
+                          <TableCell>{label}</TableCell>
+                          <TableCell>{type}</TableCell>
+                          <TableCell>
+                            <div
+                              style={{
+                                width: "20px",
+                                height: "20px",
+                                backgroundColor:
+                                  (cssNamedColors as any)[color] || color,
+                                border: "1px solid #ccc",
+                                display: "inline-block",
+                                marginRight: "8px",
+                              }}
+                            />
+                            <span>{color}</span>
+                          </TableCell>
+                          <TableCell>{cssClass || "-"}</TableCell>
+                          <TableCell align="center">
+                            <Button
+                              variant="contained"
+                              size="small"
+                              onClick={() =>
+                                openEditModal({ id, label, type, color, cssClass })
+                              }
+                              sx={{ mr: 1 }}
+                            >
+                              <EditIcon sx={{ fontSize: "1rem" }} />
+                            </Button>
+                            <Button
+                              variant="contained"
+                              color="error"
+                              size="small"
+                              onClick={() =>
+                                setItemToDelete({ id, label, type, color, cssClass })
+                              }
+                              sx={{ fontSize: ".75rem" }}
+                            >
+                              <DeleteIcon sx={{ fontSize: "1rem" }} />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      )
+                    )}
                   </TableBody>
                 </Table>
               </TableContainer>
@@ -218,7 +296,7 @@ const EditLegendItem: React.FC = () => {
                 page={page}
                 onChange={handlePageChange}
                 color="primary"
-                sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}
+                sx={{ mt: 2, display: "flex", justifyContent: "center" }}
               />
             </>
           )}
@@ -250,16 +328,34 @@ const EditLegendItem: React.FC = () => {
                 <MenuItem value="dot">Dot</MenuItem>
               </Select>
             </FormControl>
-            <TextField
-              fullWidth
-              label="Color"
-              name="color"
-              type="color"
-              value={editForm.color}
-              onChange={handleTextFieldChange}
-              margin="normal"
-              sx={{ height: 56 }}
-            />
+
+            <FormControl fullWidth margin="normal">
+              <InputLabel id="color-label">Color</InputLabel>
+              <Select
+                labelId="color-label"
+                label="Color"
+                name="color"
+                value={editForm.color}
+                onChange={handleColorChange}
+              >
+                {Object.keys(cssNamedColors).map((name) => (
+                  <MenuItem key={name} value={name}>
+                    <div
+                      style={{
+                        width: "20px",
+                        height: "20px",
+                        backgroundColor: (cssNamedColors as any)[name],
+                        display: "inline-block",
+                        marginRight: "8px",
+                        border: "1px solid #ccc",
+                      }}
+                    />
+                    {name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
             <TextField
               fullWidth
               label="CSS Class"
@@ -268,10 +364,25 @@ const EditLegendItem: React.FC = () => {
               onChange={handleTextFieldChange}
               margin="normal"
             />
-            {modalError && <Alert severity="error" sx={{ mt: 1 }}>{modalError}</Alert>}
-            <Stack direction="row" justifyContent="flex-end" spacing={1} sx={{ mt: 2 }}>
-              <Button variant="outlined" onClick={closeModal}>Cancel</Button>
-              <Button variant="contained" onClick={handleUpdate}>Save</Button>
+
+            {modalError && (
+              <Alert severity="error" sx={{ mt: 1 }}>
+                {modalError}
+              </Alert>
+            )}
+
+            <Stack
+              direction="row"
+              justifyContent="flex-end"
+              spacing={1}
+              sx={{ mt: 2 }}
+            >
+              <Button variant="outlined" onClick={closeModal}>
+                Cancel
+              </Button>
+              <Button variant="contained" onClick={handleUpdate}>
+                Save
+              </Button>
             </Stack>
           </form>
         </Modal>
@@ -280,11 +391,25 @@ const EditLegendItem: React.FC = () => {
       {itemToDelete && (
         <Modal onClose={() => setItemToDelete(null)} title="Confirm Delete">
           <p>
-            Are you sure you want to delete <strong>{itemToDelete.label}</strong>?
+            Are you sure you want to delete{" "}
+            <strong>{itemToDelete.label}</strong>?
           </p>
-          <Stack direction="row" justifyContent="flex-end" spacing={1} sx={{ mt: 2 }}>
-            <Button variant="outlined" onClick={() => setItemToDelete(null)}>Cancel</Button>
-            <Button variant="contained" color="error" onClick={confirmDelete}>Confirm Delete</Button>
+          <Stack
+            direction="row"
+            justifyContent="flex-end"
+            spacing={1}
+            sx={{ mt: 2 }}
+          >
+            <Button variant="outlined" onClick={() => setItemToDelete(null)}>
+              Cancel
+            </Button>
+            <Button
+              variant="contained"
+              color="error"
+              onClick={confirmDelete}
+            >
+              Confirm Delete
+            </Button>
           </Stack>
         </Modal>
       )}
