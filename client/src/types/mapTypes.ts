@@ -30,7 +30,7 @@ export interface Purok extends Coordinates {
 
 export interface Sheet extends Coordinates {
   id?: number;
-  sheet: string;
+  sheet_name: string;
   source_id?: number;
   date_added?: string;
   source_name?: string;

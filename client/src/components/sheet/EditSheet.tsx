@@ -62,7 +62,7 @@ const EditSheet: React.FC = () => {
 
       const parsed = arr.map((s: any) => ({
         id: s.id,
-        sheet: s.sheet,
+        sheet: s.sheet_name,
         latitude: s.latitude,
         longitude: s.longitude,
         date_added: s.date_added,

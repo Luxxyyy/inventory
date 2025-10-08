@@ -1,17 +1,29 @@
+// AddSheet.tsx
 import React, { useState, useEffect } from "react";
 import { getSources } from "../../api/source_api";
 import { addSheet } from "../../api/sheet_api";
 import type { Source } from "../../types/mapTypes";
 
-function AddSheet() {
+interface AddSheetProps {
+  lat?: string;
+  lng?: string;
+  onClose?: () => void;
+}
+
+function AddSheet({ lat, lng, onClose }: AddSheetProps) {
   const [sheet, setSheet] = useState("");
   const [source, setSource] = useState("");
-  const [latitude, setLatitude] = useState("");
-  const [longitude, setLongitude] = useState("");
+  const [latitude, setLatitude] = useState(lat || "");
+  const [longitude, setLongitude] = useState(lng || "");
   const [sources, setSources] = useState<Source[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+
+  useEffect(() => {
+    setLatitude(lat || "");
+    setLongitude(lng || "");
+  }, [lat, lng]);
 
   useEffect(() => {
     getSources()
@@ -21,11 +33,10 @@ function AddSheet() {
           : Array.isArray(data?.data)
           ? data.data
           : [];
-
         const valid = arr.filter(
-          (item: any) => typeof item?.id === "number" && typeof item?.source === "string"
+          (item: any) =>
+            typeof item?.id === "number" && typeof item?.source === "string"
         );
-
         setSources(valid as Source[]);
       })
       .catch(() => setSources([]));
@@ -41,23 +52,30 @@ function AddSheet() {
     }
 
     const parsedSourceId = parseInt(source, 10);
+    const parsedLat = parseFloat(latitude);
+    const parsedLng = parseFloat(longitude);
+
     if (isNaN(parsedSourceId)) {
       setError("Invalid source selected!");
+      return;
+    }
+    if (isNaN(parsedLat) || isNaN(parsedLng)) {
+      setError("Invalid latitude or longitude!");
       return;
     }
 
     setLoading(true);
     try {
-      await addSheet(sheet, parsedSourceId, longitude, latitude);
-      setSuccess("Sheet added!");
-
+      await addSheet(sheet, parsedSourceId, parsedLng.toString(), parsedLat.toString());
+      setSuccess("Sheet added successfully!");
       setSheet("");
       setSource("");
-      setLatitude("");
-      setLongitude("");
-    } catch (err) {
+      setLatitude(lat || "");
+      setLongitude(lng || "");
+      if (onClose) onClose();
+    } catch (err: any) {
       console.error(err);
-      setError("Failed to add sheet.");
+      setError(err.response?.data?.message || "Failed to add sheet.");
     } finally {
       setLoading(false);
     }
@@ -71,7 +89,9 @@ function AddSheet() {
       {success && <div className="alert alert-success">{success}</div>}
 
       <div className="mb-3">
-        <label htmlFor="sheetInput" className="form-label">Sheet</label>
+        <label htmlFor="sheetInput" className="form-label">
+          Sheet
+        </label>
         <input
           type="text"
           className="form-control"
@@ -79,16 +99,20 @@ function AddSheet() {
           placeholder="Enter Sheet"
           value={sheet}
           onChange={(e) => setSheet(e.target.value)}
+          disabled={loading}
         />
       </div>
 
       <div className="mb-3">
-        <label htmlFor="sourceInput" className="form-label">Source</label>
+        <label htmlFor="sourceInput" className="form-label">
+          Source
+        </label>
         <select
           className="form-select"
           id="sourceInput"
           value={source}
           onChange={(e) => setSource(e.target.value)}
+          disabled={loading}
         >
           <option value="">Select Source</option>
           {sources.map((src) => (
@@ -100,7 +124,9 @@ function AddSheet() {
       </div>
 
       <div className="mb-3">
-        <label htmlFor="latitudeInput" className="form-label">Latitude</label>
+        <label htmlFor="latitudeInput" className="form-label">
+          Latitude
+        </label>
         <input
           type="text"
           className="form-control"
@@ -108,11 +134,14 @@ function AddSheet() {
           placeholder="Enter Latitude"
           value={latitude}
           onChange={(e) => setLatitude(e.target.value)}
+          disabled={loading}
         />
       </div>
 
       <div className="mb-3">
-        <label htmlFor="longitudeInput" className="form-label">Longitude</label>
+        <label htmlFor="longitudeInput" className="form-label">
+          Longitude
+        </label>
         <input
           type="text"
           className="form-control"
@@ -120,17 +149,21 @@ function AddSheet() {
           placeholder="Enter Longitude"
           value={longitude}
           onChange={(e) => setLongitude(e.target.value)}
+          disabled={loading}
         />
       </div>
 
-      <button
-        type="button"
-        className="btn btn-success text-white"
-        onClick={handleAdd}
-        disabled={loading}
-      >
-        {loading ? "Adding..." : "Add"}
-      </button>
+      <div className="d-flex justify-content-center mt-3">
+        <button
+          type="button"
+          className="btn btn-success text-white"
+          style={{ minWidth: "150px" }}
+          onClick={handleAdd}
+          disabled={loading}
+        >
+          {loading ? "Adding..." : "Add"}
+        </button>
+      </div>
     </div>
   );
 }

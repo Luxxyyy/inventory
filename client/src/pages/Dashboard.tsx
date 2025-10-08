@@ -115,7 +115,7 @@ const Dashboard = () => {
           <SharedDropdown
             label="Sheet"
             items={sheets.filter((s) => s.source_id === selection.source?.id)}
-            getLabel={(s) => s.sheet}
+            getLabel={(s) => s.sheet_name}
             onSelect={(sheet) =>
               setSelection((prev) => ({
                 ...prev,

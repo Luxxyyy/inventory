@@ -19,21 +19,9 @@ import { ShapeDetails } from "../../types/mapShape_type";
 import "../../design/map.css";
 import { useAuth } from "../../contexts/AuthContext";
 import { RiStickyNoteAddLine } from "react-icons/ri";
-import { PiNoteThin, PiMapPinBold } from "react-icons/pi";
+import { PiNoteThin } from "react-icons/pi";
 import { createRoot, Root } from "react-dom/client";
 import ReactDOMServer from "react-dom/server";
-
-// Replace default Leaflet marker with a React icon
-const ReactMarkerIcon = L.divIcon({
-  className: "react-default-marker",
-  html: ReactDOMServer.renderToString(
-    <PiMapPinBold size={32} color="#288cffff" />
-  ),
-  iconSize: [32, 32],
-  iconAnchor: [16, 32],
-  popupAnchor: [0, -30],
-});
-L.Marker.prototype.options.icon = ReactMarkerIcon;
 
 const defaultDetails: ShapeDetails = {
   title: "",
@@ -241,7 +229,8 @@ const MapComponent2D: React.FC<{ center?: CenterType | null }> = ({
       });
       map.addControl(drawControl);
     }
-
+    
+    // Condition to add the Note Control and related listeners for 'admin' or 'engr'
     if (user?.role === "admin" || user?.role === "engr") {
       const NoteControl = L.Control.extend({
         onAdd: function (map: L.Map) {
@@ -357,6 +346,7 @@ const MapComponent2D: React.FC<{ center?: CenterType | null }> = ({
       }
     };
 
+    // Condition to load notes only for 'admin' or 'engr'
     const loadNotes = async () => {
       if (user?.role !== "admin" && user?.role !== "engr") {
         return;
@@ -399,6 +389,7 @@ const MapComponent2D: React.FC<{ center?: CenterType | null }> = ({
     loadShapes();
     loadNotes();
 
+    // Event handlers for drawing, editing, and deleting shapes
     if (user?.role === "admin") {
       map.on(L.Draw.Event.CREATED, (e: any) => {
         drawnItems.addLayer(e.layer);

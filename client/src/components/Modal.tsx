@@ -4,6 +4,7 @@ type ModalProps = {
     children: React.ReactNode;
     footer?: React.ReactNode;
     width?: string; 
+    height?: string;
 };
 
 function Modal({ onClose, title, children, footer, width }: ModalProps) {
