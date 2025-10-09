@@ -3,17 +3,23 @@ function GetPageTitle(pathname: string): string {
         case '/':
             return 'Map';
         case '/list':
-            return 'List';
+            return 'Dashboard';
         case '/source':
-            return 'Source';
+            return 'Sources';
+        case '/sheet':
+            return 'Sheets';
         case '/balangay':
-            return 'Balangay';
-        case '/consumer':
-            return 'Consumer';
+            return 'Barangays';
+        case '/purok':
+            return 'Puroks/Balangays';
+        case '/add-user':
+            return 'Users';
+        case '/legend':
+            return 'Legends';
         case '/logs':
             return 'Logs';
-        case '/add-user':
-            return 'Add User';
+        case '/notes':
+            return 'Notes';
         default:
             return 'Dashboard';
     }

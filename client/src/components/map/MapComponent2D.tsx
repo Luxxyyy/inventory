@@ -20,6 +20,7 @@ import "../../design/map.css";
 import { useAuth } from "../../contexts/AuthContext";
 import { RiStickyNoteAddLine } from "react-icons/ri";
 import { PiNoteThin } from "react-icons/pi";
+import { FaMapMarkerAlt } from "react-icons/fa";
 import { createRoot, Root } from "react-dom/client";
 import ReactDOMServer from "react-dom/server";
 
@@ -95,6 +96,19 @@ const MapComponent2D: React.FC<{ center?: CenterType | null }> = ({
         iconSize: [32, 32],
         iconAnchor: [16, 32],
         popupAnchor: [0, -25],
+      }),
+    []
+  );
+  
+  const createCenterIcon = useCallback(
+    (color = "#2824ffff") =>
+      L.divIcon({
+        className: "center-icon-div",
+        html: ReactDOMServer.renderToString(
+          <FaMapMarkerAlt size={32} color={color} />
+        ),
+        iconSize: [32, 32],
+        iconAnchor: [16, 32], 
       }),
     []
   );
@@ -452,9 +466,12 @@ const MapComponent2D: React.FC<{ center?: CenterType | null }> = ({
         mapRef.current.removeLayer(markerRef.current);
       }
 
-      markerRef.current = L.marker([lat, lng]).addTo(mapRef.current);
+      // 3. USE CUSTOM ICON FOR CENTER MARKER
+      markerRef.current = L.marker([lat, lng], {
+        icon: createCenterIcon("#D9534F"), // Using a distinct color like a bootstrap danger red
+      }).addTo(mapRef.current);
     }
-  }, [center]);
+  }, [center, createCenterIcon]);
 
   return (
     <>
