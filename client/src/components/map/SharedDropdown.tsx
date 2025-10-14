@@ -59,7 +59,7 @@ function SharedDropdown<T>({
         className="dropdown-menu"
         style={{
           backgroundColor: "#0d6efd",
-          maxHeight: "21  rem",
+          maxHeight: "21rem",
           overflowY: "auto",
         }}
       >

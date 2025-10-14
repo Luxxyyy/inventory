@@ -403,7 +403,7 @@ const MapComponent2D: React.FC<{ center?: CenterType | null }> = ({
     loadShapes();
     loadNotes();
 
-    // Event handlers for drawing, editing, and deleting shapes
+    // Event handlers for drawing, editing, and deleting shapes for admin.
     if (user?.role === "admin") {
       map.on(L.Draw.Event.CREATED, (e: any) => {
         drawnItems.addLayer(e.layer);
@@ -456,6 +456,7 @@ const MapComponent2D: React.FC<{ center?: CenterType | null }> = ({
     }
   }, [isCreatingNote, user]);
 
+  //custom center map marker.
   useEffect(() => {
     if (center && mapRef.current && center.latitude && center.longitude) {
       const lat = Number(center.latitude);
@@ -466,9 +467,8 @@ const MapComponent2D: React.FC<{ center?: CenterType | null }> = ({
         mapRef.current.removeLayer(markerRef.current);
       }
 
-      // 3. USE CUSTOM ICON FOR CENTER MARKER
       markerRef.current = L.marker([lat, lng], {
-        icon: createCenterIcon("#D9534F"), // Using a distinct color like a bootstrap danger red
+        icon: createCenterIcon("#D9534F"),
       }).addTo(mapRef.current);
     }
   }, [center, createCenterIcon]);

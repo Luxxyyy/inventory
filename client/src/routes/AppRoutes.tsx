@@ -13,6 +13,7 @@ import Layout from "../components/Layout";
 import Logs from  "../pages/Logs";
 import Notes from "../pages/Notes";
 import Legend from "../pages/Legend"
+import Message from "../pages/Message"
 
 function AppRoutes() {
   return (
@@ -20,6 +21,7 @@ function AppRoutes() {
       <Route path="/login" element={<Login />} />
       <Route path="/" element={<Layout />}>
         <Route index element={<Dashboard />} />
+        <Route path="message" element={<Message />} />
         <Route path="list" element={<ListGroup />} />
         <Route path="source" element={ <ProtectedRoute requiredRole="admin"> <Source /> </ProtectedRoute> }/>
         <Route path="sheet" element={ <ProtectedRoute requiredRole="admin"> <Sheet /> </ProtectedRoute> }/>

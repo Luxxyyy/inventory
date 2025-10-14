@@ -114,6 +114,8 @@ app.use("/api/logs", require("./routes/log_route"));
 app.use("/api/notes", require("./routes/notes_route"));
 app.use("/api/legend", require("./routes/legend_route"));
 app.use("/api/sheets", require("./routes/sheet_route"));
+app.use("/api/messages", require("./routes/message_route"));
+app.use("/api/conversations", require("./routes/conversation_route"));
 
 // ======================
 // Serve React build

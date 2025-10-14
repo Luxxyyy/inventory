@@ -64,16 +64,17 @@ const toTitleCase = (s: string) => {
 };
 
 const navItems: NavItem[] = [
-  { label: "Map", path: "/", icon: <FiMap />, roles: ["admin", "engr", "user"] },
-  { label: "Summary", path: "/list", icon: <FiList />, roles: ["admin", "engr", "user"] },
-  { label: "Source", path: "/source", icon: <FaFaucet />, roles: ["admin"], section: "Manage" },
-  { label: "Sheet", path: "/sheet", icon: <FiSquare   />, roles: ["admin"], section: "Manage" },
-  { label: "Barangay", path: "/balangay", icon: <FaMapMarkerAlt />, roles: ["admin"], section: "Manage" },
-  { label: "Purok/Balangay", path: "/purok", icon: <FaMapPin />, roles: ["admin", "manager"], section: "Manage" },
+  { label: "Map", path: "/", icon: <FiMap />, roles: ["admin", "engr", "user"], section: "Dashboard" },
+  { label: "Message", path: "/message", icon: <FiList />, roles: ["admin", "engr", "user"], section: "Dashboard" },
+  { label: "Summary", path: "/list", icon: <FiList />, roles: ["admin", "engr", "user"], section: "Dashboard" },
+  { label: "Source", path: "/source", icon: <FaFaucet />, roles: ["admin"], section: "Map Manage" },
+  { label: "Sheet", path: "/sheet", icon: <FiSquare   />, roles: ["admin"], section: "Map Manage" },
+  { label: "Barangay", path: "/balangay", icon: <FaMapMarkerAlt />, roles: ["admin"], section: "Map Manage" },
+  { label: "Purok/Balangay", path: "/purok", icon: <FaMapPin />, roles: ["admin", "manager"], section: "Map Manage" },
+  { label: "Add Legend", path: "/legend", icon: <FiMapPin  />, roles: ["admin"], section: "Map Manage" },
+  { label: "Notes", path: "/notes", icon: <BsFillEnvelopeFill />, roles: ["admin"], section: "Map Manage" },
   { label: "Add User", path: "/add-user", icon: <FiUserPlus />, roles: ["admin"], section: "Admin" },
-  { label: "Add Legend", path: "/legend", icon: <FiMapPin  />, roles: ["admin"], section: "Admin" },
   { label: "Logs", path: "/logs", icon: <BsChatSquareQuote />, roles: ["admin"], section: "Admin" },
-  { label: "Notes", path: "/notes", icon: <BsFillEnvelopeFill />, roles: ["admin"], section: "Admin" },
 ];
 
 const socket = io("http://localhost:8080");
@@ -99,7 +100,6 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed }) => {
   const handleDialogOpen = () => setOpenDialog(true);
   const handleDialogClose = () => setOpenDialog(false);
 
-  // Helper to create a thumbnail base64 from full image base64
   const createThumbnail = (base64Image: string): Promise<string> => {
     return new Promise((resolve) => {
       const img = new Image();
@@ -107,7 +107,7 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed }) => {
       img.onload = () => {
         const canvas = document.createElement("canvas");
         const ctx = canvas.getContext("2d");
-        const maxWidth = 100; // max width for thumbnail
+        const maxWidth = 100;
         const scaleSize = maxWidth / img.width;
         canvas.width = maxWidth;
         canvas.height = img.height * scaleSize;

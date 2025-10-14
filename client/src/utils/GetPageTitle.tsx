@@ -3,7 +3,9 @@ function GetPageTitle(pathname: string): string {
         case '/':
             return 'Map';
         case '/list':
-            return 'Dashboard';
+            return 'Summary';
+        case '/message':
+            return 'Message';
         case '/source':
             return 'Sources';
         case '/sheet':

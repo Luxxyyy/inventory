@@ -64,112 +64,85 @@ const ListGroup: React.FC = () => {
       .map((item) => item.username || 'Unknown')
       .sort((a, b) => a.localeCompare(b));
 
+  const cardsData = [
+    { count: sources.length, icon: <FaFaucet />, label: 'Sources', color: 'primary' },
+    { count: balangays.length, icon: <FaMapMarkerAlt />, label: 'Balangays', color: 'info' },
+    { count: puroks.length, icon: <FaMapPin />, label: 'Puroks', color: 'warning' },
+    { count: users.length, icon: <FiUserPlus />, label: 'Users', color: 'success' },
+  ];
+
+  const listsData = [
+    { items: getSortedSources(), label: 'Sources' },
+    { items: getSortedBalangays(), label: 'Balangays' },
+    { items: getSortedPuroks(), label: 'Puroks' },
+    { items: getSortedUsers(), label: 'Users' },
+  ];
+
   return (
     <>
-      <div
-        className="dashboard-summary"
-        style={{ display: 'flex', gap: 20, padding: 20, flexWrap: 'wrap' }}
-      >
-        {[
-          { count: sources.length, icon: <FaFaucet size={32} />, label: 'Sources' },
-          { count: balangays.length, icon: <FaMapMarkerAlt size={32} />, label: 'Balangays' },
-          { count: puroks.length, icon: <FaMapPin size={32} />, label: 'Puroks' },
-          { count: users.length, icon: <FiUserPlus size={32} />, label: 'Users' },
-        ].map(({ count, icon, label }) => (
-          <div
-            key={label}
-            className="summary-card"
-            style={{
-              flex: '1 1 200px',
-              padding: 20,
-              backgroundColor:
-                label === 'Sources'
-                  ? '#f0f0f0'
-                  : label === 'Balangays'
-                  ? '#e0f7fa'
-                  : label === 'Puroks'
-                  ? '#fff3e0'
-                  : '#e8f5e9',
-              borderRadius: 8,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: 12,
-              minWidth: 180,
-            }}
-          >
-            {icon}
-            <div style={{ fontSize: 24, fontWeight: 'bold' }}>{count}</div>
-            <div>{label}</div>
-          </div>
-        ))}
-      </div>
+      <style>
+        {`
+          .card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+          }
+          .list-group-item:hover {
+            background-color: #007bff; /* Bootstrap primary blue */
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s ease, color 0.3s ease;
+          }
+        `}
+      </style>
 
-      <div
-        className="dashboard-data-lists"
-        style={{
-          display: 'flex',
-          gap: 20,
-          padding: 20,
-          flexWrap: 'wrap',
-          justifyContent: 'center',
-        }}
-      >
-        {[
-          { items: getSortedSources(), label: 'Sources' },
-          { items: getSortedBalangays(), label: 'Balangays' },
-          { items: getSortedPuroks(), label: 'Puroks' },
-          { items: getSortedUsers(), label: 'Users' },
-        ].map(({ items, label }) => (
-          <div
-            key={label}
-            style={{
-              flex: '1 1 220px',
-              minHeight: 400,
-              maxHeight: 400,
-              overflowX: 'hidden',
-              overflowY: 'auto',
-              backgroundColor: '#fff',
-              borderRadius: 8,
-              boxShadow: '0 0 10px rgba(0,0,0,0.1)',
-              padding: 15,
-              minWidth: 200,
-            }}
-            aria-label={`${label} alphabetical list`}
-          >
-            <h5
-              style={{
-                marginBottom: 12,
-                textAlign: 'center',
-                borderBottom: '1px solid #ddd',
-                paddingBottom: 6,
-              }}
-            >
-              {label}
-            </h5>
-            {items.length > 0 ? (
-              <ul
-                style={{
-                  listStyle: 'none',
-                  paddingLeft: 0,
-                  margin: 0,
-                  fontSize: 14,
-                  color: '#444',
-                }}
-              >
-                {items.map((name, idx) => (
-                  <li key={idx} style={{ padding: '2px 0' }}>
-                    {name}
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p style={{ fontStyle: 'italic', color: '#999', textAlign: 'center' }}>
-                No data
-              </p>
-            )}
-          </div>
-        ))}
+      <div className="container my-4">
+        {/* Summary cards */}
+        <div className="row g-4 justify-content-center">
+          {cardsData.map(({ count, icon, label, color }) => (
+            <div key={label} className="col-6 col-md-3">
+              <div className={`card text-center border-${color} shadow-sm h-100`}>
+                <div className={`card-body text-${color}`}>
+                  <div className="mb-3" style={{ fontSize: '2.5rem' }}>
+                    {icon}
+                  </div>
+                  <h2 className="card-title fw-bold">{count}</h2>
+                  <p className="card-text">{label}</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Lists */}
+        <div className="row mt-5 g-4 justify-content-center">
+          {listsData.map(({ items, label }) => (
+            <div key={label} className="col-12 col-md-6 col-lg-3">
+              <div className="card h-100 shadow-sm">
+                <div className="card-header bg-light text-center">
+                  <h5 className="mb-0">{label}</h5>
+                </div>
+                <div
+                  className="card-body overflow-auto"
+                  style={{ maxHeight: '300px', padding: '0.75rem 1.25rem' }}
+                  aria-label={`${label} alphabetical list`}
+                >
+                  {items.length > 0 ? (
+                    <ul className="list-group list-group-flush">
+                      {items.map((name, idx) => (
+                        <li key={idx} className="list-group-item py-1">
+                          {name}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-muted fst-italic text-center my-3">No data</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
       <ToastContainer position="top-right" autoClose={3000} />
