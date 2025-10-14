@@ -22,6 +22,7 @@
     "axios": "^1.11.0",
     "bootstrap": "^5.3.7",
     "bootstrap-icons": "^1.13.1",
+    "crypto-js": "^4.2.0",
     "http": "^0.0.1-security",
     "leaflet": "^1.9.4",
     "leaflet-draw": "^1.0.4",
@@ -39,6 +40,7 @@
   },
   "devDependencies": {
     "@types/cacheable-request": "^6.0.3",
+    "@types/crypto-js": "^4.2.2",
     "@types/debug": "^4.1.12",
     "@types/fs-extra": "^11.0.4",
     "@types/http-cache-semantics": "^4.0.4",

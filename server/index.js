@@ -11,6 +11,9 @@ const { Server } = require("socket.io");
 const app = express();
 const server = http.createServer(app);
 
+// ======================
+// SOCKET.IO SETUP
+// ======================
 const io = new Server(server, {
   cors: {
     origin: [
@@ -26,22 +29,19 @@ const io = new Server(server, {
 });
 
 app.set("io", io);
-
 const PORT = process.env.PORT || 8080;
 
 // ======================
-// Session Setup
+// SESSION
 // ======================
 const sessionStore = new SequelizeStore({
   db: sequelize,
   tableName: "sessions",
-  extendDefaultFields: (defaults, session) => {
-    return {
-      data: defaults.data,
-      expires: defaults.expires,
-      user_id: session?.user?.id,
-    };
-  },
+  extendDefaultFields: (defaults, session) => ({
+    data: defaults.data,
+    expires: defaults.expires,
+    user_id: session?.user?.id,
+  }),
 });
 
 sessionStore.sync();
@@ -61,7 +61,7 @@ app.use(
 );
 
 // ======================
-// CORS Setup
+// CORS
 // ======================
 const allowedOrigins = [
   "http://localhost:5173",
@@ -74,9 +74,8 @@ const allowedOrigins = [
 const corsOptions = {
   origin: function (origin, callback) {
     if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
+    if (allowedOrigins.includes(origin)) callback(null, true);
+    else {
       console.warn("❌ Blocked CORS request from:", origin);
       callback(new Error("Not allowed by CORS"));
     }
@@ -87,22 +86,15 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-
-// ======================
-// Increase Payload Limit
-// ======================
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
 // ======================
-// Middleware
+// MIDDLEWARE & ROUTES
 // ======================
 const { attachUser } = require("./middleware/auth_middleware");
 app.use(attachUser);
 
-// ======================
-// API Routes
-// ======================
 app.use("/api/map-shapes", require("./routes/map_shape_route"));
 app.use("/api/sources", require("./routes/source_route"));
 app.use("/api/balangays", require("./routes/balangay_route"));
@@ -118,7 +110,7 @@ app.use("/api/messages", require("./routes/message_route"));
 app.use("/api/conversations", require("./routes/conversation_route"));
 
 // ======================
-// Serve React build
+// SERVE FRONTEND BUILD
 // ======================
 app.use(express.static(path.join(__dirname, "public")));
 app.use((req, res) => {
@@ -126,7 +118,31 @@ app.use((req, res) => {
 });
 
 // ======================
-// DB + Server Init
+// SOCKET.IO HANDLERS
+// ======================
+io.on("connection", (socket) => {
+  console.log("⚡ Client connected:", socket.id);
+
+  socket.on("join", ({ userId }) => {
+    if (!userId) return;
+    const room = `user_${userId}`;
+    socket.join(room);
+    console.log(`✅ User ${userId} joined room ${room}`);
+  });
+
+  socket.on("mark_read", ({ conversation_id, user_id }) => {
+    console.log(
+      `📘 User ${user_id} marked conversation ${conversation_id} as read`
+    );
+  });
+
+  socket.on("disconnect", () => {
+    console.log("❌ Client disconnected:", socket.id);
+  });
+});
+
+// ======================
+// DATABASE INIT
 // ======================
 const User = require("./models/user_model");
 

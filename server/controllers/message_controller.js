@@ -36,9 +36,25 @@ async function sendMessage(req, res) {
       { where: { id: conversation_id } }
     );
 
+    const io = req.app.get("io");
+
+    if (io) {
+      // Emit to receiver
+      if (receiver_id) {
+        const receiverRoom = `user_${receiver_id}`;
+        io.to(receiverRoom).emit("new_message", newMessage);
+        console.log(`📩 Sent new_message to ${receiverRoom}`);
+      }
+
+      // Emit to sender
+      const senderRoom = `user_${sender_id}`;
+      io.to(senderRoom).emit("new_message", newMessage);
+      console.log(`📤 Sent new_message to ${senderRoom}`);
+    }
+
     res.status(201).json(newMessage);
   } catch (error) {
-    console.error("Send message error:", error);
+    console.error("❌ Send message error:", error);
     res.status(500).json({ error: "Failed to send message" });
   }
 }
@@ -58,12 +74,9 @@ async function getMessagesByConversation(req, res) {
 
     res.json(messages);
   } catch (error) {
-    console.error("Fetch messages error:", error);
+    console.error("❌ Fetch messages error:", error);
     res.status(500).json({ error: "Failed to fetch messages" });
   }
 }
 
-module.exports = {
-  sendMessage,
-  getMessagesByConversation,
-};
+module.exports = { sendMessage, getMessagesByConversation };
