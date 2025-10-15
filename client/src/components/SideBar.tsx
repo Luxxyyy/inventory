@@ -13,6 +13,7 @@ import {
 } from "react-icons/fi";
 import { BsChatSquareQuote, BsFillEnvelopeFill } from "react-icons/bs";
 import { FaFaucet, FaMapMarkerAlt, FaMapPin } from "react-icons/fa";
+import { MdOutlineMessage } from "react-icons/md";
 import { useAuth } from "../contexts/AuthContext";
 import { toast } from "react-toastify";
 import io from "socket.io-client";
@@ -64,9 +65,8 @@ const toTitleCase = (s: string) => {
 };
 
 const navItems: NavItem[] = [
-  { label: "Map", path: "/", icon: <FiMap />, roles: ["admin", "engr", "user"], section: "Dashboard" },
-  { label: "Message", path: "/message", icon: <FiList />, roles: ["admin", "engr", "user"], section: "Dashboard" },
-  { label: "Summary", path: "/list", icon: <FiList />, roles: ["admin", "engr", "user"], section: "Dashboard" },
+  { label: "Map", path: "/", icon: <FiMap />, roles: ["admin", "engr", "user"], section: "Overview" },
+  { label: "Summary", path: "/list", icon: <FiList />, roles: ["admin", "engr", "user"], section: "Overview" },
   { label: "Source", path: "/source", icon: <FaFaucet />, roles: ["admin"], section: "Map Manage" },
   { label: "Sheet", path: "/sheet", icon: <FiSquare   />, roles: ["admin"], section: "Map Manage" },
   { label: "Barangay", path: "/balangay", icon: <FaMapMarkerAlt />, roles: ["admin"], section: "Map Manage" },
@@ -75,6 +75,7 @@ const navItems: NavItem[] = [
   { label: "Notes", path: "/notes", icon: <BsFillEnvelopeFill />, roles: ["admin"], section: "Map Manage" },
   { label: "Add User", path: "/add-user", icon: <FiUserPlus />, roles: ["admin"], section: "Admin" },
   { label: "Logs", path: "/logs", icon: <BsChatSquareQuote />, roles: ["admin"], section: "Admin" },
+  { label: "Message", path: "/message", icon: <MdOutlineMessage />, roles: ["admin", "engr", "user"], section: "Team Chat" },
 ];
 
 const socket = io("http://localhost:8080");
