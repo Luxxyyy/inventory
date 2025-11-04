@@ -94,7 +94,6 @@ app.use(express.urlencoded({ limit: "50mb", extended: true }));
 // ======================
 const { attachUser } = require("./middleware/auth_middleware");
 app.use(attachUser);
-
 app.use("/api/map-shapes", require("./routes/map_shape_route"));
 app.use("/api/sources", require("./routes/source_route"));
 app.use("/api/balangays", require("./routes/balangay_route"));
@@ -108,6 +107,7 @@ app.use("/api/legend", require("./routes/legend_route"));
 app.use("/api/sheets", require("./routes/sheet_route"));
 app.use("/api/messages", require("./routes/message_route"));
 app.use("/api/conversations", require("./routes/conversation_route"));
+app.use("/api/inventory", require("./routes/inventory_route"));
 
 // ======================
 // SERVE FRONTEND BUILD

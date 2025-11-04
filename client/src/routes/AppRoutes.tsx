@@ -12,8 +12,9 @@ import User from "../pages/User";
 import Layout from "../components/Layout";
 import Logs from  "../pages/Logs";
 import Notes from "../pages/Notes";
-import Legend from "../pages/Legend"
-import Message from "../pages/Message"
+import Legend from "../pages/Legend";
+import Message from "../pages/Message";
+import Inventory from "../pages/Inventory";
 
 function AppRoutes() {
   return (
@@ -31,6 +32,7 @@ function AppRoutes() {
         <Route path="legend" element={ <ProtectedRoute requiredRole="admin"> <Legend /> </ProtectedRoute> }/>
         <Route path="logs" element={ <ProtectedRoute requiredRole="admin"> <Logs /> </ProtectedRoute> }/>
         <Route path="notes" element={ <ProtectedRoute requiredRole="admin"> <Notes /> </ProtectedRoute> }/>
+        <Route path="inventory" element={ <ProtectedRoute requiredRole="admin"> <Inventory /> </ProtectedRoute> }/>
       </Route>
     </Routes>
   );

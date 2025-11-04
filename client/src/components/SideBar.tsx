@@ -76,6 +76,7 @@ const navItems: NavItem[] = [
   { label: "Add User", path: "/add-user", icon: <FiUserPlus />, roles: ["admin"], section: "Admin" },
   { label: "Logs", path: "/logs", icon: <BsChatSquareQuote />, roles: ["admin"], section: "Admin" },
   { label: "Message", path: "/message", icon: <MdOutlineMessage />, roles: ["admin", "engr", "user"], section: "Team Chat" },
+  { label: "Inventory", path: "/inventory", icon: <MdOutlineMessage />, roles: ["admin"], section: "Inventory" },
 ];
 
 const socket = io("http://localhost:8080");

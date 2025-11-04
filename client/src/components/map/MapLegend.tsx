@@ -48,7 +48,7 @@ const MapLegend: React.FC = React.memo(() => {
           maxHeight: "200px",
           overflowY: "auto",
           width: "90%",
-          maxWidth: "400px",
+          maxWidth: "400px",
         }}
       >
         <p>Loading legend...</p>
