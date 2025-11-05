@@ -1,28 +1,60 @@
 const { logAction } = require("../utils/logger");
 const Inventory = require("../models/inventory_model");
+const Item = require("../models/item_model");
+const Supplier = require("../models/supplier_model");
+const Category = require("../models/category_model");
 
+// Get all inventory
 async function getAllInventory(req, res) {
   try {
-    const items = await Inventory.findAll({ order: [["id", "ASC"]] });
-    res.json(items);
+    const inventory = await Inventory.findAll({
+      include: [
+        { model: Item, attributes: ["id", "item_name"] },
+        { model: Supplier, attributes: ["id", "supplier_name"] },
+        { model: Category, attributes: ["id", "category_name"] },
+      ],
+      order: [["id", "ASC"]],
+    });
+
+    const response = inventory.map((inv) => ({
+      id: inv.id,
+      item_id: inv.item_id,
+      supplier_id: inv.supplier_id,
+      category_id: inv.category_id,
+      item_name: inv.Item?.item_name || null,
+      supplier_name: inv.Supplier?.supplier_name || null,
+      category_name: inv.Category?.category_name || null,
+      quantity: inv.quantity,
+      price: inv.price,
+      amount: inv.quantity * inv.price,
+      date_added: inv.date_added,
+    }));
+
+    res.json(response);
   } catch (error) {
     console.error("Inventory fetch error:", error);
     res.status(500).json({ error: "Database error" });
   }
 }
 
+// Create new inventory record
 async function createInventory(req, res) {
   try {
-    const { item_name, supplier, quantity, price } = req.body;
+    const { item_id, supplier_id, category_id, quantity, price } = req.body;
 
-    if (!item_name || !supplier || quantity == null || price == null) {
+    if (
+      !item_id ||
+      !supplier_id ||
+      !category_id ||
+      quantity == null ||
+      price == null
+    )
       return res.status(400).json({ error: "All fields are required" });
-    }
 
-    // Remove amount: let MySQL compute it
-    const newItem = await Inventory.create({
-      item_name,
-      supplier,
+    const newRecord = await Inventory.create({
+      item_id,
+      supplier_id,
+      category_id,
       quantity,
       price,
     });
@@ -30,65 +62,78 @@ async function createInventory(req, res) {
     await logAction({
       action: "create",
       model: "Inventory",
-      description: `Item '${item_name}' created`,
+      description: `Inventory for ItemID ${item_id} created`,
       userId: req.user.id,
     });
 
-    res.status(201).json(newItem);
+    res.status(201).json(newRecord);
   } catch (error) {
     console.error("Inventory insert error:", error);
-    res.status(500).json({ error: "Failed to insert item" });
+    res.status(500).json({ error: "Failed to insert inventory record" });
   }
 }
 
+// Update inventory record
 async function updateInventory(req, res) {
   try {
     const { id } = req.params;
-    const { item_name, supplier, quantity, price } = req.body;
+    const { item_id, supplier_id, category_id, quantity, price } = req.body;
 
-    if (!item_name || !supplier || quantity == null || price == null) {
+    if (
+      !item_id ||
+      !supplier_id ||
+      !category_id ||
+      quantity == null ||
+      price == null
+    )
       return res.status(400).json({ error: "All fields are required" });
-    }
 
-    const existingItem = await Inventory.findByPk(id);
-    if (!existingItem) return res.status(404).json({ error: "Item not found" });
+    const existing = await Inventory.findByPk(id);
+    if (!existing)
+      return res.status(404).json({ error: "Inventory record not found" });
 
-    // Remove amount: let MySQL compute it
-    await existingItem.update({ item_name, supplier, quantity, price });
+    await existing.update({
+      item_id,
+      supplier_id,
+      category_id,
+      quantity,
+      price,
+    });
 
     await logAction({
       action: "update",
       model: "Inventory",
-      description: `Item ID ${id} updated`,
+      description: `Inventory ID ${id} updated`,
       userId: req.user.id,
     });
 
-    res.json({ message: "Item updated successfully", item: existingItem });
+    res.json({ message: "Inventory updated successfully", item: existing });
   } catch (error) {
     console.error("Inventory update error:", error);
-    res.status(500).json({ error: "Failed to update item" });
+    res.status(500).json({ error: "Failed to update inventory" });
   }
 }
 
+// Delete inventory record
 async function deleteInventory(req, res) {
   try {
     const { id } = req.params;
-    const item = await Inventory.findByPk(id);
-    if (!item) return res.status(404).json({ error: "Item not found" });
+    const record = await Inventory.findByPk(id);
+    if (!record) return res.status(404).json({ error: "Inventory not found" });
 
-    await item.destroy();
+    await record.destroy();
 
     await logAction({
       action: "delete",
       model: "Inventory",
-      description: `Item '${item.item_name}' deleted`,
+      description: `Inventory ID ${id} deleted`,
       userId: req.user.id,
     });
 
-    res.json({ message: "Item deleted successfully" });
+    res.json({ message: "Inventory deleted successfully" });
   } catch (error) {
     console.error("Inventory deletion error:", error);
-    res.status(500).json({ error: "Failed to delete item" });
+    res.status(500).json({ error: "Failed to delete inventory" });
   }
 }
 

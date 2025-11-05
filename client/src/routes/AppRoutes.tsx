@@ -15,6 +15,9 @@ import Notes from "../pages/Notes";
 import Legend from "../pages/Legend";
 import Message from "../pages/Message";
 import Inventory from "../pages/Inventory";
+import Item from "../pages/Item";
+import Category from "../pages/Category";
+import Supplier from "../pages/Supplier";
 
 function AppRoutes() {
   return (
@@ -33,6 +36,9 @@ function AppRoutes() {
         <Route path="logs" element={ <ProtectedRoute requiredRole="admin"> <Logs /> </ProtectedRoute> }/>
         <Route path="notes" element={ <ProtectedRoute requiredRole="admin"> <Notes /> </ProtectedRoute> }/>
         <Route path="inventory" element={ <ProtectedRoute requiredRole="admin"> <Inventory /> </ProtectedRoute> }/>
+        <Route path="items" element={ <ProtectedRoute requiredRole="admin"> <Item /> </ProtectedRoute> }/>
+        <Route path="categories" element={ <ProtectedRoute requiredRole="admin"> <Category /> </ProtectedRoute> }/>
+        <Route path="suppliers" element={ <ProtectedRoute requiredRole="admin"> <Supplier /> </ProtectedRoute> }/>
       </Route>
     </Routes>
   );

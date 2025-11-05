@@ -24,6 +24,12 @@ function GetPageTitle(pathname: string): string {
             return 'Notes';
         case '/inventory':
             return 'Inventory';
+        case '/items':
+            return 'Items';
+        case '/categories':
+            return 'Categories';
+        case '/suppliers':
+            return 'Suppliers';
         default:
             return 'Dashboard';
     }

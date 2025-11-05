@@ -108,6 +108,9 @@ app.use("/api/sheets", require("./routes/sheet_route"));
 app.use("/api/messages", require("./routes/message_route"));
 app.use("/api/conversations", require("./routes/conversation_route"));
 app.use("/api/inventory", require("./routes/inventory_route"));
+app.use("/api/items", require("./routes/item_route"));
+app.use("/api/categories", require("./routes/category_route"));
+app.use("/api/suppliers", require("./routes/supplier_route"));
 
 // ======================
 // SERVE FRONTEND BUILD

@@ -1,38 +1,56 @@
-import http from './http';
+import http from "./http";
 
 export type InventoryResponse = {
   id: number;
+  item_id: number;
+  supplier_id: number;
+  category_id: number;
   item_name: string;
-  supplier: string;
+  supplier_name: string;
+  category_name: string;
   quantity: number;
   price: number;
-  amount: number; // generated column returned by DB
+  amount: number;
   date_added: string;
 };
 
 export async function getInventory() {
-  const { data } = await http.get<InventoryResponse[]>('/inventory');
+  const { data } = await http.get<InventoryResponse[]>("/inventory");
   return data;
 }
 
 export async function addInventory(
-  item_name: string,
-  supplier: string,
+  item_id: number,
+  supplier_id: number,
+  category_id: number,
   quantity: number,
   price: number
 ) {
-  const { data } = await http.post<InventoryResponse>('/inventory', { item_name, supplier, quantity, price });
+  const { data } = await http.post<InventoryResponse>("/inventory", {
+    item_id,
+    supplier_id,
+    category_id,
+    quantity,
+    price,
+  });
   return data;
 }
 
 export async function updateInventory(
   id: number,
-  item_name: string,
-  supplier: string,
+  item_id: number,
+  supplier_id: number,
+  category_id: number,
   quantity: number,
   price: number
 ) {
-  const { data } = await http.put<InventoryResponse>(`/inventory/${id}`, { item_name, supplier, quantity, price });
+  const { data } = await http.put<InventoryResponse>(`/inventory/${id}`, {
+    item_id,
+    supplier_id,
+    category_id,
+    quantity,
+    price,
+  });
   return data;
 }
 

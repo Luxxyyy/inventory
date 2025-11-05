@@ -1,5 +1,8 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../db");
+const Item = require("./item_model");
+const Supplier = require("./supplier_model");
+const Category = require("./category_model");
 
 const Inventory = sequelize.define(
   "Inventory",
@@ -9,13 +12,23 @@ const Inventory = sequelize.define(
       autoIncrement: true,
       primaryKey: true,
     },
-    item_name: {
-      type: DataTypes.STRING,
+    item_id: {
+      type: DataTypes.INTEGER,
       allowNull: false,
+      references: { model: "item", key: "id" },
+      onDelete: "CASCADE",
     },
-    supplier: {
-      type: DataTypes.STRING,
+    supplier_id: {
+      type: DataTypes.INTEGER,
       allowNull: false,
+      references: { model: "supplier", key: "id" },
+      onDelete: "CASCADE",
+    },
+    category_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: { model: "category", key: "id" },
+      onDelete: "CASCADE",
     },
     quantity: {
       type: DataTypes.INTEGER,
@@ -26,8 +39,10 @@ const Inventory = sequelize.define(
       allowNull: false,
     },
     amount: {
-      type: DataTypes.FLOAT,
-      allowNull: true,
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.getDataValue("quantity") * this.getDataValue("price");
+      },
     },
     date_added: {
       type: DataTypes.DATE,
@@ -40,5 +55,9 @@ const Inventory = sequelize.define(
     timestamps: false,
   }
 );
+
+Inventory.belongsTo(Item, { foreignKey: "item_id" });
+Inventory.belongsTo(Supplier, { foreignKey: "supplier_id" });
+Inventory.belongsTo(Category, { foreignKey: "category_id" });
 
 module.exports = Inventory;
