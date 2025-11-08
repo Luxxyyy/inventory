@@ -65,21 +65,13 @@ const toTitleCase = (s: string) => {
 };
 
 const navItems: NavItem[] = [
-  { label: "Map", path: "/", icon: <FiMap />, roles: ["admin", "engr", "user"], section: "Overview" },
   { label: "Summary", path: "/list", icon: <FiList />, roles: ["admin", "engr", "user"], section: "Overview" },
-  { label: "Source", path: "/source", icon: <FaFaucet />, roles: ["admin"], section: "Map Manage" },
-  { label: "Sheet", path: "/sheet", icon: <FiSquare   />, roles: ["admin"], section: "Map Manage" },
-  { label: "Barangay", path: "/balangay", icon: <FaMapMarkerAlt />, roles: ["admin"], section: "Map Manage" },
-  { label: "Purok/Balangay", path: "/purok", icon: <FaMapPin />, roles: ["admin", "manager"], section: "Map Manage" },
-  { label: "Add Legend", path: "/legend", icon: <FiMapPin  />, roles: ["admin"], section: "Map Manage" },
-  { label: "Notes", path: "/notes", icon: <BsFillEnvelopeFill />, roles: ["admin"], section: "Map Manage" },
-  { label: "Add User", path: "/add-user", icon: <FiUserPlus />, roles: ["admin"], section: "Admin" },
-  { label: "Logs", path: "/logs", icon: <BsChatSquareQuote />, roles: ["admin"], section: "Admin" },
-  { label: "Message", path: "/message", icon: <MdOutlineMessage />, roles: ["admin", "engr", "user"], section: "Team Chat" },
   { label: "Manage", path: "/inventory", icon: <MdOutlineMessage />, roles: ["admin"], section: "Inventory" },
   { label: "Items", path: "/items", icon: <MdOutlineMessage />, roles: ["admin"], section: "Inventory" },
   { label: "Categories", path: "/categories", icon: <MdOutlineMessage />, roles: ["admin"], section: "Inventory" },
   { label: "Suppliers", path: "/suppliers", icon: <MdOutlineMessage />, roles: ["admin"], section: "Inventory" },
+  { label: "Add User", path: "/add-user", icon: <FiUserPlus />, roles: ["admin"], section: "Admin" },
+  { label: "Logs", path: "/logs", icon: <BsChatSquareQuote />, roles: ["admin"], section: "Admin" },
 ];
 
 const socket = io("http://localhost:8080");
@@ -251,9 +243,8 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed }) => {
                 <li className="nav-item text-center" key={item.path}>
                   <Link
                     to={item.path}
-                    className={`nav-link modern-link d-flex justify-content-center align-items-center p-3 ${
-                      isActive(item.path) ? "active" : ""
-                    }`}
+                    className={`nav-link modern-link d-flex justify-content-center align-items-center p-3 ${isActive(item.path) ? "active" : ""
+                      }`}
                     title={item.label}
                     aria-current={isActive(item.path) ? "page" : undefined}
                     onClick={() => setMobileDropdownOpen(false)}
@@ -277,9 +268,8 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed }) => {
   return (
     <>
       <aside
-        className={`text-white d-flex flex-column bg-dark ${
-          collapsed ? "sidebar-collapsed" : "sidebar-expanded"
-        }`}
+        className={`text-white d-flex flex-column bg-dark ${collapsed ? "sidebar-collapsed" : "sidebar-expanded"
+          }`}
         style={{
           width: collapsed ? SIDEBAR_WIDTH_COLLAPSED : SIDEBAR_WIDTH_EXPANDED,
           transition: "width 0.3s ease",
@@ -335,9 +325,8 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed }) => {
                   <li className="nav-item" key={item.path}>
                     <Link
                       to={item.path}
-                      className={`nav-link modern-link d-flex align-items-center gap-2 ${
-                        isActive(item.path) ? "active" : ""
-                      }`}
+                      className={`nav-link modern-link d-flex align-items-center gap-2 ${isActive(item.path) ? "active" : ""
+                        }`}
                     >
                       {item.icon}
                       {!collapsed && item.label}
