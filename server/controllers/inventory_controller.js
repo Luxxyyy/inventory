@@ -53,7 +53,6 @@ async function createInventory(req, res) {
       isNaN(quantity) ||
       isNaN(price)
     ) {
-      console.error("Invalid data:", req.body);
       return res.status(400).json({ error: "All fields are required" });
     }
 
@@ -101,7 +100,6 @@ async function updateInventory(req, res) {
       isNaN(quantity) ||
       isNaN(price)
     ) {
-      console.error("Invalid update data:", req.body);
       return res.status(400).json({ error: "All fields are required" });
     }
 
@@ -109,6 +107,7 @@ async function updateInventory(req, res) {
     if (!existing)
       return res.status(404).json({ error: "Inventory record not found" });
 
+    // ✅ Backend handles the addition
     const updatedQuantity = existing.quantity + quantity;
     const amount = updatedQuantity * price;
 

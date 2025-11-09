@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { addInventory } from "../../api/inventory_api";
+import { addInventory, updateInventory } from "../../api/inventory_api";
 import { getSuppliers } from "../../api/supplier_api";
 import http from "../../api/http";
 import { toast } from "react-toastify";
@@ -14,7 +14,7 @@ interface AddInventoryProps {
 interface ItemType {
   id: number;
   item_name: string;
-  category_id: number; // link category to item
+  category_id: number;
 }
 
 interface SupplierType {
@@ -83,7 +83,11 @@ const AddInventory: React.FC<AddInventoryProps> = ({ onClose, onAdded }) => {
       return;
     }
 
-    setForm((prev) => ({ ...prev, item_id: String(item.id), category_id: String(item.category_id) }));
+    setForm((prev) => ({
+      ...prev,
+      item_id: String(item.id),
+      category_id: String(item.category_id),
+    }));
 
     try {
       const { data } = await http.get(`/inventory`);
@@ -118,7 +122,9 @@ const AddInventory: React.FC<AddInventoryProps> = ({ onClose, onAdded }) => {
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
@@ -127,7 +133,13 @@ const AddInventory: React.FC<AddInventoryProps> = ({ onClose, onAdded }) => {
     e.preventDefault();
     setError("");
 
-    if (!form.item_id || !form.supplier_id || !form.category_id || !form.quantity || !form.price) {
+    if (
+      !form.item_id ||
+      !form.supplier_id ||
+      !form.category_id ||
+      !form.quantity ||
+      !form.price
+    ) {
       setError("All fields are required");
       return;
     }
@@ -142,8 +154,15 @@ const AddInventory: React.FC<AddInventoryProps> = ({ onClose, onAdded }) => {
       };
 
       if (existing) {
-        const updatedData = { ...payload, quantity: existing.quantity + Number(form.quantity) };
-        await http.put(`/inventory/${existing.id}`, updatedData);
+        // ✅ FIXED: send only the new quantity (backend adds it)
+        await updateInventory(
+          existing.id,
+          payload.item_id,
+          payload.supplier_id,
+          payload.category_id,
+          payload.quantity,
+          payload.price
+        );
         toast.success("Inventory updated successfully!");
       } else {
         await addInventory(
@@ -173,13 +192,12 @@ const AddInventory: React.FC<AddInventoryProps> = ({ onClose, onAdded }) => {
       {error && <div className="alert alert-danger">{error}</div>}
 
       <form onSubmit={handleSubmit}>
-        {/* Searchable Item Field */}
         <div className="mb-3">
           <label className="form-label fw-semibold">Select Item</label>
           <Autocomplete
             options={items}
             getOptionLabel={(option) => option.item_name}
-            value={items.find(i => i.id === Number(form.item_id)) || null}
+            value={items.find((i) => i.id === Number(form.item_id)) || null}
             onChange={(_, value) => handleItemSelect(value)}
             renderInput={(params) => (
               <TextField {...params} placeholder="Type or select an item" />
@@ -210,7 +228,8 @@ const AddInventory: React.FC<AddInventoryProps> = ({ onClose, onAdded }) => {
             type="text"
             className="form-control"
             value={
-              categories.find((c) => c.id === Number(form.category_id))?.category_name || ""
+              categories.find((c) => c.id === Number(form.category_id))
+                ?.category_name || ""
             }
             disabled
           />
@@ -241,7 +260,11 @@ const AddInventory: React.FC<AddInventoryProps> = ({ onClose, onAdded }) => {
         </div>
 
         <div className="d-flex justify-content-end mt-4">
-          <button type="button" className="btn btn-secondary me-2" onClick={onClose}>
+          <button
+            type="button"
+            className="btn btn-secondary me-2"
+            onClick={onClose}
+          >
             Cancel
           </button>
           <button type="submit" className="btn btn-success text-white">
