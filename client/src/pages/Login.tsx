@@ -38,12 +38,7 @@ const Login: React.FC = () => {
       <div className="card shadow login-card" style={{ width: '100%', maxWidth: '400px' }}>
         <div className="card-body p-5">
           <div className="text-center mb-4">
-            <img
-                src={qbwdLogo}
-                alt="QBWD Logo"
-                className="mb-3"
-                style={{ maxWidth: '150px' }}
-            />
+            <h1>Inventory Management</h1>
             <h4 className="card-title">Login</h4>
             <p className="text-muted">Sign in to your account</p>
           </div>
@@ -80,9 +75,9 @@ const Login: React.FC = () => {
             </div>
 
             <div className="d-grid">
-              <button 
-                type="submit" 
-                className="btn btn-primary" 
+              <button
+                type="submit"
+                className="btn btn-primary"
                 disabled={loading}
               >
                 {loading ? (
