@@ -101,6 +101,7 @@ app.use("/api/inventory", require("./routes/inventory_route"));
 app.use("/api/items", require("./routes/item_route"));
 app.use("/api/categories", require("./routes/category_route"));
 app.use("/api/suppliers", require("./routes/supplier_route"));
+app.use("/api/sales", require("./routes/sales_route"));
 
 // ======================
 // SERVE FRONTEND BUILD

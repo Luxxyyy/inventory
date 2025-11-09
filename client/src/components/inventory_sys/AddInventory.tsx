@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { addInventory } from "../../api/inventory_api";
-import { getItems } from "../../api/item_api";
 import { getSuppliers } from "../../api/supplier_api";
-import http from "../../api/http"; // ✅ used to check existing inventory
+import http from "../../api/http";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { TextField, Autocomplete } from "@mui/material";
 
 interface AddInventoryProps {
   onClose: () => void;
@@ -21,42 +21,53 @@ interface SupplierType {
   supplier_name: string;
 }
 
+interface CategoryType {
+  id: number;
+  category_name: string;
+}
+
 interface ExistingInventory {
   id: number;
   item_id: number;
   supplier_id: number;
+  category_id: number;
   price: number;
   quantity: number;
   amount: number;
+  updated_at?: string;
 }
 
 const AddInventory: React.FC<AddInventoryProps> = ({ onClose, onAdded }) => {
   const [form, setForm] = useState({
     item_id: "",
     supplier_id: "",
+    category_id: "",
     quantity: "",
     price: "",
   });
 
   const [items, setItems] = useState<ItemType[]>([]);
   const [suppliers, setSuppliers] = useState<SupplierType[]>([]);
+  const [categories, setCategories] = useState<CategoryType[]>([]);
+  const [existing, setExisting] = useState<ExistingInventory | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // ✅ Load items & suppliers
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [itemData, supplierData] = await Promise.all([
-          getItems(),
+        const [itemData, supplierData, categoryData] = await Promise.all([
+          http.get("/items"), // assuming getItems was just a wrapper
           getSuppliers(),
+          http.get("/categories"),
         ]);
-        setItems(itemData);
+        setItems(itemData.data || []);
         setSuppliers(supplierData);
+        setCategories(categoryData.data || []);
       } catch (err) {
         console.error(err);
-        setError("Failed to load items or suppliers");
-        toast.error("Failed to load items or suppliers");
+        setError("Failed to load items, suppliers, or categories");
+        toast.error("Failed to load items, suppliers, or categories");
       } finally {
         setLoading(false);
       }
@@ -64,32 +75,38 @@ const AddInventory: React.FC<AddInventoryProps> = ({ onClose, onAdded }) => {
     fetchData();
   }, []);
 
-  // ✅ When an item is selected, check if it's already in the system
-  const handleItemSelect = async (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const { value } = e.target;
-    setForm((prev) => ({ ...prev, item_id: value }));
+  const handleItemSelect = async (item: ItemType | null) => {
+    if (!item) {
+      setForm((prev) => ({ ...prev, item_id: "" }));
+      setExisting(null);
+      return;
+    }
 
-    if (!value) return;
+    setForm((prev) => ({ ...prev, item_id: String(item.id) }));
 
     try {
       const { data } = await http.get(`/inventory`);
       if (Array.isArray(data)) {
-        const existing = data.find((inv: ExistingInventory) => inv.item_id === Number(value));
+        const existingItem = data.find(
+          (inv: ExistingInventory) => inv.item_id === item.id
+        );
 
-        if (existing) {
-          // ✅ Pre-fill supplier and price, leave quantity blank
+        if (existingItem) {
+          setExisting(existingItem);
           setForm({
-            item_id: String(existing.item_id),
-            supplier_id: String(existing.supplier_id),
+            item_id: String(existingItem.item_id),
+            supplier_id: String(existingItem.supplier_id),
+            category_id: String(existingItem.category_id),
             quantity: "",
-            price: String(existing.price),
+            price: String(existingItem.price),
           });
           toast.info("Existing item found — previous data loaded.");
         } else {
-          // New item, clear fields
+          setExisting(null);
           setForm((prev) => ({
             ...prev,
             supplier_id: "",
+            category_id: "",
             quantity: "",
             price: "",
           }));
@@ -101,37 +118,52 @@ const AddInventory: React.FC<AddInventoryProps> = ({ onClose, onAdded }) => {
     }
   };
 
-  // ✅ Handle supplier, quantity, price changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  // ✅ Handle form submit
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
-    if (!form.item_id || !form.supplier_id || !form.quantity || !form.price) {
+    if (!form.item_id || !form.supplier_id || !form.category_id || !form.quantity || !form.price) {
       setError("All fields are required");
       return;
     }
 
     try {
-      await addInventory(
-        Number(form.item_id),
-        Number(form.supplier_id),
-        1, // category_id (hardcoded as before)
-        Number(form.quantity),
-        Number(form.price)
-      );
-      toast.success("Inventory added successfully!");
+      const payload = {
+        item_id: Number(form.item_id),
+        supplier_id: Number(form.supplier_id),
+        category_id: Number(form.category_id),
+        quantity: Number(form.quantity),
+        price: Number(form.price),
+      };
+
+      if (existing) {
+        // Update existing inventory record
+        const updatedData = { ...payload, quantity: existing.quantity + Number(form.quantity) };
+        await http.put(`/inventory/${existing.id}`, updatedData);
+        toast.success("Inventory updated successfully!");
+      } else {
+        // Add new inventory record
+        await addInventory(
+          payload.item_id,
+          payload.supplier_id,
+          payload.category_id,
+          payload.quantity,
+          payload.price
+        );
+        toast.success("New inventory item added successfully!");
+      }
+
       onAdded();
       onClose();
     } catch (err) {
       console.error(err);
-      setError("Failed to add inventory item");
-      toast.error("Failed to add inventory item");
+      setError("Failed to save inventory item");
+      toast.error("Failed to save inventory item");
     }
   };
 
@@ -143,25 +175,20 @@ const AddInventory: React.FC<AddInventoryProps> = ({ onClose, onAdded }) => {
       {error && <div className="alert alert-danger">{error}</div>}
 
       <form onSubmit={handleSubmit}>
-        {/* Item Dropdown */}
+        {/* Searchable Item Field */}
         <div className="mb-3">
           <label className="form-label fw-semibold">Select Item</label>
-          <select
-            name="item_id"
-            className="form-select"
-            value={form.item_id}
-            onChange={handleItemSelect} // 👈 updated
-          >
-            <option value="">-- Choose Item --</option>
-            {items.map((item) => (
-              <option key={item.id} value={item.id}>
-                {item.item_name}
-              </option>
-            ))}
-          </select>
+          <Autocomplete
+            options={items}
+            getOptionLabel={(option) => option.item_name}
+            value={items.find(i => i.id === Number(form.item_id)) || null}
+            onChange={(_, value) => handleItemSelect(value)}
+            renderInput={(params) => (
+              <TextField {...params} placeholder="Type or select an item" />
+            )}
+          />
         </div>
 
-        {/* Supplier Dropdown */}
         <div className="mb-3">
           <label className="form-label fw-semibold">Select Supplier</label>
           <select
@@ -179,7 +206,23 @@ const AddInventory: React.FC<AddInventoryProps> = ({ onClose, onAdded }) => {
           </select>
         </div>
 
-        {/* Quantity */}
+        <div className="mb-3">
+          <label className="form-label fw-semibold">Select Category</label>
+          <select
+            name="category_id"
+            className="form-select"
+            value={form.category_id}
+            onChange={handleChange}
+          >
+            <option value="">-- Choose Category --</option>
+            {categories.map((cat) => (
+              <option key={cat.id} value={cat.id}>
+                {cat.category_name}
+              </option>
+            ))}
+          </select>
+        </div>
+
         <div className="mb-3">
           <label className="form-label fw-semibold">Quantity</label>
           <input
@@ -192,7 +235,6 @@ const AddInventory: React.FC<AddInventoryProps> = ({ onClose, onAdded }) => {
           />
         </div>
 
-        {/* Price */}
         <div className="mb-3">
           <label className="form-label fw-semibold">Price</label>
           <input
@@ -206,15 +248,11 @@ const AddInventory: React.FC<AddInventoryProps> = ({ onClose, onAdded }) => {
         </div>
 
         <div className="d-flex justify-content-end mt-4">
-          <button
-            type="button"
-            className="btn btn-secondary me-2"
-            onClick={onClose}
-          >
+          <button type="button" className="btn btn-secondary me-2" onClick={onClose}>
             Cancel
           </button>
           <button type="submit" className="btn btn-success text-white">
-            Save
+            {existing ? "Update" : "Save"}
           </button>
         </div>
       </form>

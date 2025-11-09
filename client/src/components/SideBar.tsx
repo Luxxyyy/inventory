@@ -70,7 +70,7 @@ const navItems: NavItem[] = [
   { label: "Items", path: "/items", icon: <MdOutlineMessage />, roles: ["admin"], section: "Inventory" },
   { label: "Categories", path: "/categories", icon: <MdOutlineMessage />, roles: ["admin"], section: "Inventory" },
   { label: "Suppliers", path: "/suppliers", icon: <MdOutlineMessage />, roles: ["admin"], section: "Inventory" },
-  { label: "Add User", path: "/add-user", icon: <FiUserPlus />, roles: ["admin"], section: "Admin" },
+  { label: "Sales", path: "/sales", icon: <FiUserPlus />, roles: ["admin"], section: "Inventory" },
   { label: "Logs", path: "/logs", icon: <BsChatSquareQuote />, roles: ["admin"], section: "Admin" },
 ];
 

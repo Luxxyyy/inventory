@@ -4,7 +4,6 @@ const Item = require("../models/item_model");
 const Supplier = require("../models/supplier_model");
 const Category = require("../models/category_model");
 
-// Get all inventory
 async function getAllInventory(req, res) {
   try {
     const inventory = await Inventory.findAll({
@@ -37,19 +36,28 @@ async function getAllInventory(req, res) {
   }
 }
 
-// Create new inventory record
 async function createInventory(req, res) {
   try {
-    const { item_id, supplier_id, category_id, quantity, price } = req.body;
+    let { item_id, supplier_id, category_id, quantity, price } = req.body;
+
+    item_id = Number(item_id);
+    supplier_id = Number(supplier_id);
+    category_id = Number(category_id);
+    quantity = Number(quantity);
+    price = Number(price);
 
     if (
       !item_id ||
       !supplier_id ||
       !category_id ||
-      quantity == null ||
-      price == null
-    )
+      isNaN(quantity) ||
+      isNaN(price)
+    ) {
+      console.error("Invalid data:", req.body);
       return res.status(400).json({ error: "All fields are required" });
+    }
+
+    const amount = quantity * price;
 
     const newRecord = await Inventory.create({
       item_id,
@@ -57,13 +65,15 @@ async function createInventory(req, res) {
       category_id,
       quantity,
       price,
+      amount,
+      date_added: new Date(),
     });
 
     await logAction({
       action: "create",
       model: "Inventory",
       description: `Inventory for ItemID ${item_id} created`,
-      userId: req.user.id,
+      userId: req.user?.id || null,
     });
 
     res.status(201).json(newRecord);
@@ -73,38 +83,50 @@ async function createInventory(req, res) {
   }
 }
 
-// Update inventory record
 async function updateInventory(req, res) {
   try {
     const { id } = req.params;
-    const { item_id, supplier_id, category_id, quantity, price } = req.body;
+    let { item_id, supplier_id, category_id, quantity, price } = req.body;
+
+    item_id = Number(item_id);
+    supplier_id = Number(supplier_id);
+    category_id = Number(category_id);
+    quantity = Number(quantity);
+    price = Number(price);
 
     if (
       !item_id ||
       !supplier_id ||
       !category_id ||
-      quantity == null ||
-      price == null
-    )
+      isNaN(quantity) ||
+      isNaN(price)
+    ) {
+      console.error("Invalid update data:", req.body);
       return res.status(400).json({ error: "All fields are required" });
+    }
 
     const existing = await Inventory.findByPk(id);
     if (!existing)
       return res.status(404).json({ error: "Inventory record not found" });
 
+    const updatedQuantity = existing.quantity + quantity;
+    const amount = updatedQuantity * price;
+
     await existing.update({
       item_id,
       supplier_id,
       category_id,
-      quantity,
+      quantity: updatedQuantity,
       price,
+      amount,
+      date_added: new Date(),
     });
 
     await logAction({
       action: "update",
       model: "Inventory",
       description: `Inventory ID ${id} updated`,
-      userId: req.user.id,
+      userId: req.user?.id || null,
     });
 
     res.json({ message: "Inventory updated successfully", item: existing });
@@ -114,7 +136,6 @@ async function updateInventory(req, res) {
   }
 }
 
-// Delete inventory record
 async function deleteInventory(req, res) {
   try {
     const { id } = req.params;
@@ -127,7 +148,7 @@ async function deleteInventory(req, res) {
       action: "delete",
       model: "Inventory",
       description: `Inventory ID ${id} deleted`,
-      userId: req.user.id,
+      userId: req.user?.id || null,
     });
 
     res.json({ message: "Inventory deleted successfully" });

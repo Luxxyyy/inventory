@@ -10,6 +10,7 @@ import Inventory from "../pages/Inventory";
 import Item from "../pages/Item";
 import Category from "../pages/Category";
 import Supplier from "../pages/Supplier";
+import Sales from "../pages/Sales";
 
 function AppRoutes() {
   return (
@@ -23,6 +24,7 @@ function AppRoutes() {
         <Route path="items" element={<ProtectedRoute requiredRole="admin"> <Item /> </ProtectedRoute>} />
         <Route path="categories" element={<ProtectedRoute requiredRole="admin"> <Category /> </ProtectedRoute>} />
         <Route path="suppliers" element={<ProtectedRoute requiredRole="admin"> <Supplier /> </ProtectedRoute>} />
+        <Route path="sales" element={<ProtectedRoute requiredRole="admin"> <Sales /> </ProtectedRoute>} />
       </Route>
     </Routes>
   );

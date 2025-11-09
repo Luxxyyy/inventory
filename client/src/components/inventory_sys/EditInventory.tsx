@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from "react";
 import http from "../../api/http";
-import Modal from "../Modal";
 import { toast } from "react-toastify";
 import {
-  Button,
   Table,
   TableBody,
   TableCell,
@@ -28,7 +26,6 @@ type InventoryType = {
   date_added: string;
 };
 
-// 👇 Accept searchQuery as a prop
 const EditInventory: React.FC<{ searchQuery: string }> = ({ searchQuery }) => {
   const [inventory, setInventory] = useState<InventoryType[]>([]);
   const [loading, setLoading] = useState(true);
@@ -59,7 +56,7 @@ const EditInventory: React.FC<{ searchQuery: string }> = ({ searchQuery }) => {
     fetchInventory();
   }, []);
 
-  // 🔍 Filter inventory by search query (case-insensitive)
+  // Filter inventory by search query (case-insensitive)
   const filteredInventory = inventory.filter((item) => {
     const query = searchQuery.toLowerCase();
     return (
@@ -95,6 +92,7 @@ const EditInventory: React.FC<{ searchQuery: string }> = ({ searchQuery }) => {
                   {[
                     "Item Name",
                     "Supplier",
+                    "Category", // ✅ Added Category header
                     "Quantity",
                     "Price",
                     "Amount",
@@ -120,6 +118,7 @@ const EditInventory: React.FC<{ searchQuery: string }> = ({ searchQuery }) => {
                     <TableRow key={item.id}>
                       <TableCell>{item.item_name}</TableCell>
                       <TableCell>{item.supplier_name}</TableCell>
+                      <TableCell>{item.category_name}</TableCell> {/* ✅ Display category */}
                       <TableCell>{item.quantity}</TableCell>
                       <TableCell>{item.price}</TableCell>
                       <TableCell>{item.amount}</TableCell>
@@ -130,7 +129,7 @@ const EditInventory: React.FC<{ searchQuery: string }> = ({ searchQuery }) => {
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={6} align="center">
+                    <TableCell colSpan={7} align="center">
                       No items found
                     </TableCell>
                   </TableRow>
