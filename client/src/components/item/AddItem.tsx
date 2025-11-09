@@ -64,13 +64,13 @@ const AddItem: React.FC = () => {
       <div className="mb-3">
         <label className="form-label">Barcode (optional)</label>
         <input
-            type="text"
-            className="form-control"
-            value={barcode}
-            onChange={(e) => setBarcode(e.target.value)}
-            placeholder="Enter barcode (optional)"
+          type="text"
+          className="form-control"
+          value={barcode}
+          onChange={(e) => setBarcode(e.target.value)}
+          placeholder="Enter barcode (optional)"
         />
-        </div>
+      </div>
 
       <div className="mb-3">
         <label className="form-label">Category</label>

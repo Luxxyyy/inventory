@@ -14,6 +14,7 @@ interface AddInventoryProps {
 interface ItemType {
   id: number;
   item_name: string;
+  category_id: number; // link category to item
 }
 
 interface SupplierType {
@@ -57,7 +58,7 @@ const AddInventory: React.FC<AddInventoryProps> = ({ onClose, onAdded }) => {
     const fetchData = async () => {
       try {
         const [itemData, supplierData, categoryData] = await Promise.all([
-          http.get("/items"), // assuming getItems was just a wrapper
+          http.get("/items"),
           getSuppliers(),
           http.get("/categories"),
         ]);
@@ -77,12 +78,12 @@ const AddInventory: React.FC<AddInventoryProps> = ({ onClose, onAdded }) => {
 
   const handleItemSelect = async (item: ItemType | null) => {
     if (!item) {
-      setForm((prev) => ({ ...prev, item_id: "" }));
+      setForm((prev) => ({ ...prev, item_id: "", category_id: "" }));
       setExisting(null);
       return;
     }
 
-    setForm((prev) => ({ ...prev, item_id: String(item.id) }));
+    setForm((prev) => ({ ...prev, item_id: String(item.id), category_id: String(item.category_id) }));
 
     try {
       const { data } = await http.get(`/inventory`);
@@ -106,7 +107,6 @@ const AddInventory: React.FC<AddInventoryProps> = ({ onClose, onAdded }) => {
           setForm((prev) => ({
             ...prev,
             supplier_id: "",
-            category_id: "",
             quantity: "",
             price: "",
           }));
@@ -142,12 +142,10 @@ const AddInventory: React.FC<AddInventoryProps> = ({ onClose, onAdded }) => {
       };
 
       if (existing) {
-        // Update existing inventory record
         const updatedData = { ...payload, quantity: existing.quantity + Number(form.quantity) };
         await http.put(`/inventory/${existing.id}`, updatedData);
         toast.success("Inventory updated successfully!");
       } else {
-        // Add new inventory record
         await addInventory(
           payload.item_id,
           payload.supplier_id,
@@ -207,20 +205,15 @@ const AddInventory: React.FC<AddInventoryProps> = ({ onClose, onAdded }) => {
         </div>
 
         <div className="mb-3">
-          <label className="form-label fw-semibold">Select Category</label>
-          <select
-            name="category_id"
-            className="form-select"
-            value={form.category_id}
-            onChange={handleChange}
-          >
-            <option value="">-- Choose Category --</option>
-            {categories.map((cat) => (
-              <option key={cat.id} value={cat.id}>
-                {cat.category_name}
-              </option>
-            ))}
-          </select>
+          <label className="form-label fw-semibold">Category</label>
+          <input
+            type="text"
+            className="form-control"
+            value={
+              categories.find((c) => c.id === Number(form.category_id))?.category_name || ""
+            }
+            disabled
+          />
         </div>
 
         <div className="mb-3">

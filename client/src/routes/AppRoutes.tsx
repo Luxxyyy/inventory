@@ -1,6 +1,6 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
-import ListGroup from "../components/ListGroup";
+import Dashboard from "../pages/Dashboard";
 import Login from "../pages/Login";
 import ProtectedRoute from "../components/ProtectedRoute";
 import User from "../pages/User";
@@ -17,7 +17,7 @@ function AppRoutes() {
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route path="/" element={<Layout />}>
-        <Route path="list" element={<ListGroup />} />
+        <Route path="dashboard" element={<Dashboard />} />
         <Route path="add-user" element={<ProtectedRoute requiredRole="admin"> <User /> </ProtectedRoute>} />
         <Route path="logs" element={<ProtectedRoute requiredRole="admin"> <Logs /> </ProtectedRoute>} />
         <Route path="inventory" element={<ProtectedRoute requiredRole="admin"> <Inventory /> </ProtectedRoute>} />

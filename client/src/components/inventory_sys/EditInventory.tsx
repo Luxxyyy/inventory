@@ -118,7 +118,7 @@ const EditInventory: React.FC<{ searchQuery: string }> = ({ searchQuery }) => {
                     <TableRow key={item.id}>
                       <TableCell>{item.item_name}</TableCell>
                       <TableCell>{item.supplier_name}</TableCell>
-                      <TableCell>{item.category_name}</TableCell> {/* ✅ Display category */}
+                      <TableCell>{item.category_name}</TableCell>
                       <TableCell>{item.quantity}</TableCell>
                       <TableCell>{item.price}</TableCell>
                       <TableCell>{item.amount}</TableCell>

@@ -65,7 +65,7 @@ const toTitleCase = (s: string) => {
 };
 
 const navItems: NavItem[] = [
-  { label: "Summary", path: "/list", icon: <FiList />, roles: ["admin", "engr", "user"], section: "Overview" },
+  { label: "Summary", path: "/dashboard", icon: <FiList />, roles: ["admin", "engr", "user"], section: "Overview" },
   { label: "Manage", path: "/inventory", icon: <MdOutlineMessage />, roles: ["admin"], section: "Inventory" },
   { label: "Items", path: "/items", icon: <MdOutlineMessage />, roles: ["admin"], section: "Inventory" },
   { label: "Categories", path: "/categories", icon: <MdOutlineMessage />, roles: ["admin"], section: "Inventory" },
