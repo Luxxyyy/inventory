@@ -14,13 +14,11 @@ export type InventoryResponse = {
   date_added: string;
 };
 
-// ✅ Get all inventory records
 export async function getInventory() {
   const { data } = await http.get<InventoryResponse[]>("/inventory");
   return data;
 }
 
-// ✅ Add new inventory record
 export async function addInventory(
   item_id: number,
   supplier_id: number,
@@ -41,7 +39,6 @@ export async function addInventory(
   return data;
 }
 
-// ✅ Update existing inventory record
 export async function updateInventory(
   id: number,
   item_id: number,
@@ -61,7 +58,6 @@ export async function updateInventory(
   return data;
 }
 
-// ✅ Delete inventory record
 export async function deleteInventory(id: number) {
   const { data } = await http.delete(`/inventory/${id}`);
   return data;

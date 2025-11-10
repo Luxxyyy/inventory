@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { getInventory } from "../../api/inventory_api";
-import http from "../../api/http"; // we'll call backend directly for addSale
+import http from "../../api/http";
 import { toast } from "react-toastify";
 
 interface AddSalesProps {
@@ -18,8 +18,8 @@ interface InventoryItem {
 const AddSales: React.FC<AddSalesProps> = ({ onClose, onAdded }) => {
     const [inventory, setInventory] = useState<InventoryItem[]>([]);
     const [inventoryId, setInventoryId] = useState<number | null>(null);
-    const [quantitySold, setQuantitySold] = useState<number>(0);
-    const [sellingPrice, setSellingPrice] = useState<number>(0);
+    const [quantitySold, setQuantitySold] = useState<string>("");
+    const [sellingPrice, setSellingPrice] = useState<string>("");
 
     useEffect(() => {
         const fetchInventory = async () => {
@@ -37,7 +37,10 @@ const AddSales: React.FC<AddSalesProps> = ({ onClose, onAdded }) => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (!inventoryId || quantitySold <= 0 || sellingPrice <= 0) {
+        const qty = Number(quantitySold);
+        const price = Number(sellingPrice);
+
+        if (!inventoryId || qty <= 0 || price <= 0) {
             toast.error("Please fill all fields correctly.");
             return;
         }
@@ -48,28 +51,29 @@ const AddSales: React.FC<AddSalesProps> = ({ onClose, onAdded }) => {
             return;
         }
 
-        if (quantitySold > selectedItem.quantity) {
+        if (qty > selectedItem.quantity) {
             toast.error("Not enough stock available!");
             return;
         }
 
         try {
-            // ✅ Corrected payload to match backend
             const payload = {
                 inventory_id: inventoryId,
-                quantity_sold: quantitySold,
-                selling_price: sellingPrice,
+                quantity_sold: qty,
+                selling_price: price,
+                date_sold: new Date().toISOString(), // ✅ Add this for chart
             };
 
-            const { data } = await http.post("/sales", payload);
-
+            await http.post("/sales", payload);
             toast.success("Sale recorded successfully!");
-            onAdded();
+            onAdded(); // ✅ Refresh dashboard data
             onClose();
         } catch (error: any) {
             console.error("Add sale error:", error);
             if (error.response) {
-                toast.error(`Error: ${error.response.data.error || "Failed to record sale"}`);
+                toast.error(
+                    `Error: ${error.response.data.error || "Failed to record sale"}`
+                );
             } else {
                 toast.error("Failed to record sale");
             }
@@ -81,12 +85,15 @@ const AddSales: React.FC<AddSalesProps> = ({ onClose, onAdded }) => {
             <h4 className="mb-3">Add Sale</h4>
 
             <form onSubmit={handleSubmit}>
+                {/* Item Selection */}
                 <div className="mb-3">
                     <label className="form-label fw-semibold">Select Item</label>
                     <select
                         className="form-select"
                         value={inventoryId ?? ""}
-                        onChange={(e) => setInventoryId(Number(e.target.value))}
+                        onChange={(e) =>
+                            setInventoryId(e.target.value ? Number(e.target.value) : null)
+                        }
                     >
                         <option value="">-- Choose Item --</option>
                         {inventory.map((item) => (
@@ -97,31 +104,34 @@ const AddSales: React.FC<AddSalesProps> = ({ onClose, onAdded }) => {
                     </select>
                 </div>
 
+                {/* Quantity Sold */}
                 <div className="mb-3">
                     <label className="form-label fw-semibold">Quantity Sold</label>
                     <input
                         type="number"
                         className="form-control"
+                        placeholder="Enter quantity sold"
                         value={quantitySold}
                         min={1}
-                        max={
-                            inventory.find((i) => i.id === inventoryId)?.quantity || undefined
-                        }
-                        onChange={(e) => setQuantitySold(Number(e.target.value))}
+                        max={inventory.find((i) => i.id === inventoryId)?.quantity || undefined}
+                        onChange={(e) => setQuantitySold(e.target.value)}
                     />
                 </div>
 
+                {/* Selling Price */}
                 <div className="mb-3">
                     <label className="form-label fw-semibold">Selling Price per Item</label>
                     <input
                         type="number"
                         className="form-control"
+                        placeholder="Enter selling price"
                         value={sellingPrice}
                         min={1}
-                        onChange={(e) => setSellingPrice(Number(e.target.value))}
+                        onChange={(e) => setSellingPrice(e.target.value)}
                     />
                 </div>
 
+                {/* Buttons */}
                 <div className="d-flex justify-content-end mt-3">
                     <button
                         type="button"
@@ -130,7 +140,7 @@ const AddSales: React.FC<AddSalesProps> = ({ onClose, onAdded }) => {
                     >
                         Cancel
                     </button>
-                    <button type="submit" className="btn btn-success">
+                    <button type="submit" className="btn btn-success text-white">
                         Save Sale
                     </button>
                 </div>

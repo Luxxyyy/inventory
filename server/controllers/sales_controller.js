@@ -5,7 +5,7 @@ const { logAction } = require("../utils/logger");
 
 async function createSale(req, res) {
     try {
-        let { inventory_id, quantity_sold, selling_price } = req.body;
+        let { inventory_id, quantity_sold, selling_price, date_sold } = req.body;
 
         inventory_id = Number(inventory_id);
         quantity_sold = Number(quantity_sold);
@@ -16,10 +16,12 @@ async function createSale(req, res) {
         }
 
         const inventory = await Inventory.findByPk(inventory_id);
-        if (!inventory) return res.status(404).json({ error: "Inventory not found" });
+        if (!inventory)
+            return res.status(404).json({ error: "Inventory not found" });
         if (inventory.quantity < quantity_sold)
             return res.status(400).json({ error: "Not enough stock" });
 
+        // Deduct sold quantity
         inventory.quantity -= quantity_sold;
         await inventory.save();
 
@@ -31,7 +33,7 @@ async function createSale(req, res) {
             quantity_sold,
             selling_price,
             profit,
-            date_sold: new Date(),
+            date_sold: date_sold ? new Date(date_sold) : new Date(),
         });
 
         await logAction({
@@ -41,7 +43,7 @@ async function createSale(req, res) {
             userId: req.user?.id || null,
         });
 
-        res.status(201).json({ sale, profit });
+        res.status(201).json(sale);
     } catch (error) {
         console.error("🔥 Sale creation error:", error);
         res.status(500).json({ error: "Failed to create sale", details: error.message });
@@ -54,7 +56,7 @@ async function getSales(req, res) {
             include: [
                 {
                     model: Inventory,
-                    attributes: ["id", "item_id", "quantity", "price"],
+                    attributes: ["id", "item_id", "price"],
                     include: [
                         {
                             model: Item,
@@ -63,7 +65,7 @@ async function getSales(req, res) {
                     ],
                 },
             ],
-            order: [["date_sold", "DESC"]],
+            order: [["date_sold", "ASC"]],
         });
 
         const response = sales.map((s) => ({

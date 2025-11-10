@@ -56,7 +56,6 @@ const EditInventory: React.FC<{ searchQuery: string }> = ({ searchQuery }) => {
     fetchInventory();
   }, []);
 
-  // Filter inventory by search query (case-insensitive)
   const filteredInventory = inventory.filter((item) => {
     const query = searchQuery.toLowerCase();
     return (
@@ -92,7 +91,7 @@ const EditInventory: React.FC<{ searchQuery: string }> = ({ searchQuery }) => {
                   {[
                     "Item Name",
                     "Supplier",
-                    "Category", // ✅ Added Category header
+                    "Category",
                     "Quantity",
                     "Price",
                     "Amount",
