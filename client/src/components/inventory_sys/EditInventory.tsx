@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import http from "../../api/http";
 import { toast } from "react-toastify";
 import {
   Table,
@@ -10,7 +9,10 @@ import {
   TableRow,
   Paper,
   Pagination,
+  TextField,
+  Button,
 } from "@mui/material";
+import { getInventory, updateInventory } from "../../api/inventory_api";
 
 type InventoryType = {
   id: number;
@@ -31,18 +33,19 @@ const EditInventory: React.FC<{ searchQuery: string }> = ({ searchQuery }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [page, setPage] = useState(1);
+  const [editId, setEditId] = useState<number | null>(null);
+  const [editValues, setEditValues] = useState<{ quantity: number; price: number }>({
+    quantity: 0,
+    price: 0,
+  });
+
   const rowsPerPage = 10;
 
   const fetchInventory = async () => {
     try {
       setLoading(true);
-      const { data } = await http.get("/inventory");
-      const arr = Array.isArray(data)
-        ? data
-        : Array.isArray(data?.data)
-          ? data.data
-          : [];
-      const sorted = arr.sort((a: any, b: any) => (b?.id ?? 0) - (a?.id ?? 0));
+      const data = await getInventory();
+      const sorted = data.sort((a, b) => (b?.id ?? 0) - (a?.id ?? 0));
       setInventory(sorted);
     } catch {
       setError("Failed to fetch inventory");
@@ -55,6 +58,37 @@ const EditInventory: React.FC<{ searchQuery: string }> = ({ searchQuery }) => {
   useEffect(() => {
     fetchInventory();
   }, []);
+
+  const handleEdit = (item: InventoryType) => {
+    setEditId(item.id);
+    setEditValues({ quantity: item.quantity, price: item.price });
+  };
+
+  const handleCancelEdit = () => {
+    setEditId(null);
+    setEditValues({ quantity: 0, price: 0 });
+  };
+
+  // ✅ FIXED: sends updated values (not additive)
+  const handleSave = async (item: InventoryType) => {
+    try {
+      await updateInventory(
+        item.id,
+        item.item_id,
+        item.supplier_id,
+        item.category_id,
+        editValues.quantity,
+        editValues.price
+      );
+
+      toast.success(`Inventory for "${item.item_name}" updated successfully`);
+      setEditId(null);
+      fetchInventory();
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to update inventory item");
+    }
+  };
 
   const filteredInventory = inventory.filter((item) => {
     const query = searchQuery.toLowerCase();
@@ -96,6 +130,7 @@ const EditInventory: React.FC<{ searchQuery: string }> = ({ searchQuery }) => {
                     "Price",
                     "Amount",
                     "Date Added",
+                    "Actions",
                   ].map((header) => (
                     <TableCell
                       key={header}
@@ -118,17 +153,87 @@ const EditInventory: React.FC<{ searchQuery: string }> = ({ searchQuery }) => {
                       <TableCell>{item.item_name}</TableCell>
                       <TableCell>{item.supplier_name}</TableCell>
                       <TableCell>{item.category_name}</TableCell>
-                      <TableCell>{item.quantity}</TableCell>
-                      <TableCell>{item.price}</TableCell>
-                      <TableCell>{item.amount}</TableCell>
+
+                      <TableCell>
+                        {editId === item.id ? (
+                          <TextField
+                            type="number"
+                            size="small"
+                            value={editValues.quantity}
+                            onChange={(e) =>
+                              setEditValues({
+                                ...editValues,
+                                quantity: Number(e.target.value),
+                              })
+                            }
+                            sx={{ width: 90 }}
+                          />
+                        ) : (
+                          item.quantity
+                        )}
+                      </TableCell>
+
+                      <TableCell>
+                        {editId === item.id ? (
+                          <TextField
+                            type="number"
+                            size="small"
+                            value={editValues.price}
+                            onChange={(e) =>
+                              setEditValues({
+                                ...editValues,
+                                price: Number(e.target.value),
+                              })
+                            }
+                            sx={{ width: 90 }}
+                          />
+                        ) : (
+                          item.price
+                        )}
+                      </TableCell>
+
+                      <TableCell>{item.quantity * item.price}</TableCell>
                       <TableCell>
                         {new Date(item.date_added).toLocaleString()}
+                      </TableCell>
+
+                      <TableCell>
+                        {editId === item.id ? (
+                          <>
+                            <Button
+                              size="small"
+                              variant="contained"
+                              color="success"
+                              onClick={() => handleSave(item)}
+                              sx={{ mr: 1 }}
+                            >
+                              Save
+                            </Button>
+                            <Button
+                              size="small"
+                              variant="outlined"
+                              color="inherit"
+                              onClick={handleCancelEdit}
+                            >
+                              Cancel
+                            </Button>
+                          </>
+                        ) : (
+                          <Button
+                            size="small"
+                            variant="contained"
+                            color="primary"
+                            onClick={() => handleEdit(item)}
+                          >
+                            Edit
+                          </Button>
+                        )}
                       </TableCell>
                     </TableRow>
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={7} align="center">
+                    <TableCell colSpan={8} align="center">
                       No items found
                     </TableCell>
                   </TableRow>

@@ -107,15 +107,14 @@ async function updateInventory(req, res) {
     if (!existing)
       return res.status(404).json({ error: "Inventory record not found" });
 
-    // ✅ Backend handles the addition
-    const updatedQuantity = existing.quantity + quantity;
-    const amount = updatedQuantity * price;
+    // ✅ Replace existing values
+    const amount = quantity * price;
 
     await existing.update({
       item_id,
       supplier_id,
       category_id,
-      quantity: updatedQuantity,
+      quantity,
       price,
       amount,
       date_added: new Date(),

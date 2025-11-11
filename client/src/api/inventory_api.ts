@@ -39,6 +39,7 @@ export async function addInventory(
   return data;
 }
 
+// ✅ FIXED: Now correctly recalculates amount and replaces values (not adds)
 export async function updateInventory(
   id: number,
   item_id: number,
@@ -47,12 +48,14 @@ export async function updateInventory(
   quantity: number,
   price: number
 ) {
+  const amount = quantity * price; // recalculate total properly
   const { data } = await http.put<InventoryResponse>(`/inventory/${id}`, {
     item_id,
     supplier_id,
     category_id,
     quantity,
     price,
+    amount, // ✅ included
     date_added: new Date().toISOString(),
   });
   return data;
